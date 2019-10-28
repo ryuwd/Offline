@@ -18,6 +18,7 @@
 #include <TGLayout.h>
 #include <TGTab.h>
 #include <TG3DLine.h>
+#include<TGLViewer.h>
 // ... libGeom
 #include <TGeoManager.h>
 #include <TGeoTube.h>
@@ -72,7 +73,7 @@
 
 
 // Mu2e diagnostics
-using namespace mu2e;
+using namespace std;
 
 class point {
 	public:
@@ -132,7 +133,8 @@ namespace mu2e
 
       bool doDisplay_;
       bool clickToAdvance_;
-	//List of functions:
+      TApplication* application_;
+      TDirectory*   directory_ = nullptr;
       bool            drawGenTracks_;
       bool            drawHits_;
       Double_t        hitMarkerSize_;
@@ -143,10 +145,6 @@ namespace mu2e
       Double_t        camRotateCenterV_;
       Double_t        camDollyDelta_;
 
-    //art::ServiceHandle<Geometry>          geom_;
-    //art::ServiceHandle<PDT>               pdt_;
-
-     
       TEveGeoShape* fSimpleGeom;
 
       TEveViewer *fXYView;
@@ -165,8 +163,7 @@ namespace mu2e
       TEveElementList *fHitsList;
       
       EvtDisplayUtils *visutil_ = new EvtDisplayUtils();
-      //trkMaxStepSize_ = 0.1;
-   
+      
       void makeNavPanel();
       void InsideDS( TGeoNode * node, bool inDSVac );
       void hideTop(TGeoNode* node);
@@ -216,24 +213,25 @@ TEveEventDisplay::~TEveEventDisplay(){}
 /*-------Create Control Panel For Event Navigation----""*/
 void TEveEventDisplay::makeNavPanel()
 {
+  cout<<"Making New Panel "<<endl;
   TEveBrowser* browser = gEve->GetBrowser();
   browser->StartEmbedding(TRootBrowser::kLeft); 
-
+  cout<<"Making Main frame "<<endl;
   TGMainFrame* frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
   frmMain->SetWindowName("EVT NAV");
   frmMain->SetCleanup(kDeepCleanup);
-
+  cout<<"Hor Frame "<<endl;
   TGHorizontalFrame* navFrame = new TGHorizontalFrame(frmMain);
   TGVerticalFrame* evtidFrame = new TGVerticalFrame(frmMain);
   {
     TString icondir(TString::Format("%s/icons/", gSystem->Getenv("ROOTSYS")) );
     TGPictureButton* b = 0;
-
+    cout<<"Making back button  "<<endl;
     // ... Create back button and connect to "PrevEvent" rcvr in visutils
     b = new TGPictureButton(navFrame, gClient->GetPicture(icondir + "GoBack.gif"));
     navFrame->AddFrame(b);
     b->Connect("Clicked()", "EvtDisplayUtils", visutil_, "PrevEvent()");
-
+    cout<<"Making forwar button "<<endl;
     // ... Create forward button and connect to "NextEvent" rcvr in visutils
     b = new TGPictureButton(navFrame, gClient->GetPicture(icondir + "GoForward.gif"));
     navFrame->AddFrame(b);
@@ -276,7 +274,7 @@ void TEveEventDisplay::makeNavPanel()
     frmMain->MapSubwindows();
     frmMain->Resize();
     frmMain->MapWindow();
-
+    cout<<" finsihing panel making "<<endl;
     browser->StopEmbedding();
     browser->SetTabTitle("Event Nav", 0);
   }
@@ -285,18 +283,26 @@ void TEveEventDisplay::makeNavPanel()
 void TEveEventDisplay::beginJob(){
   
   if ( !doDisplay_ ) return;
+  art::ServiceHandle<art::TFileService> tfs;
+  directory_ = gDirectory;
 
+  // If needed, create the ROOT interactive environment. See note 1.
+   if ( !gApplication ){
+      int    tmp_argc(0);
+      char** tmp_argv(0);
+      application_ = new TApplication( "noapplication", &tmp_argc, tmp_argv );
+   }
   // Initialize global Eve application manager (return gEve)
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   TEveManager::Create();
-
+  cout<<"adding scenes "<<endl;
   // Create detector and event scenes for ortho views
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   fDetXYScene = gEve->SpawnNewScene("Det XY Scene", "");
   fDetRZScene = gEve->SpawnNewScene("Det RZ Scene", "");
   fEvtXYScene = gEve->SpawnNewScene("Evt XY Scene", "");
   fEvtRZScene = gEve->SpawnNewScene("Evt RZ Scene", "");
-
+   cout<<" projections "<<endl;
   // Create XY/RZ projection mgrs, draw projected axes, & add them to scenes
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   fXYMgr = new TEveProjectionManager(TEveProjection::kPT_RPhi);
@@ -311,7 +317,7 @@ void TEveEventDisplay::beginJob(){
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   TEveWindowSlot *slot = 0;
   TEveWindowPack *pack = 0;
-
+  cout<<"creating side by side "<<endl;
   slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
   pack = slot->MakePack();
   pack->SetElementName("Ortho Views");
@@ -335,7 +341,7 @@ void TEveEventDisplay::beginJob(){
   // Create navigation panel
   // ~~~~~~~~~~~~~~~~~~~~~~~~
   makeNavPanel();
-
+   cout<<"adding event "<<endl;
   // Add new Eve event into the "Event" scene and make it the current event
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // (Subsequent elements added using "AddElements" will be added to this event)
@@ -349,7 +355,8 @@ void TEveEventDisplay::beginJob(){
 
 }
 
-void TEveEventDisplay::beginRun(art::Run& run){
+void TEveEventDisplay::beginRun(const art::Run& run){
+  cout<<"beginning run "<<endl;
   if(gGeoManager){
     gGeoManager->GetListOfNodes()->Delete();
     gGeoManager->GetListOfVolumes()->Delete();
@@ -359,7 +366,7 @@ void TEveEventDisplay::beginRun(art::Run& run){
   fDetXYScene->DestroyElements();
   fDetRZScene->DestroyElements();
 
-  TGeoManager* geom = TGeoManager::Import("mu2e.gdml");
+  TGeoManager* geom = TGeoManager::Import("/mu2/app/users/sophie/Offline/Offline/TEveEventDisplay/src/mu2e.gdml");
 
   TGeoVolume* topvol = geom->GetTopVolume();
 
@@ -393,7 +400,7 @@ void TEveEventDisplay::beginRun(art::Run& run){
   // a TGeoCompositeShape for drawing the detector in the main 3D view and an 
   // TEveElementList for drawing the detector in the 2D orthographic views
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+  cout<<"tracker"<<endl;
   GeomHandle<Tracker> th; 
   const Tracker* tracker_mu2e = th.get(); 
   TubsParams envelope(tracker_mu2e->getInnerTrackerEnvelopeParams());
@@ -478,7 +485,7 @@ void TEveEventDisplay::beginRun(art::Run& run){
 
 void TEveEventDisplay::InsideDS( TGeoNode * node, bool inDSVac ){
   std::string _name = (node->GetVolume()->GetName());
-
+cout<<"insidie dsl "<<endl;
   if ( node->GetMotherVolume() ) {
     std::string motherName(node->GetMotherVolume()->GetName());
     if ( motherName == "DS2Vacuum" || motherName == "DS3Vacuum" ){
@@ -504,7 +511,7 @@ void TEveEventDisplay::InsideDS( TGeoNode * node, bool inDSVac ){
 void TEveEventDisplay::analyze(const art::Event& event){
   _evt = event.id().event();
   FindData(event);
-  
+  cout<<"analysing "<<endl;
   std::ostringstream sstr;
   sstr << event.id().run();
   visutil_->fTbRun->Clear();
@@ -529,7 +536,7 @@ void TEveEventDisplay::analyze(const art::Event& event){
 
 
 void TEveEventDisplay::hideTop(TGeoNode* node) {
-
+cout<<"hitde top "<<endl;
   TString name = node->GetName();
   if(name.Index("Shield")>0) {
     std::cout << name << " " <<  name.Index("mBox_") << std::endl;
@@ -674,7 +681,7 @@ void TEveEventDisplay::AddHits(const art::Event& event){
 
 bool TEveEventDisplay::FindData(const art::Event& evt){
 	_chcol = 0; 
-        
+        cout<<"finding data "<<endl;
 	auto chH = evt.getValidHandle<ComboHitCollection>(_chtag);
 	_chcol = chH.product();
 	
@@ -691,3 +698,6 @@ void eve() {
 
 }
 */
+
+using mu2e::TEveEventDisplay;
+DEFINE_ART_MODULE(TEveEventDisplay);

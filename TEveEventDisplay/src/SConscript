@@ -2,6 +2,10 @@
 #
 # Original author Rob Kutschke.
 #
+#!/usr/bin/env python
+#
+# Original author Rob Kutschke.
+#
 
 import os, re
 Import('env')
@@ -11,7 +15,7 @@ helper=mu2e_helper(env)
 
 babarlibs = env['BABARLIBS']
 rootlibs = env['ROOTLIBS']
-extrarootlibs = [ 'Geom', 'Geom', 'GeomPainter', 'Ged', 'Graf3d', 'Eve' ]
+extrarootlibs = [ 'Geom', 'Geom', 'GeomPainter', 'Ged', 'Graf3d', 'Eve', 'RGL','Gui' ]
 
 userlibs = [ rootlibs, 
              extrarootlibs,
@@ -61,7 +65,7 @@ userlibs = [ rootlibs,
 
 mainlib = helper.make_mainlib([userlibs])
 
-#helper.make_plugins( [ 'mu2e_TEveEventDisplay',userlibs ] )
+helper.make_plugins( [ 'mu2e_TEveEventDisplay',userlibs ] )
 
 
 
@@ -69,3 +73,5 @@ mainlib = helper.make_mainlib([userlibs])
 # Local Variables:
 # mode:python
 # End:
+
+
