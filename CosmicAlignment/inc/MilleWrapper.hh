@@ -6,6 +6,9 @@
 #include <vector>
 #include <memory>
 
+typedef std::vector<std::pair<unsigned int, double>> GlobalDerivativeCollection;
+
+
 /**
  * @brief A object that represents an 'alignable' object and its
  * free parameters
@@ -31,8 +34,8 @@ public:
 
 
 /**
- * @brief MilleWrapper is designed to make it as easy as possible to construct an alignment 'problem'
- * within the context of the Mu2e Tracker. This way all of the handling of Mille routines is confined to
+ * @brief MilleWrapper is designed to make it easy to construct an alignment 'problem'
+ * in an object oriented way. All of the handling of Mille routines is confined to
  * this class only.
  *
  * I'd like to keep separate mu2e types from the invokation of Millepede, for clarity and readability.
@@ -51,7 +54,9 @@ public:
 
     void RegisterAlignableObject(const AlignableObject &);
 
-    void RegisterTrack(); // accepts a track
+    void RegisterTrackHit(AlignableObject const& element,
+        GlobalDerivativeCollection const& global_derivatives,
+        std::vector<double> const& labels);
 
     void Save();
 };

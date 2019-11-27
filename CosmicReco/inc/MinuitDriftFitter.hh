@@ -45,6 +45,9 @@ struct FitResult{
 
 		std::vector<double> RecoAmbigs;
 
+
+		std::vector<double> UnbiasedDOCAs;
+
 		double NLL;
 
 };

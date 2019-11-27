@@ -133,9 +133,8 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 		}
 	}
 
-	if (cosmictrack.minuit_converged == true and trackseed._straw_chits.size() > minChits)
+	if (cosmictrack.minuit_converged and trackseed._straw_chits.size() > minChits)
 	{
-
 		//Now run Full Fit:
 		newseed[0] = FitResult.bestfit[0];
 		newseed[1] = FitResult.bestfit[1];
@@ -185,8 +184,51 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 			FitResult.FullFitEndTimeResiduals.push_back(end_time_residual);
 			FitResult.FullFitEndDOCAs.push_back(end_doca);
 			FitResult.RecoAmbigs.push_back(ambig);
+
+
 		}
 		fulldriftfit.DeleteArrays();
+
+		// check convergence!
+		if (!isnan(FitResult.bestfit[0]))
+		{
+			// Unbiased residuals!
+
+			for (int hit_idx = 0; hit_idx < (int)passed_hits.size(); hit_idx++)
+			{
+				ComboHitCollection combos(passed_hits);
+				std::vector<Straw> straws(passed_straws);
+				combos.erase(combos.begin() + hit_idx);
+				straws.erase(straws.begin() + hit_idx);
+
+				FullDriftFit rerun(combos, straws, srep, cosmictrack, constraint_means, constraints, _gaussTres, 1);
+				ROOT::Minuit2::MnMigrad migg(rerun, results, mnStrategy);
+				migg.SetLimits((signed)0, -10000, 10000);
+				migg.SetLimits((signed)1, -5, 5);
+				migg.SetLimits((signed)2, -5000, 5000);
+				migg.SetLimits((signed)3, -10, 10);
+				migg.Fix((unsigned)4);
+				min = migg(MaxLogL, tolerance);
+
+				//Will be the results of the fit routine:
+				results = min.UserParameters();
+				auto parm = results.Params();
+				if (isnan(parm[0]))
+					std::cout << "Warning: unbiased residual couldn't be calculated as Minuit didn't converge" << std::endl;
+
+				double end_doca = fit.calculate_DOCA(passed_straws[hit_idx], parm[0], parm[1], parm[2], parm[3]);
+				double ambig = fit.calculate_ambig(passed_straws[hit_idx], parm[0], parm[1], parm[2], parm[3]);
+				//double end_time_residual = fit.TimeResidual(passed_straws[hit_idx], end_doca, srep, parm[4], combos[hit_idx]);
+				FitResult.UnbiasedDOCAs.push_back(ambig * end_doca);
+
+				std::cout << hit_idx << " biased: " << FitResult.RecoAmbigs[hit_idx] * FitResult.FullFitEndDOCAs[hit_idx] << ". unbiased: " << ambig * end_doca << std::endl;
+			}
+			std::cout << trackseed._straws.size() - passed_hits.size() << " (outliers removed)" << std::endl;
+		}
+		else
+		{
+			FitResult.NLL = 0; // If the full drift fit didn't converge, don't add this track.
+		}
 	}
 	return FitResult;
 }
