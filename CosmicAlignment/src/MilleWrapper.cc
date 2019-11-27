@@ -4,7 +4,6 @@
 
 #include "CosmicAlignment/inc/MilleWrapper.hh"
 
-
 /**
  * @brief Construct a new Mille Wrapper object.
  *
@@ -32,12 +31,15 @@ void MilleWrapper::RegisterAlignableObject(AlignableObject const& object)
  * @brief Add a new track to the Mille buffer.
  *
  */
-void MilleWrapper::RegisterTrack()
+void MilleWrapper::RegisterTrackHit(AlignableObject const& element,
+    GlobalDerivativeCollection const& global_derivatives,
+    std::vector<double> const& labels)
 {
-
+    if (!millepede) return;
 }
 
 void MilleWrapper::Save()
 {
     millepede->end();
+    millepede.release();
 }
