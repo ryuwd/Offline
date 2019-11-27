@@ -85,14 +85,10 @@ public:
 	void ConvertFitToDetectorFrame(CosmicTrackFinderData &trackData, TrackAxes axes, XYZVec Position, XYZVec Direction, CosmicTrack *cosmictrack, bool isseed, bool det);
 
 	bool goodTrack(CosmicTrack &track);
-	void DriftFit(CosmicTrackFinderData &trackData);
+	void DriftFit(CosmicTrackFinderData &trackData, StrawResponse const& srep);
 
 	const Tracker *_tracker;
 	void setTracker(const Tracker *Tracker) { _tracker = Tracker; }
-
-
-	StrawResponse const& _srep;
-	void setStrawResponse(StrawResponse const &rep) { _srep = rep; }
 
 private:
 	Config _conf;

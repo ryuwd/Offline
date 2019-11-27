@@ -502,10 +502,11 @@ bool CosmicTrackFit::use_track(double track_length) const //not used but keep fo
 /*-------------Drift Fit Diagnotics--------------//
 This is were the fitter "talks" to the Minuit fitter. "EndResult" is the minimzed track parameters
 //------------------------------------------------*/
-void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData)
+void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData, StrawResponse const& _srep)
 {
 
 	FitResult endresult = MinuitDriftFitter::DoFit(_diag, trackData._tseed, _srep, _maxHitDOCA, _minnch, _maxLogL, _gaussTres, _maxTres);
+
 	//Store output in diag lists:
 	trackData._tseed._track.MinuitFitParams.A0 = endresult.bestfit[0]; //a0
 	trackData._tseed._track.MinuitFitParams.A1 = endresult.bestfit[1]; //a1
@@ -548,8 +549,9 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData)
 	{
 		for (unsigned i = 0; i < trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals.size() - 1; i++)
 		{
-			if (trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals[i] > _maxTres)
-			{
+ 			if ( trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals[i] > _maxTres ||
+			 	isnan(trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals[i]))
+		 	{
 				trackData._tseed._track.n_outliers += 1;
 				trackData._tseed._straw_chits[i]._flag.merge(_dontuseflag);
 			}
@@ -575,7 +577,6 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData)
 
 			std::vector<double> ErrorsXY = ParametricFit::GetErrors(chit, X, Y);
 			trackData._tseed._track.DriftDiag.FinalErrX.push_back(ErrorsXY[0]);
-
 			trackData._tseed._track.DriftDiag.FinalErrY.push_back(ErrorsXY[1]);
 		}
 	}

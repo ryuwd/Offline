@@ -29,7 +29,7 @@
  *  (last update by $Author: flucke $)
  */
 
-#include "Mille.h"
+#include "CosmicAlignment/inc/Mille.h"
 
 #include <fstream>
 #include <iostream>
@@ -42,7 +42,7 @@
  * \param[in] asBinary     flag for binary
  * \param[in] writeZero    flag for keeping of zeros
  */
-Mille::Mille(const char *outFileName, bool asBinary, bool writeZero) : 
+Mille::Mille(const char *outFileName, bool asBinary, bool writeZero) :
   myOutFile(outFileName, (asBinary ? (std::ios::binary | std::ios::out) : std::ios::out)),
   myAsBinary(asBinary), myWriteZero(writeZero), myBufferPos(-1), myHasSpecial(false)
 {
@@ -52,7 +52,7 @@ Mille::Mille(const char *outFileName, bool asBinary, bool writeZero) :
   myBufferFloat[0] = 0.;
 
   if (!myOutFile.is_open()) {
-    std::cerr << "Mille::Mille: Could not open " << outFileName 
+    std::cerr << "Mille::Mille: Could not open " << outFileName
 	      << " as output file." << std::endl;
   }
 }
@@ -110,8 +110,8 @@ void Mille::mille(int NLC, const float *derLc,
 	myBufferFloat[myBufferPos] = derGl[i]; // global derivatives
 	myBufferInt  [myBufferPos] = label[i]; // index of global parameter
       } else {
-	std::cerr << "Mille::mille: Invalid label " << label[i] 
-		  << " <= 0 or > " << myMaxLabel << std::endl; 
+	std::cerr << "Mille::mille: Invalid label " << label[i]
+		  << " <= 0 or > " << myMaxLabel << std::endl;
       }
     }
   }
@@ -130,7 +130,7 @@ void Mille::special(int nSpecial, const float *floatings, const int *integers)
   if (myBufferPos == -1) this->newSet(); // start, e.g. new track
   if (myHasSpecial) {
     std::cerr << "Mille::special: Special values already stored for this record."
-	      << std::endl; 
+	      << std::endl;
     return;
   }
   if (!this->checkBufferSize(nSpecial, 0)) return;
@@ -172,11 +172,11 @@ void Mille::end()
     const int numWordsToWrite = (myBufferPos + 1)*2;
 
     if (myAsBinary) {
-      myOutFile.write(reinterpret_cast<const char*>(&numWordsToWrite), 
+      myOutFile.write(reinterpret_cast<const char*>(&numWordsToWrite),
 		      sizeof(numWordsToWrite));
-      myOutFile.write(reinterpret_cast<char*>(myBufferFloat), 
+      myOutFile.write(reinterpret_cast<char*>(myBufferFloat),
 		      (myBufferPos+1) * sizeof(myBufferFloat[0]));
-      myOutFile.write(reinterpret_cast<char*>(myBufferInt), 
+      myOutFile.write(reinterpret_cast<char*>(myBufferInt),
 		      (myBufferPos+1) * sizeof(myBufferInt[0]));
     } else {
       myOutFile << numWordsToWrite << "\n";
@@ -184,7 +184,7 @@ void Mille::end()
 	myOutFile << myBufferFloat[i] << " ";
       }
       myOutFile << "\n";
-      
+
       for (int i = 0; i < myBufferPos+1; ++i) {
 	myOutFile << myBufferInt[i] << " ";
       }
@@ -215,10 +215,10 @@ bool Mille::checkBufferSize(int nLocal, int nGlobal)
 {
   if (myBufferPos + nLocal + nGlobal + 2 >= myBufferSize) {
     ++(myBufferInt[0]); // increase error count
-    std::cerr << "Mille::checkBufferSize: Buffer too short (" 
+    std::cerr << "Mille::checkBufferSize: Buffer too short ("
 	      << myBufferSize << "),"
 	      << "\n need space for nLocal (" << nLocal<< ")"
-	      << "/nGlobal (" << nGlobal << ") local/global derivatives, " 
+	      << "/nGlobal (" << nGlobal << ") local/global derivatives, "
 	      << myBufferPos + 1 << " already stored!"
 	      << std::endl;
     return false;

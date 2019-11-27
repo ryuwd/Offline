@@ -32,18 +32,18 @@ double DriftFitUtils::GetTestDOCA(Straw const& straw, double a0, double a1, doub
 
 	const CLHEP::Hep3Vector& spos = straw.getMidPoint();
 	const CLHEP::Hep3Vector& sdir = straw.getDirection();
-	
+
 	XYZVec wire_position = Geom::toXYZVec(spos);
         XYZVec wire_direction= Geom::toXYZVec(sdir);
-	
+
 	TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(track_position,
                 track_direction,
                 wire_position,
                 wire_direction,
                 1.e-8);
-	
-        double dca; 
-	dca = PCA.dca();     		
+
+        double dca;
+	dca = PCA.dca();
 	return dca;
 }
 
@@ -53,25 +53,25 @@ int DriftFitUtils::GetAmbig(Straw const& straw, double a0, double a1, double b0,
 
 	const CLHEP::Hep3Vector& spos = straw.getMidPoint();
 	const CLHEP::Hep3Vector& sdir = straw.getDirection();
-	
+
 	XYZVec wire_position = Geom::toXYZVec(spos);
         XYZVec wire_direction= Geom::toXYZVec(sdir);
-	
+
 	TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(track_position,
                 track_direction,
                 wire_position,
                 wire_direction,
                 1.e-8);
-	
-        double ambig = PCA.LRambig();     		
-	
+
+        double ambig = PCA.LRambig();
+
       	return ambig;
 
 }
-	
-double DriftFitUtils::GetPropVelocity(StrawResponse rep, ComboHit chit){
+
+double DriftFitUtils::GetPropVelocity(StrawResponse const& rep, ComboHit chit){
 	   	double vprop = 2.0*rep.halfPropV(chit.strawId(),1000.0*chit.energyDep());
-	   	return vprop; 
+	   	return vprop;
 }
 
 double DriftFitUtils::GetPropTime(ComboHit chit, Straw straw, double vprop) {
@@ -84,28 +84,28 @@ double DriftFitUtils::GetPropTime(ComboHit chit, Straw straw, double vprop) {
 		  tprop = (straw.halfLength()-chit.wireDist())/vprop;
 		  break;
 	      }
-	    
+
 	    return tprop;
   }
 
 
-double DriftFitUtils::TimeResidualTrans(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit hit){ 
-                
+double DriftFitUtils::TimeResidualTrans(Straw const&  straw, double doca, StrawResponse const& srep, double t0, ComboHit hit){
+
       	        double drift_time= doca/0.065;//srep.StrawResponse::driftDistanceToTime(strawid , fabs(doca), phi);//TODO fix the drift vel
       	        return drift_time;
 }
-        
-double DriftFitUtils::TimeResidualLong(Straw const&  straw, double doca, StrawResponse srep,  double t0, ComboHit hit){
-		
+
+double DriftFitUtils::TimeResidualLong(Straw const& straw, double doca, StrawResponse const& srep,  double t0, ComboHit hit){
+
                 StrawId strawid = straw.id();
       	        double _vprop = 2.0*srep.StrawResponse::halfPropV(strawid,1000.0*hit.energyDep());
       	        double propagation_time = GetPropTime(hit, straw,_vprop);
       	        return propagation_time;
 }
 
-double DriftFitUtils::TimeResidual(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit hit){
+double DriftFitUtils::TimeResidual(Straw const&  straw, double doca, StrawResponse const& srep, double t0, ComboHit hit){
 		double time_residual_long = TimeResidualLong( straw,  doca, srep,  t0,  hit);
-		double time_residual_trans = TimeResidualTrans(straw,doca, srep, t0, hit); 
+		double time_residual_trans = TimeResidualTrans(straw, doca, srep, t0, hit);
 		return time_residual_trans + time_residual_long;// + hitlen/299 + fltlen/299;
 }
 

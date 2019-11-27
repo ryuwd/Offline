@@ -201,7 +201,6 @@ void CosmicTrackFinder::beginRun(art::Run &run)
 void CosmicTrackFinder::produce(art::Event &event)
 {
     auto const& srep = _strawResponse_h.get(event.id());
-    _tfit.setStrawResponse(srep);
 
     if (_debug != 0)
         std::cout << "Producing Cosmic Track in  Finder..." << std::endl;
@@ -333,7 +332,7 @@ void CosmicTrackFinder::produce(art::Event &event)
 
                 if (_tfit.goodTrack(tmpResult._tseed._track) == false)
                     continue;
-                _tfit.DriftFit(tmpResult);
+                _tfit.DriftFit(tmpResult, srep);
 
                 //Add tmp to seed list:
                 track_seed_vec.push_back(tmpResult._tseed);
