@@ -195,13 +195,13 @@ void CosmicTrackFinder::beginRun(art::Run &run)
     const Tracker *tracker = th.get();
 
     _stResult.run = &run;
-    auto const &srep = _strawResponse_h.get(run.id());
     _tfit.setTracker(tracker);
-    _tfit.setStrawResponse(srep);
 }
 
 void CosmicTrackFinder::produce(art::Event &event)
 {
+    auto const& srep = _strawResponse_h.get(event.id());
+    _tfit.setStrawResponse(srep);
 
     if (_debug != 0)
         std::cout << "Producing Cosmic Track in  Finder..." << std::endl;
