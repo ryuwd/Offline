@@ -38,3 +38,13 @@ EMFCAnalysis
 .tup
 .buildopts
 tags
+.vscode/c_cpp_properties.json
+.vscode/*
+.vscode/settings.json
+.vscode/tasks.json
+output_resids.txt
+CosmicAnalysis.csv
+.cquery
+.gitignore
+compile_commands.json
+.temp_compile_cmds
