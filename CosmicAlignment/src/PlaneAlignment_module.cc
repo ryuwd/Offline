@@ -3,7 +3,7 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "Mille.h"
+#include "CosmicAlignment/inc/Mille.h"
 
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
@@ -59,6 +59,7 @@ PlaneAlignment::~PlaneAlignment()
 
 void PlaneAlignment::beginJob()
 {
+
 }
 
 void PlaneAlignment::analyze(art::Event const &event)
