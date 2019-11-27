@@ -194,8 +194,14 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 		{
 			// Unbiased residuals!
 
-			for (int hit_idx = 0; hit_idx < (int)passed_hits.size(); hit_idx++)
+			for (int hit_idx = 0; hit_idx < (int)trackseed._straws.size(); hit_idx++)
 			{
+				if (std::find(passed_straws.begin(), passed_straws.end(), trackseed._straws[hit_idx]) == passed_straws.end())
+				{
+					// then push back the residuals calculated before and continue
+					FitResult.UnbiasedDOCAs.push_back(FitResult.GaussianEndDOCAs[hit_idx] * FitResult.RecoAmbigs[hit_idx]);
+					continue;
+				}
 				ComboHitCollection combos(passed_hits);
 				std::vector<Straw> straws(passed_straws);
 				combos.erase(combos.begin() + hit_idx);

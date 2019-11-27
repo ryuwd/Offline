@@ -544,6 +544,7 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData, StrawResponse co
 	trackData._tseed._track.DriftDiag.GaussianEndTimeResiduals = endresult.GaussianEndTimeResiduals;
 	trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals = endresult.FullFitEndTimeResiduals;
 	trackData._tseed._track.DriftDiag.RecoAmbigs = endresult.RecoAmbigs;
+	trackData._tseed._track.DriftDiag.UnbiasedDOCAs = endresult.UnbiasedDOCAs;
 
 	if (trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals.size() > 0)
 	{
@@ -553,7 +554,7 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData, StrawResponse co
 			 	isnan(trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals[i]))
 		 	{
 				trackData._tseed._track.n_outliers += 1;
-				trackData._tseed._straw_chits[i]._flag.merge(_dontuseflag);
+				trackData._tseed._straw_chits[i]._flag.merge(_dontuseflag); // TODO: figure out if this cut should be applied to unbiased DOCAs
 			}
 		}
 		if (trackData._tseed._track.n_outliers > _n_outliers)
