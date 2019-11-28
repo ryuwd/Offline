@@ -22,7 +22,7 @@ private:
 
     std::vector<int> labels;
 public:
-    AlignableObject(int o_id, int n_params) : n_parameters(n_params), object_id(o_id)
+    AlignableObject(int o_id, int n_params) : object_id(o_id), n_parameters(n_params)
     {
         int start_id = get_param_id(0);
         for (int label_id = start_id; label_id < start_id + n_params; label_id++)
