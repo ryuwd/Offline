@@ -34,7 +34,6 @@ MilleWrapper::MilleWrapper(std::string output_file)
  */
 void MilleWrapper::RegisterAlignableObject(int object_id, int no_free_parameters)
 {
-    //millepede->mille()
     objects.emplace_back(object_id, no_free_parameters);
 }
 
