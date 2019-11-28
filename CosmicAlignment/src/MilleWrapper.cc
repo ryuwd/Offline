@@ -19,25 +19,41 @@
  *    the residual, and its error. Pass this information to RegisterTrackHit( ... );
  * 5. Call Save(); - This will write a binary file which can be passed to ./pede
  *
- * @param output_file the filename for the millepede binary configuration file.
+ * @param output_file the filename for the mille binary file.
  */
 MilleWrapper::MilleWrapper(std::string output_file)
 {
     millepede = std::make_unique<Mille>(output_file.c_str());
 }
 
-
+/**
+ * @brief Register an object (with a unique ID) to be aligned using N free parameters.
+ *
+ * @param object_id the unique ID of the object
+ * @param no_free_parameters the number of free parameters that Millepede will use to align the object
+ */
 void MilleWrapper::RegisterAlignableObject(int object_id, int no_free_parameters)
 {
     //millepede->mille()
     objects.emplace_back(object_id, no_free_parameters);
 }
 
+/**
+ * @brief Call me after registering all objects with RegisterAlignableObject,
+ * and ALWAYS before calling RegisterTrackHit
+ *
+ */
 void MilleWrapper::StartRegisteringHits()
 {
     std::sort(objects.begin(), objects.end());
 }
 
+/**
+ * @brief Get AlignableObject instance in this object with ID object_id
+ *
+ * @param object_id the ID of the AlignableObject to fetch.
+ * @return AlignableObject const&
+ */
 AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
 {
     return *std::lower_bound(objects.begin(), objects.end(), object_id);
@@ -72,6 +88,11 @@ void MilleWrapper::RegisterTrackHit(int object_id,
         residual_error);
 }
 
+
+/**
+ * @brief Dump the Mille buffer to file.
+ *
+ */
 void MilleWrapper::Save()
 {
     millepede->end();
