@@ -64,7 +64,7 @@ AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
  * @param object_id the ID of the object that has been 'hit' by the track e.g. a plane or panel
  * @param global_derivatives the array of partial derivatives with respect to each global alignment parameter
  * @param local_derivatives the array of partial derivatives with respect to each track parameter
- * @param residual the measured residual e.g. DOCA, or drift time.
+ * @param residual the measured residual.
  * @param residual_error the error on the measured residual.
  */
 void MilleWrapper::RegisterTrackHit(int object_id,
