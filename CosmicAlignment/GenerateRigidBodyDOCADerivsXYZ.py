@@ -18,7 +18,7 @@ def DOCA(track_pos, track_dir, wire_pos, wire_dir):
     delta = track_pos - wire_pos
 
     ddotT1 = delta.dot(track_dir)
-    ddotT2 = delta.dot(track_dir)
+    ddotT2 = delta.dot(wire_dir)
 
     s1 = (ddotT2 * alpha - ddotT1)/beta
     s2 = -(ddotT1 * alpha - ddotT2)/beta
@@ -31,9 +31,6 @@ def DOCA(track_pos, track_dir, wire_pos, wire_dir):
     doca = sqrt(diff.dot(diff))
 
     return sympy.Piecewise((doca, s2 > 0), (-doca, True))
-
-def translation(vec, translation):
-    return vec + translation
 
 def alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
     R_a = AxisOrienter(a, X.i).rotation_matrix(X)
