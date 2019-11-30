@@ -544,7 +544,10 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData, StrawResponse co
 	trackData._tseed._track.DriftDiag.GaussianEndTimeResiduals = endresult.GaussianEndTimeResiduals;
 	trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals = endresult.FullFitEndTimeResiduals;
 	trackData._tseed._track.DriftDiag.RecoAmbigs = endresult.RecoAmbigs;
-	trackData._tseed._track.DriftDiag.UnbiasedDOCAs = endresult.UnbiasedDOCAs;
+	trackData._tseed._track.DriftDiag.UnbiasedResX = endresult.UnbiasedResX;
+	trackData._tseed._track.DriftDiag.UnbiasedResY = endresult.UnbiasedResY;
+	trackData._tseed._track.DriftDiag.UnbiasedResXErr = endresult.UnbiasedResXErr;
+	trackData._tseed._track.DriftDiag.UnbiasedResYErr = endresult.UnbiasedResYErr;
 
 	if (trackData._tseed._track.DriftDiag.FullFitEndTimeResiduals.size() > 0)
 	{
@@ -572,6 +575,7 @@ void CosmicTrackFit::DriftFit(CosmicTrackFinderData &trackData, StrawResponse co
 			if (((!use_hit(*chit)) && (chit->nStrawHits() < _minnsh)))
 				continue;
 			XYZVec point(chit->pos().x(), chit->pos().y(), chit->pos().z());
+
 
 			trackData._tseed._track.DriftDiag.FinalResidualsX.push_back(ParametricFit::GetResidualX(trackData._tseed._track.MinuitFitParams.A0, trackData._tseed._track.MinuitFitParams.A1, point));
 			trackData._tseed._track.DriftDiag.FinalResidualsY.push_back(ParametricFit::GetResidualY(trackData._tseed._track.MinuitFitParams.B0, trackData._tseed._track.MinuitFitParams.B1, point));

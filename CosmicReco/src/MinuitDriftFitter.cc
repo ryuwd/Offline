@@ -185,6 +185,14 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 			FitResult.FullFitEndDOCAs.push_back(end_doca);
 			FitResult.RecoAmbigs.push_back(ambig);
 
+			FitResult.ResX.push_back(ParametricFit::GetResidualX(FitResult.bestfit[0], FitResult.bestfit[1], trackseed._straw_chits[i].pos()));
+			FitResult.ResY.push_back(ParametricFit::GetResidualY(FitResult.bestfit[2], FitResult.bestfit[3], trackseed._straw_chits[i].pos()));
+
+			std::vector<double> ErrorsXY = ParametricFit::GetErrors(&trackseed._straw_chits[i], XYZVec(1,0,0), XYZVec(0,1,0));
+			FitResult.ResXErr.push_back(ErrorsXY[0]);
+			FitResult.ResYErr.push_back(ErrorsXY[1]);
+
+
 
 		}
 		fulldriftfit.DeleteArrays();
@@ -199,7 +207,11 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 				if (std::find(passed_straws.begin(), passed_straws.end(), trackseed._straws[hit_idx]) == passed_straws.end())
 				{
 					// then push back the residuals calculated before and continue
-					FitResult.UnbiasedDOCAs.push_back(FitResult.GaussianEndDOCAs[hit_idx] * FitResult.RecoAmbigs[hit_idx]);
+					//FitResult.UnbiasedDOCAs.push_back(FitResult.GaussianEndDOCAs[hit_idx] * FitResult.RecoAmbigs[hit_idx]);
+					FitResult.UnbiasedResX.push_back(FitResult.ResX[hit_idx]);
+					FitResult.UnbiasedResY.push_back(FitResult.ResY[hit_idx]);
+					FitResult.UnbiasedResXErr.push_back(FitResult.ResXErr[hit_idx]);
+					FitResult.UnbiasedResYErr.push_back(FitResult.ResYErr[hit_idx]);
 					continue;
 				}
 				ComboHitCollection combos(passed_hits);
@@ -222,12 +234,18 @@ FitResult DoFit(int _diag, CosmicTrackSeed trackseed, StrawResponse const& srep,
 				if (isnan(parm[0]))
 					std::cout << "Warning: unbiased residual couldn't be calculated as Minuit didn't converge" << std::endl;
 
-				double end_doca = fit.calculate_DOCA(passed_straws[hit_idx], parm[0], parm[1], parm[2], parm[3]);
-				double ambig = fit.calculate_ambig(passed_straws[hit_idx], parm[0], parm[1], parm[2], parm[3]);
-				//double end_time_residual = fit.TimeResidual(passed_straws[hit_idx], end_doca, srep, parm[4], combos[hit_idx]);
-				FitResult.UnbiasedDOCAs.push_back(ambig * end_doca);
+				ComboHit & chit = trackseed._straw_chits[hit_idx];
 
-				std::cout << hit_idx << " biased: " << FitResult.RecoAmbigs[hit_idx] * FitResult.FullFitEndDOCAs[hit_idx] << ". unbiased: " << ambig * end_doca << std::endl;
+				FitResult.UnbiasedResX.push_back(ParametricFit::GetResidualX(parm[0], parm[1], chit.pos()));
+				FitResult.UnbiasedResY.push_back(ParametricFit::GetResidualY(parm[2], parm[3], chit.pos()));
+
+				std::vector<double> ErrorsXY = ParametricFit::GetErrors(&chit, XYZVec(1,0,0), XYZVec(0,1,0));
+				FitResult.UnbiasedResXErr.push_back(ErrorsXY[0]);
+				FitResult.UnbiasedResYErr.push_back(ErrorsXY[1]);
+
+				std::cout << hit_idx << " unbiased x: " << FitResult.UnbiasedResX[hit_idx] << ". unbiased y: " << FitResult.UnbiasedResY[hit_idx] << std::endl;
+				std::cout << hit_idx << " unbiased x err: " << FitResult.UnbiasedResXErr[hit_idx] << ". unbiased y err: " << FitResult.UnbiasedResYErr[hit_idx] << std::endl;
+
 			}
 			std::cout << trackseed._straws.size() - passed_hits.size() << " (outliers removed)" << std::endl;
 		}

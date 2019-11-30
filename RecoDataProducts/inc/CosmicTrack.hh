@@ -81,6 +81,9 @@ using namespace std;
 	std::vector<double> FinalErrY;
 	std::vector<double> FinalErrTot;
 	std::vector<double> InitErrTot;
+
+
+
 	TrackSeedDiag();
 
    };
@@ -90,6 +93,11 @@ using namespace std;
    	double FinalChiY;
    	double FinalChiTot;
    	double NLL;
+	std::vector<double> UnbiasedResX;
+	std::vector<double> UnbiasedResY;
+	std::vector<double> UnbiasedResXErr;
+	std::vector<double> UnbiasedResYErr;
+
 
    	std::vector<double> StartDOCAs;
    	std::vector<double> FullFitEndDOCAs;
@@ -108,7 +116,6 @@ using namespace std;
 	std::vector<double> FinalErrY;
 	std::vector<double> FinalErrTot;
 
-	std::vector<double> UnbiasedDOCAs;
 
    	TrackDriftDiag();
 
