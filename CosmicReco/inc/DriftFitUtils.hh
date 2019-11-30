@@ -29,21 +29,20 @@
 #include "BTrk/ProbTools/ChisqConsistency.hh"
 #include "BTrk/TrkBase/TrkMomCalculator.hh"
 
+
 using namespace mu2e;
 
-namespace DriftFitUtils
-{
-
-TrackEquation ConvertFitToDetectorFrame(TrackAxes axes, XYZVec Position, XYZVec Direction);
-double GetTestDOCA(Straw const &straw, double a0, double a1, double b0, double b1);
-int GetAmbig(Straw const &straw, double a0, double a1, double b0, double b1);
-double GetPropVelocity(StrawResponse const &rep, ComboHit chit);
-double GetPropTime(ComboHit chit, Straw straw, double vprop);
-double TimeResidualTrans(Straw const &straw, double doca, StrawResponse const &srep, double t0, ComboHit chit);
-double TimeResidualLong(Straw const &straw, double doca, StrawResponse const &srep, double t0, ComboHit chit);
-double TimeResidual(Straw const &straw, double doca, StrawResponse const &srep, double t0, ComboHit hit);
-double T0(Straw const &straw, double doca, StrawResponse const &srep, double t0, ComboHit hit, double average);
-
-} // namespace DriftFitUtils
+namespace DriftFitUtils{
+  	TrackEquation ConvertFitToDetectorFrame(TrackAxes axes, XYZVec Position, XYZVec Direction);
+	double GetTestDOCA(Straw const& straw, double a0, double a1, double b0, double b1);
+        int GetAmbig(Straw const& straw, double a0, double a1, double b0, double b1);
+  	double GetPropVelocity(StrawResponse rep, ComboHit chit); 
+	double GetPropTime(ComboHit chit, Straw straw, double vprop);
+  	double TimeResidualTrans(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit chit);
+  	double TimeResidualLong(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit chit);
+  	double TimeResidual(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit hit);
+  	double T0(Straw const&  straw, double doca, StrawResponse srep, double t0, ComboHit hit, double average);
+  
+ }
 
 #endif

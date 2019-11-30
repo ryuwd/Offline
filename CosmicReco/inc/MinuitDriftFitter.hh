@@ -1,8 +1,8 @@
 #ifndef _MU2E_UTILITIES_LIKLIHOODFUNCTIONS_HH
 #define _MU2E_UTILITIES_LIKLIHOODFUNCTIONS_HH
-// Author: S. Middleton
+// Author: S. Middleton 
 // Date: July 2019
-//Purpose: Will pass PDF function to Minuit
+//Purpose: Will pass PDF function to Minuit 
 #include "TrackerConditions/inc/StrawDrift.hh"
 #include "RecoDataProducts/inc/ComboHit.hh"
 #include "DataProducts/inc/XYZVec.hh"
@@ -44,24 +44,14 @@ struct FitResult{
 		std::vector<double> FullFitEndTimeResiduals;
 
 		std::vector<double> RecoAmbigs;
-
-
-		std::vector<double> ResX;
-		std::vector<double> ResY;
-		std::vector<double> ResXErr;
-		std::vector<double> ResYErr;
-		std::vector<double> UnbiasedResX;
-		std::vector<double> UnbiasedResY;
-		std::vector<double> UnbiasedResXErr;
-		std::vector<double> UnbiasedResYErr;
-
+		
 		double NLL;
-
+	
 };
 
 namespace MinuitDriftFitter {
-
-	FitResult DoFit(int diag, CosmicTrackSeed trackseed, StrawResponse const& srep, double doca_cut, unsigned int MinNCh_cut, int LogLcut, double _gaussTres, double _maxTres);
+	
+	FitResult DoFit(int diag, CosmicTrackSeed trackseed, StrawResponse srep, double doca_cut, unsigned int MinNCh_cut, int LogLcut, double _gaussTres, double _maxTres);
 
 }
 
