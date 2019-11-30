@@ -3,7 +3,7 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "CosmicAlignment/inc/MilleWrapper.h"
+#include "CosmicAlignment/inc/MilleWrapper.hh"
 
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
@@ -13,6 +13,9 @@
 #include "RecoDataProducts/inc/CosmicTrack.hh"
 #include "RecoDataProducts/inc/CosmicTrackSeed.hh"
 #include "art/Framework/Core/ModuleMacros.h"
+
+
+#include "CosmicAlignment/inc/RigidBodyDOCADeriv.hh"
 
 namespace mu2e
 {
@@ -38,7 +41,8 @@ public:
 
     PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                              //_chtag(conf().chtag()),
-                                             _costag(conf().costag()) {}
+                                             _costag(conf().costag()),
+                                             millepede("mu2e_plane_alignment.bin") {}
 
     virtual ~PlaneAlignment();
 
@@ -54,7 +58,7 @@ public:
     const CosmicTrackSeedCollection *_coscol;
 
 
-    MilleWrapper millepede("mu2e_plane_alignment.bin");
+    MilleWrapper millepede;
 };
 
 PlaneAlignment::~PlaneAlignment()
@@ -91,6 +95,7 @@ void PlaneAlignment::analyze(art::Event const &event)
         // get all unbiased residuals and their derivatives with respect
         // to all local and global parameters
         // get also plane id hit by straw hits
+
 
         //millepede.RegisterTrackHit()
 
