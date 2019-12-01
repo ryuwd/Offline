@@ -82,9 +82,10 @@ void MilleWrapper::RegisterTrackHit(int object_id,
 
     //if (!have_sorted) return;
 
-
+    // use assert since in release/production
+    // we will be calling this f'n for hundreds of thousands
+    // of hits
     assert(millepede);
-
     // We cannot rely on O(n log n) binary search on an unsorted array.
     assert(have_sorted);
 
