@@ -5,7 +5,9 @@
 #include "CosmicAlignment/inc/MilleWrapper.hh"
 #include <vector>
 #include <algorithm>    // std::sort
-#include <assert.h>
+#include <cassert>
+
+#define assertm(exp, msg) assert(((void)msg, exp))
 
 /**
  * @brief Construct a new Mille Wrapper object.
@@ -79,15 +81,14 @@ void MilleWrapper::RegisterTrackHit(int object_id,
     float residual_error)
 {
     //if (!millepede) return;
-
     //if (!have_sorted) return;
 
     // use assert since in release/production
     // we will be calling this f'n for hundreds of thousands
     // of hits
-    assert(millepede);
+    assertm(millepede, "Check that RegisterTrackHit() has not been called after Save().");
     // We cannot rely on O(n log n) binary search on an unsorted array.
-    assert(have_sorted);
+    assertm(have_sorted, "Check that StartRegisteringHits() has been called.");
 
     AlignableObject const& element = GetAlignableObject(object_id);
 
