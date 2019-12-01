@@ -81,10 +81,10 @@ public:
 class MilleWrapper
 {
 private:
-    /* data */
     std::unique_ptr<Mille> millepede;
-
     std::vector<AlignableObject> objects;
+
+    bool have_sorted = false;
 
 public:
     MilleWrapper(std::string filename);

@@ -35,6 +35,8 @@ MilleWrapper::MilleWrapper(std::string output_file)
 void MilleWrapper::RegisterAlignableObject(int object_id, int no_free_parameters)
 {
     objects.emplace_back(object_id, no_free_parameters);
+
+    if (have_sorted) have_sorted = false;
 }
 
 /**
@@ -45,6 +47,7 @@ void MilleWrapper::RegisterAlignableObject(int object_id, int no_free_parameters
 void MilleWrapper::StartRegisteringHits()
 {
     std::sort(objects.begin(), objects.end());
+    have_sorted = true;
 }
 
 /**
@@ -55,7 +58,8 @@ void MilleWrapper::StartRegisteringHits()
  */
 AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
 {
-    return *std::lower_bound(objects.begin(), objects.end(), object_id);
+    // O(n log n) array search
+    return *std::equal_range(objects.begin(), objects.end(), object_id).first;
 }
 
 /**
@@ -74,6 +78,9 @@ void MilleWrapper::RegisterTrackHit(int object_id,
     float residual_error)
 {
     if (!millepede) return;
+
+    // We cannot rely on O(n log n) binary search on an unsorted array.
+    if (!have_sorted) return;
 
     AlignableObject const& element = GetAlignableObject(object_id);
 
