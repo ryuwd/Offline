@@ -32,7 +32,7 @@ def DOCA(track_pos, track_dir, wire_pos, wire_dir):
 
     return sympy.Piecewise((doca, s2 > 0), (-doca, True))
 
-def alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
+def exact_alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
     R_a = AxisOrienter(a, X.i).rotation_matrix(X)
     R_b = AxisOrienter(b, X.j).rotation_matrix(X)
     R_g = AxisOrienter(g, X.k).rotation_matrix(X)
@@ -42,6 +42,24 @@ def alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
 
     return aligned_wire_pos, aligned_wire_dir
 
+def small_alignment_approximation(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
+    # for small a, b, g (corrections to nominal rotation transforms)
+    # we can approximate (according to Millepede documentation)
+
+    # the overall rotation matrix to:
+    # 1   g  -b
+    # -g  1   a
+    #  b -a   1
+    # Thanks to: https://www.desy.de/~kleinwrt/MP2/doc/html/draftman_page.html (See: Linear Transformations in 3D)
+
+    R_abg_approx = Matrix([[ 1, g, b],
+                           [-g, 1, a],
+                           [ b,-a, 1]])
+
+    aligned_wire_pos = matrix_to_vector((R_abg_approx * (wire_pos - body_origin).to_matrix(X)) + translation.to_matrix(X),X)
+    aligned_wire_dir = matrix_to_vector((R_abg_approx * (wire_dir).to_matrix(X)),X)
+
+    return aligned_wire_pos, aligned_wire_dir
 
 c_template = """
 
@@ -131,7 +149,7 @@ def main():
     body_origin = ppx * X.i + ppy * X.j + ppz * X.k
 
     # recalculate wire position and rotation according to alignment parameters
-    aligned_wpos, aligned_wdir = alignment(X, wire_pos, wire_dir, body_origin, trl, a, b, g)
+    aligned_wpos, aligned_wdir = exact_alignment(X, wire_pos, wire_dir, body_origin, trl, a, b, g)
 
     aligned_doca = DOCA(track_pos, track_dir, aligned_wpos, aligned_wdir)
 
