@@ -5,6 +5,7 @@
 #include "CosmicAlignment/inc/MilleWrapper.hh"
 #include <vector>
 #include <algorithm>    // std::sort
+#include <assert.h>
 
 /**
  * @brief Construct a new Mille Wrapper object.
@@ -77,10 +78,15 @@ void MilleWrapper::RegisterTrackHit(int object_id,
     float residual,
     float residual_error)
 {
-    if (!millepede) return;
+    //if (!millepede) return;
+
+    //if (!have_sorted) return;
+
+
+    assert(millepede);
 
     // We cannot rely on O(n log n) binary search on an unsorted array.
-    if (!have_sorted) return;
+    assert(have_sorted);
 
     AlignableObject const& element = GetAlignableObject(object_id);
 
