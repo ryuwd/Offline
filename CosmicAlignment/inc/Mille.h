@@ -47,7 +47,7 @@
  */
 
 /// Class to write C binary file.
-class Mille 
+class Mille
 {
  public:
   Mille(const char *outFileName, bool asBinary = true, bool writeZero = false);

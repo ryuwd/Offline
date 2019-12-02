@@ -3,11 +3,11 @@
 
 
 #include "CosmicAlignment/inc/MilleWrapper.hh"
+#include "CosmicAlignment/inc/AlignableObjects.hh"
 #include <vector>
 #include <algorithm>    // std::sort
 #include <cassert>
-
-#define assertm(exp, msg) assert(((void)msg, exp))
+#include <type_traits>
 
 /**
  * @brief Construct a new Mille Wrapper object.
@@ -21,6 +21,7 @@
  *    the derivatives with respect to each track parameter and global parameter (of that object),
  *    the residual, and its error. Pass this information to RegisterTrackHit( ... );
  * 5. Call Save(); - This will write a binary file which can be passed to ./pede
+ * 6. Stop using this object.
  *
  * @param output_file the filename for the mille binary file.
  */
@@ -35,9 +36,9 @@ MilleWrapper::MilleWrapper(std::string output_file)
  * @param object_id the unique ID of the object
  * @param no_free_parameters the number of free parameters that Millepede will use to align the object
  */
-void MilleWrapper::RegisterAlignableObject(int object_id, int no_free_parameters)
+void MilleWrapper::RegisterAlignableObject(mu2e::AlignableObject & obj)
 {
-    objects.emplace_back(object_id, no_free_parameters);
+    objects.emplace_back(obj);
 
     if (have_sorted) have_sorted = false;
 }
@@ -53,17 +54,6 @@ void MilleWrapper::StartRegisteringHits()
     have_sorted = true;
 }
 
-/**
- * @brief Get AlignableObject instance in this object with ID object_id
- *
- * @param object_id the ID of the AlignableObject to fetch.
- * @return AlignableObject const&
- */
-AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
-{
-    // O(n log n) array search
-    return *std::equal_range(objects.begin(), objects.end(), object_id).first;
-}
 
 /**
  * @brief Register a track hit residual measurement on detector element ID 'object_id'
@@ -74,7 +64,7 @@ AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
  * @param residual the measured residual.
  * @param residual_error the error on the measured residual.
  */
-void MilleWrapper::RegisterTrackHit(int object_id,
+void MilleWrapper::RegisterTrackHit(mu2e::AlignableObject const& element,
     std::vector<float> const& global_derivatives,
     std::vector<float> const& local_derivatives,
     float residual,
@@ -86,11 +76,10 @@ void MilleWrapper::RegisterTrackHit(int object_id,
     // use assert since in release/production
     // we will be calling this f'n for hundreds of thousands
     // of hits
-    assertm(millepede, "Check that RegisterTrackHit() has not been called after Save().");
+    assert(millepede && "Check that RegisterTrackHit() has not been called after Save().");
     // We cannot rely on O(n log n) binary search on an unsorted array.
-    assertm(have_sorted, "Check that StartRegisteringHits() has been called.");
 
-    AlignableObject const& element = GetAlignableObject(object_id);
+    //AlignableObject const& element = GetAlignableObject(object_id);
 
     millepede->mille(
         local_derivatives.size(),
