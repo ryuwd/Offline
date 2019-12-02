@@ -2,6 +2,7 @@
 // Module calling the MilleWrapper to set up plane alignment
 
 #include "art/Framework/Core/EDAnalyzer.h"
+#include "art_root_io/TFileService.h"
 
 #include "ProditionsService/inc/ProditionsHandle.hh"
 #include "GeometryService/inc/GeometryService.hh"
@@ -20,6 +21,10 @@
 #include "Mu2eUtilities/inc/TwoLinePCA_XYZ.hh"
 
 #include "CosmicReco/inc/DriftFitUtils.hh"
+
+
+#include "TH1F.h"
+
 
 using namespace mu2e;
 
@@ -47,6 +52,8 @@ class PlaneAlignment : public art::EDAnalyzer
 {
 private:
     /* data */
+    TH1F *residuum;
+
 
 public:
     struct Config
@@ -60,6 +67,9 @@ public:
     typedef art::EDAnalyzer::Table<Config> Parameters;
 
     virtual void beginJob();
+    virtual void endJob();
+    virtual void beginRun(art::Run const&);
+
     virtual void analyze(art::Event const &) override;
 
     PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
@@ -93,17 +103,34 @@ PlaneAlignment::~PlaneAlignment()
 
 void PlaneAlignment::beginJob()
 {
-    mu2e::GeomHandle<mu2e::Tracker> th;
-    tracker = th.get();
 
-    // get all planes and register them as alignable objects
-    for (auto const& p : tracker->getPlanes())
+	art::ServiceHandle<art::TFileService> tfs;
+    residuum = tfs->make<TH1F>("residuum","Straw Hit Residuum ",100,-100, 100);
+    residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance)");
+
+}
+
+void PlaneAlignment::beginRun(art::Run const&)
+{
+    if (tracker == nullptr)
     {
-        AlignablePlane a(p);
-        millepede.RegisterAlignableObject(a);
+        mu2e::GeomHandle<mu2e::Tracker> th;
+        tracker = th.get();
 
+        // get all planes and register them as alignable objects
+        for (auto const& p : tracker->getPlanes())
+        {
+            AlignablePlane a(p);
+            millepede.RegisterAlignableObject(a);
+
+        }
+        millepede.StartRegisteringHits();
     }
-    millepede.StartRegisteringHits();
+}
+
+void PlaneAlignment::endJob()
+{
+    millepede.Save();
 }
 
 void PlaneAlignment::analyze(art::Event const &event)
@@ -124,6 +151,8 @@ void PlaneAlignment::analyze(art::Event const &event)
 
         if (!status.hasAllProperties(TrkFitFlag::helixOK) ){continue;}
         if(st.converged == false or st.minuit_converged  == false) { continue;}
+
+        if (isnan(st.MinuitFitParams.A0)) continue;
 
 
         // get residuum and their derivatives with respect
@@ -164,13 +193,17 @@ void PlaneAlignment::analyze(art::Event const &event)
             float resid = DOCA(straw, st.MinuitFitParams.A0,
                     st.MinuitFitParams.A1, st.MinuitFitParams.B0,
                     st.MinuitFitParams.B1) - drift_prediction;
+            std::cout << "residual " << resid << std::endl;
 
+            std::cout << "derivative example " << derivs_global[0] << std::endl;
+
+            if (isnan(resid)) continue;
             millepede.RegisterTrackHit(align_obj,
                 derivs_global,
                 derivs_local,
                 resid, // FIXME! (ask about correct drift distance estimate method)
                 resid*0.1); // FIXME! need to estimate residual error
-
+            residuum->Fill(resid);
         }
 
     }
