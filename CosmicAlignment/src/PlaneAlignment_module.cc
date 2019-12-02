@@ -205,6 +205,7 @@ void PlaneAlignment::analyze(art::Event const &event)
                 resid*0.1); // FIXME! need to estimate residual error
             residuum->Fill(resid);
         }
+        millepede.WriteTrack();
 
     }
 }
