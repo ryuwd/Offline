@@ -105,8 +105,8 @@ void PlaneAlignment::beginJob()
 {
 
 	art::ServiceHandle<art::TFileService> tfs;
-    residuum = tfs->make<TH1F>("residuum","Straw Hit Residuum ",100,-100, 100);
-    residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance)");
+    residuum = tfs->make<TH1F>("residuum","Straw Hit Residuals ",100,-40, 25);
+    residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance) (mm)");
 
 }
 
