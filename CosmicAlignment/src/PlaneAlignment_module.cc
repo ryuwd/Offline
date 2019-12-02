@@ -63,7 +63,7 @@ public:
     MilleWrapper millepede;
 
     Tracker const *tracker = nullptr;
-    ProditionsHandle<StrawResponse> srep_h;
+    //ProditionsHandle<StrawResponse> srep_h;
 };
 
 PlaneAlignment::~PlaneAlignment()
@@ -87,7 +87,7 @@ void PlaneAlignment::beginJob()
 
 void PlaneAlignment::analyze(art::Event const &event)
 {
-    StrawResponse const& _srep = *srep_h.getPtr(event.id());
+    //StrawResponse const& _srep = *srep_h.getPtr(event.id());
 
     assert(tracker != nullptr && "Check tracker instance is available");
 
