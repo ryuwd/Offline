@@ -17,7 +17,28 @@
 #include "CosmicAlignment/inc/AlignableObjects.hh"
 #include "CosmicAlignment/inc/RigidBodyDOCADeriv.hh"
 
+#include "Mu2eUtilities/inc/TwoLinePCA_XYZ.hh"
+
 #include "CosmicReco/inc/DriftFitUtils.hh"
+
+using namespace mu2e;
+
+double DOCA(Straw const& straw, double a0, double a1, double b0, double b1) {
+	XYZVec track_position(a0,b0,0);
+	XYZVec track_direction(a1,b1,1);
+
+	const CLHEP::Hep3Vector& spos = straw.getMidPoint();
+	const CLHEP::Hep3Vector& sdir = straw.getDirection();
+	XYZVec wire_position  = Geom::toXYZVec(spos);
+    XYZVec wire_direction = Geom::toXYZVec(sdir);
+
+	TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(track_position,
+                track_direction,
+                wire_position,
+                wire_direction,
+                1.e-8);
+	return PCA.LRambig() * PCA.dca();
+}
 
 namespace mu2e
 {
@@ -140,8 +161,7 @@ void PlaneAlignment::analyze(art::Event const &event)
             // FIXME! use _srep utilities to do this properly!
             float drift_prediction = straw_hit.driftTime() * 0.065; //_srep.driftTimeToDistance(straw_hit.strawId(), straw_hit.driftTime(), straw_hit.);
 
-            float resid = DriftFitUtils::GetTestDOCA(
-                    straw, st.MinuitFitParams.A0,
+            float resid = DOCA(straw, st.MinuitFitParams.A0,
                     st.MinuitFitParams.A1, st.MinuitFitParams.B0,
                     st.MinuitFitParams.B1) - drift_prediction;
 
