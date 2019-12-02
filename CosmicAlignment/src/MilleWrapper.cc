@@ -101,5 +101,5 @@ void MilleWrapper::Save()
 {
     // the Mille documentation states that the Mille
     // object must go out of scope or be destroyed to properly save the file.
-    millepede.release();
+    millepede->~Mille();
 }
