@@ -14,7 +14,6 @@
 namespace mu2e
 {
 
-
 /**
  * @brief A object that represents an 'alignable' object and its
  * free parameters
@@ -29,7 +28,6 @@ namespace mu2e
 class AlignableObject
 {
 private:
-
     int object_class;
     int object_class_size;
     int object_id;
@@ -48,8 +46,7 @@ protected:
      * @param o_id class specific object ID
      * @param n_params number of free parameters (currently supports up to 10)
      */
-    AlignableObject(const int o_cla, const int o_cla_size, const int o_id, const int n_params) :
-        object_class(o_cla), object_class_size(o_cla_size), object_id(o_id), n_parameters(n_params)
+    AlignableObject(const int o_cla, const int o_cla_size, const int o_id, const int n_params) : object_class(o_cla), object_class_size(o_cla_size), object_id(o_id), n_parameters(n_params)
     {
         unique_id = AlignableObject::calc_unique_id(o_cla, o_cla_size, o_id);
 
@@ -59,21 +56,16 @@ protected:
             labels.push_back(label_id);
     }
 
-
-
 public:
-    AlignableObject(AlignableObject const& other) :
-        object_class(other.object_class), object_class_size(other.object_class_size),
-        object_id(other.object_id), n_parameters(other.n_parameters), unique_id(other.unique_id) { }
-
+    AlignableObject(AlignableObject const &other) : object_class(other.object_class), object_class_size(other.object_class_size),
+                                                    object_id(other.object_id), n_parameters(other.n_parameters), unique_id(other.unique_id), labels(other.labels) {}
 
     static const int calc_unique_id(const int object_class, const int object_class_size, const int object_id)
     {
-        return (object_class) * object_class_size + object_id;
+        return (object_class)*object_class_size + object_id;
     }
 
-
-    virtual ~AlignableObject() { };
+    virtual ~AlignableObject(){};
 
     /**
      * @brief Get the Millepede label 'l' unique id of the global free parameter.
@@ -87,11 +79,14 @@ public:
      * @brief Get the Millepede global param labels
      * as a C array (input to mille())
      *
-     * @return const int*
+     * @return std::vector<int> const&
      */
-    const int* get_param_labels() const
+    std::vector<int> const &get_param_labels() const
     {
-        return labels.data();
+        if (labels.size() == 0)
+            std::cout << "Warning: label vector empty..." << std::endl;
+
+        return labels;
     }
 
     /**
@@ -108,22 +103,20 @@ public:
      */
     int get_unique_id() const { return unique_id; }
 
-
-    bool operator<(AlignableObject const&other)
+    bool operator<(AlignableObject const &other)
     {
         return unique_id < other.unique_id;
     }
 
-    bool operator<(int const&other)
+    bool operator<(int const &other)
     {
         return unique_id < other;
     }
 
-    friend bool operator<(int const&, AlignableObject const&);
-
+    friend bool operator<(int const &, AlignableObject const &);
 };
 
-bool operator<(int const&lhs, AlignableObject const&rhs)
+bool operator<(int const &lhs, AlignableObject const &rhs)
 {
     return lhs < rhs.unique_id;
 }
@@ -141,13 +134,11 @@ public:
     static const int class_size = mu2e::StrawId::_nplanes;
     static const int free_parameters = 6;
 
-    AlignablePlane(mu2e::Plane const& p) :
-        AlignableObject(class_id, class_size, (const int)p.id().asUint16(), free_parameters)
+    AlignablePlane(mu2e::Plane const &p) : AlignableObject(class_id, class_size, (const int)p.id().plane(), free_parameters)
     {
         // nothing complicated required
     }
-    AlignablePlane(AlignableObject const&other) : AlignableObject(other) { }
-
+    AlignablePlane(AlignableObject const &other) : AlignableObject(other) {}
 };
 
 /**
@@ -162,8 +153,7 @@ public:
     static const int class_size = mu2e::StrawId::_nplanes * mu2e::StrawId::_npanels;
     static const int free_parameters = 6;
 
-    AlignablePanel(mu2e::Panel const& p) :
-        AlignableObject(class_id, class_size, (const int)p.id().asUint16(), free_parameters)
+    AlignablePanel(mu2e::Panel const &p) : AlignableObject(class_id, class_size, (const int)p.id().asUint16(), free_parameters)
     {
         // nothing complicated required
     }

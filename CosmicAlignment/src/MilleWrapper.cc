@@ -80,13 +80,14 @@ void MilleWrapper::RegisterTrackHit(mu2e::AlignableObject const& element,
     // We cannot rely on O(n log n) binary search on an unsorted array.
 
     //AlignableObject const& element = GetAlignableObject(object_id);
-
+    assert(global_derivatives.size() == element.get_param_labels().size && "check param label n corresponds to global derivative N");
+    std::cout << element.get_param_labels().size() << global_derivatives.size() << std::endl;
     millepede->mille(
         local_derivatives.size(),
         local_derivatives.data(),
         global_derivatives.size(),
         global_derivatives.data(),
-        element.get_param_labels(),
+        element.get_param_labels().data(),
         residual,
         residual_error);
 }
