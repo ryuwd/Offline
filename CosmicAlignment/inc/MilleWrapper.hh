@@ -51,6 +51,15 @@ public:
         float residual,
         float residual_error);
 
+    /**
+     * @brief Write track measurements accumulated in buffer to file.
+     *
+     */
+    void WriteTrack()
+    {
+        millepede->end();
+    }
+
     void Save();
 };
 
