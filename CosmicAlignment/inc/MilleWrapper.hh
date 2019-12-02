@@ -57,6 +57,7 @@ public:
      */
     void WriteTrack()
     {
+        assert(millepede);
         millepede->end();
     }
 

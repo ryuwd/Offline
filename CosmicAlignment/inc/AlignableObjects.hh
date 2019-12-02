@@ -83,9 +83,7 @@ public:
      */
     std::vector<int> const &get_param_labels() const
     {
-        if (labels.size() == 0)
-            std::cout << "Warning: label vector empty..." << std::endl;
-
+        assert(labels.size() > 0 && "Check that labels have been generated for each global parameter");
         return labels;
     }
 
@@ -153,9 +151,23 @@ public:
     static const int class_size = mu2e::StrawId::_nplanes * mu2e::StrawId::_npanels;
     static const int free_parameters = 6;
 
-    AlignablePanel(mu2e::Panel const &p) : AlignableObject(class_id, class_size, (const int)p.id().asUint16(), free_parameters)
+    AlignablePanel(mu2e::Panel const &p) : AlignableObject(class_id, class_size,
+        (p.id().plane() * mu2e::StrawId::_npanels) + p.id().panel(), free_parameters)
     {
-        // nothing complicated required
+    }
+};
+
+
+class AlignableStraw : public AlignableObject
+{
+public:
+    static const int class_id = 2;
+    static const int class_size = mu2e::StrawId::_nplanes * mu2e::StrawId::_npanels * mu2e::StrawId::_nstraws;
+    static const int free_parameters = 6;
+
+    AlignableStraw(mu2e::Straw const &p) : AlignableObject(class_id, class_size, // TODO: check plane, panel, straw IDs start at zero
+        ((p.id().plane() * mu2e::StrawId::_npanels) + p.id().panel())*mu2e::StrawId::_nstraws + p.id().straw(), free_parameters)
+    {
     }
 };
 
