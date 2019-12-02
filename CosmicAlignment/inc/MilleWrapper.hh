@@ -1,88 +1,26 @@
 // Ryunosuke O'Neil, 2019
 // Millepede-II Mille routine wrapper
 
+#ifndef F1708379_AFCE_4CEC_A9F1_86381EDEE222
+#define F1708379_AFCE_4CEC_A9F1_86381EDEE222
+
 #include "CosmicAlignment/inc/Mille.h"
+#include "CosmicAlignment/inc/AlignableObjects.hh"
 
 #include <vector>
 #include <memory>
-
-typedef std::vector<std::pair<unsigned int, double>> GlobalDerivativeCollection;
-
-
-/**
- * @brief A object that represents an 'alignable' object and its
- * free parameters
- *
- */
-class AlignableObject
-{
-private:
-    int object_id;
-    int n_parameters;
-
-    std::vector<int> labels;
-public:
-    AlignableObject(int o_id, int n_params) : object_id(o_id), n_parameters(n_params)
-    {
-        int start_id = get_param_id(0);
-        for (int label_id = start_id; label_id < start_id + n_params; label_id++)
-            labels.push_back(label_id);
-    }
-
-    ~AlignableObject() { };
-
-    /**
-     * @brief Get the Millepede label 'l' unique id of the global free parameter.
-     *
-     * @param param_id
-     * @return unsigned int
-     */
-    int get_param_id(int param_id) const { return object_id * 10 + param_id; }
-
-    /**
-     * @brief Get the Millepede global param labels
-     * as a C array (input to mille())
-     *
-     * @return const int*
-     */
-    const int* get_param_labels() const
-    {
-        return labels.data();
-    }
-
-    /**
-     * @brief Get the object ID.
-     *
-     * @return int
-     */
-    int get_id() const { return object_id; }
-
-
-    bool operator<(AlignableObject const&other)
-    {
-        return object_id < other.object_id;
-    }
-
-    bool operator<(const int &other)
-    {
-        return object_id < other;
-    }
-
-};
+#include <algorithm>
 
 
 /**
- * @brief MilleWrapper is designed to make it easy to construct an alignment 'problem'.
+ * @brief MilleWrapper is designed to make it easy to construct an alignment 'problem' with Millepede.
  * All of the handling of Mille routines is confined to this class only.
- *
- * I'd like to keep separate mu2e types from the invokation of Millepede, for clarity and readability.
- *
  */
 class MilleWrapper
 {
 private:
     std::unique_ptr<Mille> millepede;
-    std::vector<AlignableObject> objects;
+    std::vector<mu2e::AlignableObject> objects;
 
     bool have_sorted = false;
 
@@ -91,13 +29,23 @@ public:
 
     ~MilleWrapper() { }
 
-    void RegisterAlignableObject(int, int);
+    void RegisterAlignableObject(mu2e::AlignableObject &);
 
-    AlignableObject const& GetAlignableObject(int);
+    /**
+     * @brief Get the AlignableObject by its class specific ID
+     * e.g. GetAlignableObject<AlignablePlane>((mu2e::Plane)plane.id())
+     *
+     * @tparam T AlignableObject type e.g. AlignablePlane, AlignablePanel.
+     *  If not derived from AlignableObject the compiler will complain.
+     * @param object_id the class-specific ID of the object to align
+     * @return AlignableObject const& fetched object.
+     */
+    template <class T>
+    mu2e::AlignableObject const& GetAlignableObject(int object_id);
 
     void StartRegisteringHits();
 
-    void RegisterTrackHit(int object_id,
+    void RegisterTrackHit(mu2e::AlignableObject const& element,
         std::vector<float> const& global_derivatives,
         std::vector<float> const& local_derivatives,
         float residual,
@@ -105,3 +53,17 @@ public:
 
     void Save();
 };
+
+
+template <class T>
+mu2e::AlignableObject const& MilleWrapper::GetAlignableObject(int object_id)
+{
+    static_assert(std::is_convertible<T, mu2e::AlignableObject>::value,
+        "T in GetAlignableObject must be an alignable object");
+    assert(have_sorted && "Check that StartRegisteringHits() has been called.");
+
+    // O(n log n) array search
+    return objects[std::equal_range(objects.begin(), objects.end(),
+        mu2e::AlignableObject::calc_unique_id(T::class_id, T::class_size, object_id)).first - objects.begin()];
+}
+#endif /* F1708379_AFCE_4CEC_A9F1_86381EDEE222 */

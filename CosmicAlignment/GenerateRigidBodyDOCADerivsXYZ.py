@@ -69,14 +69,6 @@ c_template = """
 
 %s
 
-std::vector<double> RigidBodyDOCADerivatives(double a0, double b0, double a1, double b1, double dx, double dy, double dz, double a, double b, double g, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz)
-{
-    std::vector<double> result;
-
-    %s
-
-    return result;
-}
 """
 
 h_template = """
@@ -85,13 +77,24 @@ h_template = """
 #include <vector>
 %s
 
-std::vector<double> RigidBodyDOCADerivatives(double a0, double b0, double a1, double b1, double dx, double dy, double dz, double a, double b, double g, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz);
-
 #endif
 
 """
 
-fn_template = "double %s(%s);"
+deriv_calc_fn_template = """
+
+std::vector<float> RigidBodyDOCADerivatives_%s(%s)
+{
+    std::vector<float> result;
+
+%s
+
+    return result;
+}
+
+"""
+
+fn_template = "%s %s(%s);"
 
 def cseexpr_to_ccode( symname, symfunc, symbolslist ):
     tmpsyms = numbered_symbols("R")
@@ -107,7 +110,7 @@ def cseexpr_to_ccode( symname, symfunc, symbolslist ):
 
     return code
 
-def main():
+def main(approximate=False, remove_globalparam_dependence = True):
     # define symbols for alignment and track params
     X = CoordSys3D('X') # coordinate system
 
@@ -148,8 +151,12 @@ def main():
     ppz = Symbol('ppz', real=True)
     body_origin = ppx * X.i + ppy * X.j + ppz * X.k
 
+    alignment_func = exact_alignment
+    if approximate:
+        alignment_func = small_alignment_approximation
+
     # recalculate wire position and rotation according to alignment parameters
-    aligned_wpos, aligned_wdir = exact_alignment(X, wire_pos, wire_dir, body_origin, trl, a, b, g)
+    aligned_wpos, aligned_wdir = alignment_func(X, wire_pos, wire_dir, body_origin, trl, a, b, g)
 
     aligned_doca = DOCA(track_pos, track_dir, aligned_wpos, aligned_wdir)
 
@@ -159,20 +166,51 @@ def main():
     global_params = [dx,dy,dz,a,b,g]
 
     all_params = local_params + global_params + [wx,wy,wz,wwx,wwy,wwz,ppx,ppy,ppz]
+    if remove_globalparam_dependence:
+        all_params = local_params + [wx,wy,wz,wwx,wwy,wwz,ppx,ppy,ppz]
 
     code = []
     functions=[]
-    functioncalls=[]
+    args = 'double ' + (', double '.join([p.name for p in all_params]))
+
     for parameter in local_params + global_params:
         pdev = diff(aligned_doca, parameter)
 
-        fnname = 'rigidbodyalign_doca_deriv_%s' % parameter.name
-        args = 'double ' + (', double '.join([p.name for p in all_params]))
-        code.append(cseexpr_to_ccode(fnname, pdev, all_params))
-        functions.append(fn_template % (fnname, args))
-        functioncalls.append('result.push_back(%s(%s));' % (fnname, ','.join([p.name for p in all_params])))
+        if remove_globalparam_dependence:
+            # since these derivatives are intended for use BEFORE
+            # any corrections are applied, we substitute a,b,g,dx,dy,dz to equal zero
+            # in our final expressions
+            pdev = pdev.subs({
+                dx:0,
+                dy:0,
+                dz:0,
+                a:0,
+                b:0,
+                g:0
+            })
 
-    c_code = c_template % ('\n\n'.join(code), '\n'.join(functioncalls))
+
+        fnname = 'rigidbodyalign_doca_deriv_%s' % parameter.name
+        code.append(cseexpr_to_ccode(fnname, pdev, all_params))
+        functions.append(fn_template % ('double', fnname, args))
+
+    # generate helper functions
+    functions.append(fn_template %('std::vector<float>', "RigidBodyDOCADerivatives_local", args))
+    functioncalls=[]
+
+    for parameter in local_params:
+        functioncalls.append('result.push_back(%s(%s));' % ('rigidbodyalign_doca_deriv_%s' % parameter.name, ','.join([p.name for p in all_params])))
+    code.append(deriv_calc_fn_template % ('local', args, '\n'.join(functioncalls)))
+
+    functions.append(fn_template %('std::vector<float>', "RigidBodyDOCADerivatives_global", args))
+    functioncalls=[]
+    for parameter in global_params:
+        functioncalls.append('result.push_back(%s(%s));' % ('rigidbodyalign_doca_deriv_%s' % parameter.name, ','.join([p.name for p in all_params])))
+    code.append(deriv_calc_fn_template % ('global', args, '\n'.join(functioncalls)))
+
+    # pull everything together and write to file
+
+    c_code = c_template % ('\n\n'.join(code))
     c_header = h_template % '\n\n'.join(functions)
 
     with open('src/RigidBodyDOCADeriv.cc', 'w') as f:
@@ -182,4 +220,4 @@ def main():
         f.write(c_header)
 
 if __name__ == "__main__":
-    main()
+    main(approximate=True)
