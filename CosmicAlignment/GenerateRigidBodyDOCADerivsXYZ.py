@@ -198,7 +198,7 @@ def main(approximate=False, remove_globalparam_dependence = True):
     argsd = 'double ' + (', double '.join([p.name for p in local_params+[wx,wy,wz,wwx,wwy,wwz]]))
 
     code.append(cseexpr_to_ccode('RigidBodyDOCADerivatives_DOCAfn', DOCA(track_pos, track_dir, wire_pos, wire_dir), local_params+[wx,wy,wz,wwx,wwy,wwz]))
-    functions.append(fn_template %('double', 'RigidBodyDOCADerivatives_DOCAfn', args))
+    functions.append(fn_template %('double', 'RigidBodyDOCADerivatives_DOCAfn', argsd))
 
     functions.append(fn_template %('std::vector<float>', "RigidBodyDOCADerivatives_local", args))
     functioncalls=[]
