@@ -368,6 +368,28 @@ double rigidbodyalign_doca_deriv_g(double a0, double b0, double a1, double b1, d
 }
 
 
+double RigidBodyDOCADerivatives_DOCAfn(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz)
+{
+    double R0 = a1*wwx + b1*wwy;
+    double R1 = 1.0/(1 - pow(R0, 2));
+    double R2 = a0 - wx;
+    double R3 = R2*a1;
+    double R4 = b0 - wy;
+    double R5 = R4*b1;
+    double R6 = R2*wwx + R4*wwy - wwz*wz;
+    double R7 = R1*(-R0*(R3 + R5) + R6);
+    double R8 = R1*(R0*R6 - R3 - R5);
+    double R9 = sqrt(pow(-R7*wwz - wz, 2) + pow(R2 - R7*wwx + R8*a1, 2) + pow(R4 - R7*wwy + R8*b1, 2));
+    double result = ((R7 > 0) ? (
+   R9
+)
+: (
+   -R9
+));
+    return result;
+}
+
+
 
 
 std::vector<float> RigidBodyDOCADerivatives_local(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz)
