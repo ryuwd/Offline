@@ -37,7 +37,7 @@ def exact_alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
     R_b = AxisOrienter(b, X.j).rotation_matrix(X)
     R_g = AxisOrienter(g, X.k).rotation_matrix(X)
 
-    aligned_wire_pos = matrix_to_vector((R_a * R_b * R_g * (wire_pos - body_origin).to_matrix(X)) + translation.to_matrix(X),X)
+    aligned_wire_pos = body_origin + matrix_to_vector((R_a * R_b * R_g * (wire_pos - body_origin).to_matrix(X)),X) + translation
     aligned_wire_dir = matrix_to_vector((R_a * R_b * R_g * (wire_dir).to_matrix(X)),X) # direction unaffected by translation of plane/panel
 
     return aligned_wire_pos, aligned_wire_dir
@@ -56,7 +56,7 @@ def small_alignment_approximation(X, wire_pos, wire_dir, body_origin, translatio
                            [-g, 1, a],
                            [ b,-a, 1]])
 
-    aligned_wire_pos = matrix_to_vector((R_abg_approx * (wire_pos - body_origin).to_matrix(X)) + translation.to_matrix(X),X)
+    aligned_wire_pos = body_origin + matrix_to_vector((R_abg_approx * (wire_pos - body_origin).to_matrix(X)),X) + translation
     aligned_wire_dir = matrix_to_vector((R_abg_approx * (wire_dir).to_matrix(X)),X)
 
     return aligned_wire_pos, aligned_wire_dir
