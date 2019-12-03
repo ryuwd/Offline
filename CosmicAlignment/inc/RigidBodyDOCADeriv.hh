@@ -22,7 +22,7 @@ double rigidbodyalign_doca_deriv_b(double a0, double b0, double a1, double b1, d
 
 double rigidbodyalign_doca_deriv_g(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz);
 
-double RigidBodyDOCADerivatives_DOCAfn(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz);
+double RigidBodyDOCADerivatives_DOCAfn(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz);
 
 std::vector<float> RigidBodyDOCADerivatives_local(double a0, double b0, double a1, double b1, double wx, double wy, double wz, double wwx, double wwy, double wwz, double ppx, double ppy, double ppz);
 
