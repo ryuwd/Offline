@@ -70,18 +70,14 @@ void MilleWrapper::RegisterTrackHit(mu2e::AlignableObject const& element,
     float residual,
     float residual_error)
 {
-    //if (!millepede) return;
-    //if (!have_sorted) return;
-
     // use assert since in release/production
-    // we will be calling this f'n for hundreds of thousands
-    // of hits
+    // we will be calling this f'n for many hits
     assert(millepede && "Check that RegisterTrackHit() has not been called after Save().");
     // We cannot rely on O(n log n) binary search on an unsorted array.
 
     //AlignableObject const& element = GetAlignableObject(object_id);
     assert(global_derivatives.size() == element.get_param_labels().size && "check param label n corresponds to global derivative N");
-    std::cout << element.get_param_labels().size() << global_derivatives.size() << std::endl;
+
     millepede->mille(
         local_derivatives.size(),
         local_derivatives.data(),

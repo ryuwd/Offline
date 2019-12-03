@@ -27,68 +27,32 @@
 
 
 using namespace mu2e;
-/*
-    p1, t1: track
-    p2, t2: wire
 
-    // Cosine of angle between the two line directions.
-    double c(_t1.Dot(_t2));
-
-    // Sine-squared corresponding to c.
-    double sinsq(1.-c*c);
-
-      XYZVec delta(_p1-_p2);
-      double dDotT1 = delta.Dot(_t1);
-      double dDotT2 = delta.Dot(_t2);
-
-      _s1 =  (dDotT2*c-dDotT1)/sinsq;
-      _s2 = -(dDotT1*c-dDotT2)/sinsq;
-
-      _pca1 = _p1 + _t1*_s1;
-      _pca2 = _p2 + _t2*_s2;
-      _LRambig = _s2 > 0 ? 1 : -1;//int ambig_sign= ambig > 0 ? 1 : -1;
-
-    XYZVec diff = (_pca1-_pca2);
-    _dca   = sqrt(diff.Mag2());
-    _dca2d = sqrt(diff.Perp2());
-
-
-
-def DOCA(track_pos, track_dir, wire_pos, wire_dir):
-    alpha = track_dir.dot(wire_dir)
-    beta = 1 - alpha*alpha
-    delta = track_pos - wire_pos
-
-    ddotT1 = delta.dot(track_dir)
-    ddotT2 = delta.dot(wire_dir)
-
-    s1 = (ddotT2 * alpha - ddotT1)/beta
-    s2 = -(ddotT1 * alpha - ddotT2)/beta
-
-    pca1 = track_pos + track_dir * s1
-    pca2 = wire_pos + wire_dir * s2
-
-    diff = pca1 - pca2
-
-    doca = sqrt(diff.dot(diff))
-
-    return sympy.Piecewise((doca, s2 > 0), (-doca, True))
-*/
-
-double DOCA(Straw const& straw, double a0, double a1, double b0, double b1) {
-	XYZVec track_position(a0,b0,0);
-	XYZVec track_direction(a1,b1,1);
-
-	const CLHEP::Hep3Vector& spos = straw.getMidPoint();
-	const CLHEP::Hep3Vector& sdir = straw.getDirection();
-	XYZVec wire_position  = Geom::toXYZVec(spos);
-    XYZVec wire_direction = Geom::toXYZVec(sdir);
-
-	TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(track_position,
+double DOCA(XYZVec const& track_position, XYZVec const& track_direction,
+        XYZVec const& wire_position, XYZVec const& wire_direction)
+{
+	TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(
+                track_position,
                 track_direction,
                 wire_position,
                 wire_direction,
                 1.e-8);
+
+    /*std::cout << "p1: " << track_position << std::endl;
+    std::cout << "t1: " << track_direction << std::endl;
+    std::cout << "t1.unit(): " << track_direction.unit() << std::endl;
+
+    std::cout << "p2: " << wire_position << std::endl;
+    std::cout << "t2: " << wire_direction << std::endl;
+    std::cout << "t2.unit(): " << wire_direction.unit() << std::endl;
+
+    std::cout << "s1: " << PCA.s1() << std::endl;
+    std::cout << "s2: " << PCA.s2() << std::endl;
+    std::cout << "pca1: " << PCA.point1() << std::endl;
+    std::cout << "pca2: " << PCA.point2() << std::endl;
+    std::cout << "nearly parallel?" << PCA.closeToParallel() << std::endl;
+    std::cout << "PCA LRambig: " << PCA.LRambig() << std::endl;
+    std::cout << "PCA dca(): " << PCA.dca()<< std::endl;*/
 	return PCA.LRambig() * PCA.dca();
 }
 
@@ -202,10 +166,10 @@ void PlaneAlignment::analyze(art::Event const &event)
 
         if (isnan(st.MinuitFitParams.A0)) continue;
 
-        XYZVec track_dir(st.MinuitFitParams.A1, st.MinuitFitParams.B1, 0);
-        XYZVec track_dir_unit = track_dir.unit();
+        XYZVec track_pos(st.MinuitFitParams.A0, st.MinuitFitParams.B0, 0);
+        XYZVec track_dir(st.MinuitFitParams.A1, st.MinuitFitParams.B1, 1);
 
-        // get residuum and their derivatives with respect
+        // get residuals and their derivatives with respect
         // to all local and global parameters
         // get also plane id hit by straw hits
         for (auto const&straw_hit : sts._straw_chits)
@@ -214,16 +178,17 @@ void PlaneAlignment::analyze(art::Event const &event)
                 straw_hit.strawId().plane()).origin();
             auto const &straw = tracker->getStraw(
                 straw_hit.strawId());
-            auto straw_mp = straw.getMidPoint();
-            auto wire_dir = straw.getDirection().unit();
+
+            auto const &straw_mp = straw.getMidPoint();
+            auto const &wire_dir = straw.getDirection().unit();
 
             // now calculate the derivatives.
             auto const &align_obj = millepede.GetAlignableObject<AlignablePlane>((int)straw_hit.strawId().plane());
             auto derivs_local = RigidBodyDOCADerivatives_local(
                 st.MinuitFitParams.A0,
                 st.MinuitFitParams.B0,
-                track_dir_unit.X(),
-                track_dir_unit.Y(),
+                st.MinuitFitParams.A1,
+                st.MinuitFitParams.B1,
                 straw_mp.x(), straw_mp.y(), straw_mp.z(), // TODO: is this suitable?
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
@@ -231,8 +196,8 @@ void PlaneAlignment::analyze(art::Event const &event)
             auto derivs_global = RigidBodyDOCADerivatives_global(
                 st.MinuitFitParams.A0,
                 st.MinuitFitParams.B0,
-                track_dir_unit.X(),
-                track_dir_unit.Y(),
+                st.MinuitFitParams.A1,
+                st.MinuitFitParams.B1,
                 straw_mp.x(), straw_mp.y(), straw_mp.z(), // TODO: is this suitable?
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
@@ -240,20 +205,26 @@ void PlaneAlignment::analyze(art::Event const &event)
             // FIXME! use _srep utilities to do this properly!
             float drift_prediction = straw_hit.driftTime() * 0.065; //_srep.driftTimeToDistance(straw_hit.strawId(), straw_hit.driftTime(), straw_hit.);
 
-            float resid = DOCA(straw, st.MinuitFitParams.A0,
-                    st.MinuitFitParams.A1, st.MinuitFitParams.B0,
-                    st.MinuitFitParams.B1) - drift_prediction;
-            std::cout << "residual " << resid << std::endl;
-            float resid_compar = RigidBodyDOCADerivatives_DOCAfn(
+            float resid = DOCA(track_pos, track_dir,
+                Geom::toXYZVec(straw_mp), Geom::toXYZVec(wire_dir)) - drift_prediction;
+
+            /* debug comments!
+            float pydca = RigidBodyDOCADerivatives_DOCAfn(
                 st.MinuitFitParams.A0,
                 st.MinuitFitParams.B0,
-                track_dir_unit.X(),
-                track_dir_unit.Y(),
+                st.MinuitFitParams.A1,
+                st.MinuitFitParams.B1,
                 straw_mp.x(), straw_mp.y(), straw_mp.z(), // TODO: is this suitable?
-                wire_dir.x(), wire_dir.y(), wire_dir.z()) - drift_prediction;
-            std::cout << "residual used in python: " << resid_compar << std::endl;
+                wire_dir.x(), wire_dir.y(), wire_dir.z());
 
+            std::cout << "residual " << resid << std::endl;
+            std::cout << "drift prediction = " << drift_prediction << std::endl;
+            std::cout << "residual (python): " << pydca-drift_prediction << std::endl;
             std::cout << "derivative example " << derivs_global[0] << std::endl;
+
+            std::cout << "TwoLinePCA DOCA = " << DOCA(track_pos, track_dir_unit, Geom::toXYZVec(straw_mp), Geom::toXYZVec(wire_dir)) << std::endl;
+            std::cout << "PYGen DOCA = " << pydca << std::endl;
+            */
 
             if (isnan(resid)) continue;
             millepede.RegisterTrackHit(align_obj,
