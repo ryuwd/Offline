@@ -26,10 +26,10 @@ def DOCA(track_pos, track_dir, wire_pos, wire_dir):
     pca1 = track_pos + track_dir * s1
     pca2 = wire_pos + wire_dir * s2
 
-    diff = pca1-pca2
+    diff = pca1 - pca2
 
-    doca = sqrt(diff.dot(diff))
-
+    #doca = sqrt(diff.dot(diff))
+    doca = diff.magnitude()
     return sympy.Piecewise((doca, s2 > 0), (-doca, True))
 
 def exact_alignment(X, wire_pos, wire_dir, body_origin, translation, a, b, g):
@@ -195,6 +195,11 @@ def main(approximate=False, remove_globalparam_dependence = True):
         functions.append(fn_template % ('double', fnname, args))
 
     # generate helper functions
+    argsd = 'double ' + (', double '.join([p.name for p in local_params+[wx,wy,wz,wwx,wwy,wwz]]))
+
+    code.append(cseexpr_to_ccode('RigidBodyDOCADerivatives_DOCAfn', DOCA(track_pos, track_dir, wire_pos, wire_dir), local_params+[wx,wy,wz,wwx,wwy,wwz]))
+    functions.append(fn_template %('double', 'RigidBodyDOCADerivatives_DOCAfn', args))
+
     functions.append(fn_template %('std::vector<float>', "RigidBodyDOCADerivatives_local", args))
     functioncalls=[]
 
