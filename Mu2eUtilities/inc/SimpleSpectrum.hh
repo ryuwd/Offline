@@ -23,6 +23,7 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <string>
 
 // Mu2e includes
 #include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"

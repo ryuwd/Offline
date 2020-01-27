@@ -1,5 +1,8 @@
-#include "Mu2eUtilities/inc/MedianCalculator.hh"
 #include <iostream>
+#include <algorithm>
+#include <memory>
+
+#include "Mu2eUtilities/inc/MedianCalculator.hh"
 #include "cetlib_except/exception.h"
 
 namespace mu2e {

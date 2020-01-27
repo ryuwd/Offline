@@ -24,6 +24,10 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+namespace CLHEP {
+class RandFlat;
+}  // namespace CLHEP
+
 // Called by the Daya Bay comsic code.
 extern "C" {
   void rm48_ ( double *v, int* n);

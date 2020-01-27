@@ -1,6 +1,11 @@
 //
 // Original author: Kyle Knoepfel
 
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+#include <vector>
+
 #include "Mu2eUtilities/inc/CoordinateString.hh"
 #include "GeneralUtilities/inc/splitLine.hh"
 

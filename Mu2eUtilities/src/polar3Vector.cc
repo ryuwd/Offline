@@ -14,6 +14,7 @@
 #include "Mu2eUtilities/inc/ThreeVectorUtil.hh"
 #include "GeneralUtilities/inc/safeSqrt.hh"
 #include "GeneralUtilities/inc/sqrtOrThrow.hh"
+#include "CLHEP/Vector/ThreeVector.h"
 
 using CLHEP::Hep3Vector;
 

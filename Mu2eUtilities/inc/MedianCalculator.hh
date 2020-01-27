@@ -7,6 +7,7 @@
 // from a set of elements that are stored internally in a vector
 //
 
+#include <stddef.h>
 #include <vector>
 //#include <utility>
 #include <numeric>

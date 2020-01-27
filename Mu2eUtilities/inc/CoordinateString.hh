@@ -45,6 +45,7 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <string>
 
 // Framework includes
 #include "cetlib_except/exception.h"

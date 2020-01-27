@@ -17,6 +17,7 @@
 #include <iterator>
 #include <utility>
 #include <vector>
+#include <string>
 
 // Framework includes
 #include "cetlib_except/exception.h"

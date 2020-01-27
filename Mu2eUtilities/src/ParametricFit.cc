@@ -1,11 +1,16 @@
 //Author: S Middleton
 //Purpose: Stores all the functions associated with building and interpretting parametric line equations for the purpose of cosmic track based alignment. This includes calculting track axes, hit errors and re-orientating those errors, track residuals are also calcuated here.
 
+#include <math.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <iostream>
+
 #include "Mu2eUtilities/inc/ParametricFit.hh"
 #include "RecoDataProducts/inc/CosmicTrack.hh"
-
-//ROOT
-#include "TMath.h"
+#include "Math/GenVector/Cartesian3D.h"
+#include "Math/GenVector/DisplacementVector3D.h"
+#include "RecoDataProducts/inc/ComboHit.hh"
 
 using namespace std;
 using namespace mu2e;

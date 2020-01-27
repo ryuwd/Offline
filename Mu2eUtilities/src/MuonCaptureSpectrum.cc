@@ -2,21 +2,25 @@
 // radiative muon capture; largely cloned from radiative pion capture.  see doc-db 4378
 //
 // Mu2e includes
+#include <math.h>
+#include <stdlib.h>
+// C++ includes
+#include <iostream>
+#include <memory>
+
 #include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
 #include "GlobalConstantsService/inc/PhysicsParams.hh"
 #include "GlobalConstantsService/inc/ParticleDataTable.hh"
 #include "Mu2eUtilities/inc/MuonCaptureSpectrum.hh"
 #include "Mu2eUtilities/inc/RandomUnitSphere.hh"
-
-// Framework includes
-#include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "cetlib/pow.h"
-
 // CLHEP includes
 #include "CLHEP/Random/RandFlat.h"
-
-// C++ includes
-#include <iostream>
+#include "CLHEP/Vector/LorentzVector.h"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "DataProducts/inc/PDGCode.hh"
+#include "HepPDT/Measurement.hh"
+#include "HepPDT/ParticleData.hh"
 
 using namespace std;
 

@@ -1,4 +1,20 @@
+#include <math.h>
+#include <stddef.h>
+#include <array>
+#include <vector>
+
 #include "Mu2eUtilities/inc/HelixTool.hh"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "DataProducts/inc/XYZVec.hh"
+#include "GeomPrimitives/inc/TubsParams.hh"
+#include "RecoDataProducts/inc/ComboHit.hh"
+#include "RecoDataProducts/inc/HelixSeed.hh"
+#include "RecoDataProducts/inc/RobustHelix.hh"
+#include "RecoDataProducts/inc/StrawHitFlag.hh"
+#include "TrackerGeom/inc/Panel.hh"
+#include "TrackerGeom/inc/Plane.hh"
+#include "TrackerGeom/inc/Straw.hh"
+#include "TrackerGeom/inc/Tracker.hh"
 
 
 namespace mu2e {

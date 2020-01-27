@@ -1,4 +1,7 @@
 #include "Mu2eUtilities/inc/particleEnteringG4Volume.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
+#include "MCDataProducts/inc/StepPointMC.hh"
+#include "MCDataProducts/inc/StrawGasStep.hh"
 
 art::Ptr<mu2e::SimParticle> mu2e::particleEnteringG4Volume(const StepPointMC& step) {
     art::Ptr<SimParticle> p = step.simParticle();

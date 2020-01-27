@@ -14,6 +14,10 @@
 #include "MCDataProducts/inc/StrawGasStep.hh"
 
 namespace mu2e{
+class StepPointMC;
+class StrawGasStep;
+struct SimParticle;
+
   art::Ptr<mu2e::SimParticle> particleEnteringG4Volume(const StepPointMC& step);
   art::Ptr<mu2e::SimParticle> particleEnteringG4Volume(const StrawGasStep& step);
 }

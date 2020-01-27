@@ -1,10 +1,13 @@
+#include <memory>
+#include <vector>
+
 #include "Mu2eUtilities/inc/TrackCuts.hh"
-
 #include "fhiclcpp/ParameterSet.h"
-
 #include "TH1.h"
-
 #include "RecoDataProducts/inc/TrackSummary.hh"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "cetlib_except/exception.h"
+#include "fhiclcpp/exception.h"
 
 namespace mu2e {
 

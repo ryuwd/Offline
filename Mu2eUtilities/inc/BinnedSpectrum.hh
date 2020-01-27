@@ -14,15 +14,23 @@
 
 // C++ includes
 #include <assert.h>
+#include <stddef.h>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
+#include <algorithm>
+#include <array>
+#include <memory>
+#include <type_traits>
 
 #include "cetlib_except/exception.h"
-
 #include "Mu2eUtilities/inc/Table.hh"
 #include "fhiclcpp/ParameterSet.h"
+
+namespace fhicl {
+class ParameterSet;
+}  // namespace fhicl
 
 namespace mu2e {
 

@@ -12,6 +12,7 @@
 //
 
 #include "MCDataProducts/inc/SimParticleCollection.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
 
 namespace mu2e{
 

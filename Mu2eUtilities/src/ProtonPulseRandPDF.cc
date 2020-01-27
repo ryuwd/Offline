@@ -6,13 +6,26 @@
 //
 // Original author: Kyle Knoepfel
 
+#include <stdlib.h>
+// C++ includes
+#include <algorithm>
+#include <array>
+#include <string>
+#include <utility>
+#include <vector>
+
 // Mu2e includes
 #include "ConditionsService/inc/ConditionsHandle.hh"
 #include "ConfigTools/inc/ConfigFileLookupPolicy.hh"
 #include "Mu2eUtilities/inc/ProtonPulseRandPDF.hh"
-
-// C++ includes
-#include <algorithm>
+#include "CLHEP/Random/RandGeneral.h"
+#include "ConditionsService/inc/AcceleratorParams.hh"
+#include "Mu2eUtilities/inc/Table.hh"
+#include "art/Framework/Services/Optional/RandomNumberGenerator.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/exception.h"
+#include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/OptionalAtom.h"
 
 // The following defines the proton pulse shape parameters (pdf width,
 // pdf step and differential distribution).  Please note that it is

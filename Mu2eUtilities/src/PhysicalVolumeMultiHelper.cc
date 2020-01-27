@@ -1,10 +1,14 @@
 // Andrei Gaponenko, 2013
 
-#include "Mu2eUtilities/inc/PhysicalVolumeMultiHelper.hh"
+#include <memory>
 
+#include "Mu2eUtilities/inc/PhysicalVolumeMultiHelper.hh"
 #include "cetlib_except/exception.h"
+#include "cetlib/map_vector.h"
 
 namespace mu2e {
+struct PhysicalVolumeInfo;
+
   PhysicalVolumeMultiHelper::PhysicalVolumeMultiHelper(const PhysicalVolumeInfoMultiCollection& coll)
     : pi_(&coll)
   {}

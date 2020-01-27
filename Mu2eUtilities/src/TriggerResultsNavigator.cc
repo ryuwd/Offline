@@ -1,8 +1,19 @@
+#include <stddef.h>
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/ParameterSetRegistry.h"
 #include "Mu2eUtilities/inc/TriggerResultsNavigator.hh"
-#include <iostream>
-#include <iomanip>
+#include "canvas/Persistency/Common/HLTenums.h"
+#include "canvas/Persistency/Common/TriggerResults.h"
+#include "fhiclcpp/coding.h"
+#include "fhiclcpp/exception.h"
 
 namespace mu2e {
 

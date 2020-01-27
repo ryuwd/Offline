@@ -8,6 +8,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
 
 namespace mu2e {
   class SimParticleCollectionPrinter {

@@ -11,6 +11,7 @@
 #include "MCDataProducts/inc/SimParticle.hh"
 
 namespace mu2e {
+struct PhysicalVolumeInfo;
 
   class PhysicalVolumeMultiHelper {
   public:

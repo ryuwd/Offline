@@ -8,24 +8,26 @@
 // Contact person Rob Kutschke
 //
 
+#include <cmath>
+#include <vector>
+
 // Mu2e includes
 #include "Mu2eUtilities/inc/GeneratorSummaryHistograms.hh"
 #include "GeometryService/inc/DetectorSystem.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 #include "StoppingTargetGeom/inc/zBinningForFoils.hh"
 #include "StoppingTargetGeom/inc/StoppingTarget.hh"
-
 // Framework includes
 #include "art_root_io/TFileService.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-
-// Root includes
-#include "TH1F.h"
-#include "TH2F.h"
-
-// C++ includes
-#include <iostream>
-#include <cmath>
+#include "CLHEP/Vector/LorentzVector.h"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "GeneralUtilities/inc/Binning.hh"
+#include "MCDataProducts/inc/GenId.hh"
+#include "TH1.h"
+#include "TH2.h"
+#include "art_root_io/TFileDirectory.h"
+#include "canvas/Utilities/Exception.h"
 
 namespace mu2e {
 

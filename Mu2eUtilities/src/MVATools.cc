@@ -1,19 +1,34 @@
-#include "ConfigTools/inc/ConfigFileLookupPolicy.hh"
-#include "Mu2eUtilities/inc/MVATools.hh"
-
-// From the art tool-chain
-#include "fhiclcpp/ParameterSet.h"
-
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
-#include <xercesc/dom/DOM.hpp>
-#include <xercesc/sax/HandlerBase.hpp>
+#include <ext/alloc_traits.h>
+#include <math.h>
+#include <stdlib.h>
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <limits>
+#include <algorithm>
+#include <utility>
+
+#include "ConfigTools/inc/ConfigFileLookupPolicy.hh"
+#include "Mu2eUtilities/inc/MVATools.hh"
+// From the art tool-chain
+#include "fhiclcpp/ParameterSet.h"
+#include "DataProducts/inc/MVAMask.hh"
+#include "cetlib_except/exception.h"
+#include "fhiclcpp/exception.h"
+#include "fhiclcpp/types/Atom.h"
+#include "xercesc/dom/DOMDocument.hpp"
+#include "xercesc/dom/DOMElement.hpp"
+#include "xercesc/dom/DOMNamedNodeMap.hpp"
+#include "xercesc/dom/DOMNode.hpp"
+#include "xercesc/dom/DOMNodeList.hpp"
+#include "xercesc/dom/DOMXPathResult.hpp"
+#include "xercesc/parsers/AbstractDOMParser.hpp"
+#include "xercesc/util/XMLException.hpp"
+#include "xercesc/util/XMLString.hpp"
+#include "xercesc/util/XercesDefs.hpp"
+#include "xercesc/util/Xerces_autoconf_config.hpp"
 
 using namespace xercesc;
 

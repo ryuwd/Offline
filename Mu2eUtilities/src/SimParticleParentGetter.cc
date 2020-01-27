@@ -1,16 +1,22 @@
+#include <memory>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
+
 #include "Mu2eUtilities/inc/SimParticleParentGetter.hh"
-
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "canvas/Persistency/Common/FindOne.h"
-#include "canvas/Utilities/InputTag.h"
-
 #include "MCDataProducts/inc/SimParticle.hh"
 #include "MCDataProducts/inc/StepPointMC.hh"
 #include "MCDataProducts/inc/GenParticleSPMHistory.hh"
 #include "MCDataProducts/inc/GenSimParticleLink.hh"
-
 #include "cetlib_except/exception.h"
+#include "art/Framework/Principal/Handle.h"
+#include "canvas/Persistency/Common/Assns.h"
+
+namespace mu2e {
+class GenParticle;
+}  // namespace mu2e
 
 //#define AGDEBUG(stuff) std::cerr<<"AG: "<<__FILE__<<", line "<<__LINE__<<": "<<stuff<<std::endl;
 #define AGDEBUG(stuff)

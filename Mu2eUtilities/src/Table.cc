@@ -9,8 +9,10 @@
 //
 // Original author: Kyle Knoepfel
 
-#include "Mu2eUtilities/inc/Table.hh"
 #include <numeric>
+#include <algorithm>
+
+#include "Mu2eUtilities/inc/Table.hh"
 
 namespace mu2e {
 

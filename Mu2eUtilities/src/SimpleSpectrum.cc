@@ -5,11 +5,14 @@
 // $Date: 2014/02/25 17:14:10 $
 //
 
+#include <cstddef>
+#include <vector>
+
 // Mu2e includes
 #include "Mu2eUtilities/inc/SimpleSpectrum.hh"
-
 // Framework includes
 #include "cetlib/pow.h"
+#include "cetlib_except/exception.h"
 
 using namespace std;
 

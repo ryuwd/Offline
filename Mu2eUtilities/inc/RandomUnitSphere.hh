@@ -21,6 +21,11 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "CLHEP/Vector/ThreeVector.h"
+#include "CLHEP/Units/SystemOfUnits.h"
+
+namespace CLHEP {
+class HepRandomEngine;
+}  // namespace CLHEP
 
 namespace mu2e {
 

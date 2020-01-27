@@ -3,9 +3,17 @@
 //  reconstruct a given track.
 //
 
+#include <memory>
+#include <string>
+#include <typeinfo>
+
 #include "Mu2eUtilities/inc/decodeTrackPatRecType.hh"
 #include "RecoDataProducts/inc/KalRepCollection.hh"
 #include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Principal/Provenance.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/exception.h"
 
 namespace mu2e {
 

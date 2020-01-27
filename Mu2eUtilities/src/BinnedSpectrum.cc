@@ -1,10 +1,10 @@
-#include "Mu2eUtilities/inc/BinnedSpectrum.hh"
+#include <string>
 
+#include "Mu2eUtilities/inc/BinnedSpectrum.hh"
 #include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
 #include "GlobalConstantsService/inc/ParticleDataTable.hh"
 #include "GlobalConstantsService/inc/PhysicsParams.hh"
 #include "ConfigTools/inc/ConfigFileLookupPolicy.hh"
-
 #include "Mu2eUtilities/inc/CzarneckiSpectrum.hh"
 #include "Mu2eUtilities/inc/SimpleSpectrum.hh"
 #include "Mu2eUtilities/inc/ConversionSpectrum.hh"
@@ -12,6 +12,10 @@
 #include "Mu2eUtilities/inc/MuonCaptureSpectrum.hh"
 #include "Mu2eUtilities/inc/PionCaptureSpectrum.hh"
 #include "DataProducts/inc/PDGCode.hh"
+#include "HepPDT/Measurement.hh"
+#include "HepPDT/ParticleData.hh"
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/exception.h"
 
 namespace mu2e {
 

@@ -1,10 +1,11 @@
+#include <memory>
+#include <vector>
+
 #include "Mu2eUtilities/inc/HistTrackSum.hh"
-
 #include "art_root_io/TFileDirectory.h"
-
 #include "TH1.h"
-
 #include "RecoDataProducts/inc/TrackSummary.hh"
+#include "CLHEP/Vector/ThreeVector.h"
 
 namespace mu2e {
 
