@@ -5,8 +5,6 @@
 #include "art_root_io/TFileService.h"
 
 #include "ProditionsService/inc/ProditionsHandle.hh"
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
 #include "TrackerGeom/inc/Tracker.hh"
 
 #include "RecoDataProducts/inc/ComboHit.hh"
@@ -19,7 +17,7 @@
 #include "CosmicReco/inc/DriftFitUtils.hh"
 
 
-#include "CosmicAlignment/inc/Mille.hh"
+#include "CosmicAlignment/inc/Mille.h"
 #include "CosmicAlignment/inc/RigidBodyDOCADeriv.hh"
 
 #include "TH1F.h"
@@ -48,22 +46,23 @@ public:
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
 
-    virtual void beginJob();
-    virtual void endJob();
-    virtual void beginRun(art::Run const&);
+    override void beginJob();
+    override void endJob();
+    override void beginRun(art::Run const&);
 
-    virtual void analyze(art::Event const &) override;
+    void analyze(art::Event const &) override;
 
-    PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
+    explicit PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                             _diag(conf().diaglvl()),
                                             _costag(conf().costag()),
+                                            _outfilename(conf().millefile())
     {
         // generate hashtable of plane number to DOF labels for planes
 
         int counter = 0;
         int dof_per_plane = 6;
 
-        for (uint16_t i = 0; i < StrawId::nplanes; i++)
+        for (uint16_t i = 0; i < StrawId::_nplanes; i++)
         {
             std::vector<int> labels;
             for (size_t dof_n = 0; dof_n < dof_per_plane; dof_n++)
@@ -77,7 +76,7 @@ public:
         }
     }
 
-    virtual ~PlaneAlignment();
+    virtual ~PlaneAlignment() = default;
 
     Config _conf;
 
@@ -85,6 +84,7 @@ public:
     art::InputTag _costag;
     const CosmicTrackSeedCollection *_coscol;
 
+    std::string _outfilename;
     std::unique_ptr<Mille> millepede;
     ProditionsHandle<Tracker> _alignedTracker_h;
 
@@ -92,13 +92,9 @@ public:
     //ProditionsHandle<StrawResponse> srep_h;
 };
 
-PlaneAlignment::~PlaneAlignment()
-{
-}
-
 void PlaneAlignment::beginJob()
 {
-    millepede = std::make_unique<Mille>(conf().millefile().c_str());
+    millepede = std::make_unique<Mille>(_outfilename.c_str());
 
     if (_diag > 0)
     {
@@ -126,15 +122,14 @@ void PlaneAlignment::analyze(art::Event const &event)
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
 
-    for(size_t ist = 0;ist < _coscol->size(); ++ist)
+    for (CosmicTrackSeed const& sts : *_coscol)
     {
-        CosmicTrackSeed sts =(*_coscol)[ist];
-        CosmicTrack st = sts._track;
+        CosmicTrack const& st = sts._track;
 
         TrkFitFlag const& status = sts._status;
 
         if (!status.hasAllProperties(TrkFitFlag::helixOK) ){continue;}
-        if(st.converged == false or st.minuit_converged  == false) { continue;}
+        if (!st.converged or !st.minuit_converged) { continue;}
 
         if (isnan(st.MinuitFitParams.A0)) continue;
 
@@ -179,7 +174,7 @@ void PlaneAlignment::analyze(art::Event const &event)
 
 
             // FIXME! use _srep utilities to do this properly!
-            float drift_prediction = straw_hit.driftTime() * 0.065; //_srep.driftTimeToDistance(straw_hit.strawId(), straw_hit.driftTime(), straw_hit.);
+            double drift_prediction = straw_hit.driftTime() * 0.065; //_srep.driftTimeToDistance(straw_hit.strawId(), straw_hit.driftTime(), straw_hit.);
 
             // Distance of Closest Approach (DOCA)
             TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(
@@ -188,8 +183,8 @@ void PlaneAlignment::analyze(art::Event const &event)
                     Geom::toXYZVec(straw_mp),
                     Geom::toXYZVec(wire_dir),
                     1.e-8);
-            float residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
-            float residual_error = 0;
+            double residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
+            double residual_error = 0; // use TrkStrawHit (?) ::radialErr()
 
             if (isnan(residual)) continue;
 
@@ -206,7 +201,7 @@ void PlaneAlignment::analyze(art::Event const &event)
             // diagnostic information
             if (_diag > 0)
             {
-                residuum->Fill(resid);
+                residuum->Fill(residual);
             }
         }
 
