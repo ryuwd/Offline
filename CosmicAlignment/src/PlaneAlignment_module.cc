@@ -35,6 +35,9 @@ private:
 
 
 public:
+    const static int _dof_per_plane = 6; // dx, dy, dz, a, b, g (translation, rotation)
+    const static int _ndof = StrawId::_nplanes * _dof_per_plane;
+
     struct Config
     {
         using Name = fhicl::Name;
@@ -60,19 +63,18 @@ public:
         // generate hashtable of plane number to DOF labels for planes
 
         int counter = 0;
-        int dof_per_plane = 6;
-
         for (uint16_t i = 0; i < StrawId::_nplanes; i++)
         {
             std::vector<int> labels;
-            for (size_t dof_n = 0; dof_n < dof_per_plane; dof_n++)
+            for (size_t dof_n = 0; dof_n < _dof_per_plane; dof_n++)
                 labels.push_back(counter++);
             dof_labels[i] = std::move(labels);
         }
 
         if (_diag > 0)
         {
-            std::cout << "Plane d.o.f. labels occupy range [0," << counter - 1 << "] inclusive" << std::endl;
+            std::cout << "PlaneAlignment: Total number of plane degrees of freedom = " << _ndof << std::endl;
+            std::cout << "PlaneAlignment: Plane d.o.f. labels occupy range [0," << counter - 1 << "] inclusive" << std::endl;
         }
     }
 
@@ -125,7 +127,6 @@ void PlaneAlignment::analyze(art::Event const &event)
     for (CosmicTrackSeed const& sts : *_coscol)
     {
         CosmicTrack const& st = sts._track;
-
         TrkFitFlag const& status = sts._status;
 
         if (!status.hasAllProperties(TrkFitFlag::helixOK) ){continue;}
@@ -142,27 +143,27 @@ void PlaneAlignment::analyze(art::Event const &event)
         for (auto const&straw_hit : sts._straw_chits)
         {
             // straw and plane info
-            StrawId straw_id = straw_hit.strawId();
+            StrawId const& straw_id = straw_hit.strawId();
             Straw const& straw = tracker.getStraw(straw_id);
             auto plane_id = straw_id.plane();
 
             // geometry info
-            auto const& plane_origin = tracker.getPlane(plane_id).origin();
+            auto const &plane_origin = tracker.getPlane(plane_id).origin();
             auto const &straw_mp = straw.getMidPoint();
             auto const &wire_dir = straw.getDirection().unit();
 
             // now calculate the derivatives.
-            auto derivs_local = RigidBodyDOCADerivatives_local(
+            auto derivativesLocal = RigidBodyDOCADerivatives_local(
                 st.MinuitFitParams.A0,
                 st.MinuitFitParams.B0,
                 st.MinuitFitParams.A1,
                 st.MinuitFitParams.B1,
-                straw_mp.x(), straw_mp.y(), straw_mp.z(), // TODO: is this suitable?
+                straw_mp.x(), straw_mp.y(), straw_mp.z(),
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
                 );
 
-            auto derivs_global = RigidBodyDOCADerivatives_global(
+            auto derivativesGlobal = RigidBodyDOCADerivatives_global(
                 st.MinuitFitParams.A0,
                 st.MinuitFitParams.B0,
                 st.MinuitFitParams.A1,
@@ -190,10 +191,10 @@ void PlaneAlignment::analyze(art::Event const &event)
 
             // write the track hit to the track buffer
             millepede->mille(
-                    derivs_local.size(),
-                    derivs_local.data(),
-                    derivs_global.size(),
-                    derivs_global.data(),
+                    derivativesLocal.size(),
+                    derivativesLocal.data(),
+                    derivativesGlobal.size(),
+                    derivativesGlobal.data(),
                     dof_labels[plane_id].data(),
                     residual,
                     residual_error);
