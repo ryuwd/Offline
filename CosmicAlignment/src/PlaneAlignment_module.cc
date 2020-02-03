@@ -35,8 +35,8 @@ private:
 
 
 public:
-    const static int _dof_per_plane = 6; // dx, dy, dz, a, b, g (translation, rotation)
-    const static int _ndof = StrawId::_nplanes * _dof_per_plane;
+    const int _dof_per_plane = 6; // dx, dy, dz, a, b, g (translation, rotation)
+    const int _ndof = StrawId::_nplanes * _dof_per_plane;
 
     struct Config
     {
@@ -44,7 +44,7 @@ public:
         using Comment = fhicl::Comment;
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
-        fhicl::Atom<std::string> millefile{Name("MillepedeBinaryOutputFile"), Comment("Output filename for millepede binary")};
+        fhicl::Atom<std::string> millefile{Name("MillepedeBinaryOutputFile"), Comment("Output filename for Millepede data file")};
 
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
@@ -91,7 +91,7 @@ public:
     ProditionsHandle<Tracker> _alignedTracker_h;
 
     std::unordered_map<uint16_t, std::vector<int>> dof_labels;
-    //ProditionsHandle<StrawResponse> srep_h;
+    ProditionsHandle<StrawResponse> srep_h;
 };
 
 void PlaneAlignment::beginJob()
@@ -118,7 +118,7 @@ void PlaneAlignment::endJob()
 
 void PlaneAlignment::analyze(art::Event const &event)
 {
-    //StrawResponse const& _srep = srep_h.get(event.id());
+    StrawResponse const& _srep = srep_h.get(event.id());
     Tracker const& tracker = _alignedTracker_h.get(event.id());
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
@@ -140,7 +140,7 @@ void PlaneAlignment::analyze(art::Event const &event)
         // get residuals and their derivatives with respect
         // to all local and global parameters
         // get also plane id hit by straw hits
-        for (auto const&straw_hit : sts._straw_chits)
+        for (ComboHit const&straw_hit : sts._straw_chits)
         {
             // straw and plane info
             StrawId const& straw_id = straw_hit.strawId();
@@ -168,14 +168,14 @@ void PlaneAlignment::analyze(art::Event const &event)
                 st.MinuitFitParams.B0,
                 st.MinuitFitParams.A1,
                 st.MinuitFitParams.B1,
-                straw_mp.x(), straw_mp.y(), straw_mp.z(), // TODO: is this suitable?
+                straw_mp.x(), straw_mp.y(), straw_mp.z(),
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
                 );
 
-
-            // FIXME! use _srep utilities to do this properly!
-            double drift_prediction = straw_hit.driftTime() * 0.065; //_srep.driftTimeToDistance(straw_hit.strawId(), straw_hit.driftTime(), straw_hit.);
+            Hep3Vector td(st.MinuitFitParams.A1, st.MinuitFitParams.B1, 1);
+            td = td.unit();
+            Hep3Vector rperp = td - (td.dot(straw.getDirection()) * straw.getDirection());
 
             // Distance of Closest Approach (DOCA)
             TwoLinePCA_XYZ PCA = TwoLinePCA_XYZ(
@@ -184,9 +184,12 @@ void PlaneAlignment::analyze(art::Event const &event)
                     Geom::toXYZVec(straw_mp),
                     Geom::toXYZVec(wire_dir),
                     1.e-8);
-            double residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
-            double residual_error = 0; // use TrkStrawHit (?) ::radialErr()
 
+            double phi = rperp.theta();
+            double drift_distance = _srep.driftTimeToDistance(straw_id, straw_hit.driftTime(), phi); //straw_hit.driftTime() * 0.065;
+            double residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
+            double residual_error = _srep.driftDistanceError(straw_id, drift_prediction, phi, PCA.dca());
+            
             if (isnan(residual)) continue;
 
             // write the track hit to the track buffer
