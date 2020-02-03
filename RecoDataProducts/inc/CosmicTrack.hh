@@ -4,9 +4,7 @@
 #include "TMath.h"
 #include "TMatrixD.h"
 #include "DataProducts/inc/XYZVec.hh"
-#include "RecoDataProducts/inc/ComboHit.hh"
-#include "Mu2eUtilities/inc/BuildLinearFitMatrixSums.hh"
-
+#include "Mu2eUtilities/inc/PointLinePCA_XYZ.hh"
 #include<vector>
 #include<bitset>
 
@@ -25,7 +23,7 @@ using namespace std;
   	double sigB1;
   	TrackCov();
   	TrackCov(double siga0, double siga0a1,double siga1a0, double siga1, double sigb0,double sigb0b1, double sigb1b0, double sigb1) : sigA0(siga0), sigA0A1(siga0a1), sigA1A0(siga1a0), sigA1(siga1), sigB0(sigb0), sigB0B1(sigb0b1), sigB1B0(sigb1b0), sigB1(sigb1) {};
-
+   
    };
    //Struct To Hold Track Parameters
    struct TrackParams{
@@ -42,7 +40,7 @@ using namespace std;
   	TrackParams();
   	TrackParams(double a0, double a1, double  b0, double b1) : A0(a0), A1(a1), B0(b0) , B1(b1){};
 	TrackCov Covarience;
-
+	
    };
    //Struct to hold Coordinate System
    struct TrackAxes{
@@ -51,7 +49,7 @@ using namespace std;
   	XYZVec _ZPrime;
   	TrackAxes();
   	TrackAxes(XYZVec X, XYZVec Y, XYZVec Z) : _XDoublePrime(X),_YDoublePrime(Y),_ZPrime(Z){};
-
+  	
    };
    //Struct to store a Track Equation (optional)
    struct TrackEquation{
@@ -65,122 +63,75 @@ using namespace std;
    	double FinalChiX;
    	double FinalChiY;
    	double FinalChiTot;
-
+   	
    	double InitialChiX;
    	double InitialChiY;
    	double InitialChiTot;
-
-   	std::vector<double> InitialResidualsX;
-   	std::vector<double> InitialResidualsY;
-   	std::vector<double> FinalResidualsX;
-   	std::vector<double> FinalResidualsY;
-
-	std::vector<double> InitErrX;
-	std::vector<double> InitErrY;
-	std::vector<double> FinalErrX;
-	std::vector<double> FinalErrY;
-	std::vector<double> FinalErrTot;
-	std::vector<double> InitErrTot;
-
-
-
+   	
 	TrackSeedDiag();
 
    };
 
-   struct TrackDriftDiag{
-        double FinalChiX;
-   	double FinalChiY;
-   	double FinalChiTot;
-   	double NLL;
-	std::vector<double> UnbiasedResX;
-	std::vector<double> UnbiasedResY;
-	std::vector<double> UnbiasedResXErr;
-	std::vector<double> UnbiasedResYErr;
-
-
-   	std::vector<double> StartDOCAs;
-   	std::vector<double> FullFitEndDOCAs;
-	std::vector<double> GaussianEndDOCAs;
-
-   	std::vector<double> StartTimeResiduals;
-   	std::vector<double> FullFitEndTimeResiduals;
-	std::vector<double> GaussianEndTimeResiduals;
-
-   	std::vector<double> RecoAmbigs;
-
-   	std::vector<double> FinalResidualsX;
-   	std::vector<double> FinalResidualsY;
-
-	std::vector<double> FinalErrX;
-	std::vector<double> FinalErrY;
-	std::vector<double> FinalErrTot;
-
-
-   	TrackDriftDiag();
-
-   };
 namespace mu2e {
-
+  
   class CosmicTrack{
   public:
-
-
+  
+    
     // Constructors
     public:
 	    CosmicTrack();
 	    CosmicTrack(TrackParams params) : FitParams(params) {};
 	    ~CosmicTrack();
-
+	    
 	 //---------------Accessors:--------------//
-
-	    double GetSagitta() const {return _Sagitta;}
-
+	  
 	    double get_fit_phi() const { return FitPhi;}
-
 	    double get_fit_theta() const { return FitTheta;}
-
 	    int get_N() const { return _Nhits;}
 	    int get_iter(){return _niters;}
-
-	    TrackParams GetFitParams()const{
+	    
+	    TrackParams GetFitParams()const{ 
 	    	return FitParams;
 	    }
-	    TrackParams GetInitParams()const{
+	    TrackParams GetInitParams()const{ 
 	    	return InitParams;
 	    }
 
-	    void SetTrackDirection(XYZVec dir){
-	    	this->Direction = dir;
-	    }
-
-	    XYZVec GetTrackDirection() const{
+	    XYZVec GetTrackDirection() const{ //TODO use private direction 
 	    	XYZVec Direction(FitParams.A1, FitParams.B1, 1);
 	    	return Direction;
 	    }
-
+	    
 	    XYZVec GetInitTrackDirection() const{
 	    	XYZVec Direction(InitParams.A1, InitParams.B1, 1);
 	    	return Direction.Unit();
 	    }
-
-	    XYZVec GetTrackPosition() const{
+	    
+	    XYZVec GetTrackPosition() const{ //TODO use private positon?
 	    	XYZVec Position(FitParams.A0, FitParams.B0, 0);
 	    	return Position;
 	    }
+
+ 	     XYZVec GetPOCA() const{
+		return POCA;
+             }
+
+	     double GetDOCA() const{
+		return DOCA;
+             }
 
 	     void clear_errors(); //clears track info and diagnostics
 	     void clear_parameters(); //clears just track info
 	     void clear_diag();
 	     void clear_cov();
 	//-------------Modiffiers of Track Parameters/Features---------------//
-	    void SetFitParams(TrackParams par){
+	    void SetFitParams(TrackParams par){ 
 	    	this->FitParams = par;
 	    }
-	    void SetInitParams(TrackParams par){
+	    void SetInitParams(TrackParams par){ 
 	    	this->InitParams = par;
 	    }
-
 
 	    void SetMinuitParams(double par_a0, double par_a1, double par_b0, double par_b1, double par_t0 ){
 	    	this->MinuitFitParams.A0 = par_a0;
@@ -188,7 +139,7 @@ namespace mu2e {
 	 	this->MinuitFitParams.B0 = par_b0;
 	 	this->MinuitFitParams.B1 = par_b1;
 	  	this->MinuitFitParams.T0 = par_t0;
-
+	    
 	    }
 	    void SetFitTrackCoOrdSystem(TrackAxes coordsys){
 	    	this->TrackCoordSystem = coordsys;
@@ -197,8 +148,8 @@ namespace mu2e {
 	    void SetInitTrackCoordSystem(TrackAxes coordsys){
 	    	this->InitTrackCoordSystem = coordsys;
     	    }
-
-    	    void SetCovarience(double siga0, double siga0a1, double siga1a0, double siga1, double sigb0, double sigb0b1, double sigb1b0, double sigb1){
+    	    
+    	    void SetCovarience(double siga0, double siga0a1, double siga1a0, double siga1, double sigb0, double sigb0b1, double sigb1b0, double sigb1){ 
     	    	TrackCov Cov(siga0, siga0a1, siga1a0, siga1, sigb0, sigb0b1, sigb1b0, sigb1);
 	    	this->FitParams.Covarience = Cov;
 	    }
@@ -206,96 +157,92 @@ namespace mu2e {
 	    	this->MinuitCoordSystem = coordsys;
 	    }
 	    void Set_N(unsigned N){_Nhits = N;}
-
-	    void SetTrackEquation(TrackEquation Track){
+	    
+	    void SetTrackEquation(TrackEquation Track){ 
 	        this->FitEquation = Track;
 	     }
 
-	    void SetTrackEquationXYZ(TrackEquation Track){
+	    void SetTrackEquationXYZ(TrackEquation Track){ 
 	        this->FitEquationXYZ = Track;
 	     }
 
-	    void SetMinuitTrackEquation(TrackEquation Track){
+	    void SetMinuitTrackEquation(TrackEquation Track){ 
 	        this->MinuitFitEquation = Track;
 	     }
+	    
+	    void SetTrackDirection(XYZVec dir){
+	    	this->Direction = dir;
+	    }
 
+	    void SetTrackPosition(XYZVec pos){
+	    	this->Position = pos;
+	    }
+	   void SetFirstHitVec(double x, double y, double z) {
+		this->FirstHitVec.SetXYZ(x,y,z);
 
+	    }
+  	    void SetLastHitVec(double x, double y, double z) {
+		this->LastHitVec.SetXYZ(x,y,z);
+	    }
+
+	    void SetTrackPOCA() {
+		XYZVec TrackerCenter(0,0,0);//TODO 🙄
+        	PointLinePCA_XYZ PCA = PointLinePCA_XYZ(TrackerCenter, this->FirstHitVec, this->LastHitVec);
+		this->POCA = PCA.pca();
+		this->DOCA = PCA.dca();
+	    }
+  
 	    void set_fit_theta(double track_angle){ FitTheta = track_angle;}
-	    void set_mom(XYZVec mom){ _track_mommentum = mom;}
 	    void set_fit_phi(double track_angle){ FitPhi = track_angle;}
-	    //-----------Fill Diag info----------//
+
+	    //-----------Fill Diag info this is legacy it will probably be removed soon----------//
 	    void set_finalchisq_dof(double finalchisq_dof)   { Diag.FinalChiTot = finalchisq_dof; }
 	    void set_finalchisq_dofX(double finalchisq_dofX) { Diag.FinalChiX = finalchisq_dofX; }
 	    void set_finalchisq_dofY(double finalchisq_dofY) { Diag.FinalChiY = finalchisq_dofY; }
-
+	    
 	    void set_initchisq_dof(double initchisq_dof)   { Diag.InitialChiTot = initchisq_dof; }
 	    void set_initchisq_dofX(double initchisq_dofX) { Diag.InitialChiX = initchisq_dofX; }
 	    void set_initchisq_dofY(double initchisq_dofY) { Diag.InitialChiY = initchisq_dofY; }
-
-	    void set_init_fit_residualsX(double residual)  { Diag.InitialResidualsX.push_back(residual); }
-	    void set_final_fit_residualsX(double residual) { Diag.FinalResidualsX.push_back(residual); }
-
-	    void set_init_fit_residualsY(double residual)  { Diag.InitialResidualsY.push_back(residual); }
-	    void set_final_fit_residualsY(double residual) { Diag.FinalResidualsY.push_back(residual); }
-
-	    void SetFinalErrorsX(double residual_err){ Diag.FinalErrX.push_back(residual_err); }
-	    void SetInitErrorsX(double residual_err) { Diag.InitErrX.push_back(residual_err); }
-
-	    void SetInitErrors(double residual_errX, double residual_errY) {
-	      Diag.InitErrX.push_back(residual_errX);
-	      Diag.InitErrY.push_back(residual_errY);
-	      Diag.InitErrTot.push_back(sqrt((residual_errX*residual_errX)+(residual_errY*residual_errY)));
-	     }
-	     void SetFinalErrors(double residual_errX, double residual_errY) {
-	      Diag.FinalErrX.push_back(residual_errX);
-	      Diag.FinalErrY.push_back(residual_errY);
-	      Diag.FinalErrTot.push_back(sqrt((residual_errX*residual_errX)+(residual_errY*residual_errY)));
-	     }
-
-	    void SetInitErrorsY(double residual_err) { Diag.InitErrY.push_back(residual_err); }
-	    void SetFinalErrorsY(double residual_err) { Diag.FinalErrY.push_back(residual_err); }
-
-            //------------End Diag Fill---------------//
-	    void set_niter(int iter){_niters= (iter);}
-
-    	     TrackParams FitParams; //Seed Fit
-             TrackParams InitParams; //Initial fit
-	     TrackParams MinuitFitParams; // Minuit Params
+	    void set_niter(int iter){ _niters= (iter); }
+            //----------------------------End Diag Fill---------------------------------//
+    	     TrackParams FitParams; //From Iterative Seed Fit (not drift)
+             TrackParams InitParams; //Initial fit (first estimate)
+	     TrackParams MinuitFitParams; // Minuit Params (seed drift final)
 
 	     TrackAxes MinuitCoordSystem;//Result from Minuit Fit
 	     TrackAxes TrackCoordSystem;//Seed Fit Result Axes
 	     TrackAxes InitTrackCoordSystem;//Initial Axes (start->end line)
-
-	     //These will become track representations LineFitTraj eventually TODO
+	     
 	     TrackEquation FitEquation;
 	     TrackEquation FitEquationXYZ;
 	     TrackEquation MinuitFitEquation;
 
 	     TrackSeedDiag Diag;
-	     TrackDriftDiag DriftDiag;
-
+	     
 	     XYZVec sigmaPos;
 	     XYZVec sigmaDir;
-
+	     
 	     bool converged = false;
 	     bool minuit_converged = false;
 	     unsigned n_outliers = 0;
 
+	     double FitPhi;
+	     double FitTheta;
+	     XYZVec POCA;
+	     double DOCA;
+
   private:
-
+	    
 	    unsigned _Nhits;
-
-	    double FitPhi;
-	    double FitTheta;
-
-	    double _Sagitta;//TODO
-	    XYZVec _track_mommentum;//TODO
-
+	   
 	    int _niters;
 	    XYZVec Direction;
-
+	    XYZVec Position;
+	    XYZVec FirstHitVec;
+	    XYZVec LastHitVec; 
+	    
   };
-
+  
 }
 
 #endif
