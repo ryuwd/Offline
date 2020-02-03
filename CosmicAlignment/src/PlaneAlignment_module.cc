@@ -44,7 +44,7 @@ public:
         using Comment = fhicl::Comment;
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
-        fhicl::Atom<std::string> millefile{Name("MillepedeBinaryOutputFile"), Comment("Output filename for Millepede data file")};
+        fhicl::Atom<std::string> millefile{Name("MillepedeOutputFile"), Comment("Output filename for Millepede data file")};
 
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
@@ -189,7 +189,7 @@ void PlaneAlignment::analyze(art::Event const &event)
             double drift_distance = _srep.driftTimeToDistance(straw_id, straw_hit.driftTime(), phi); //straw_hit.driftTime() * 0.065;
             double residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
             double residual_error = _srep.driftDistanceError(straw_id, drift_prediction, phi, PCA.dca());
-            
+
             if (isnan(residual)) continue;
 
             // write the track hit to the track buffer

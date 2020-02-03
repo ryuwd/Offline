@@ -1,0 +1,12 @@
+# -*- mode: tcl -*-
+
+BEGIN_PROLOG
+
+PlaneAlignment : {
+    module_type		: PlaneAlignment
+    diagLevel : 2
+    CosmicTrackSeedCollection : "CosmicTrackFinder"
+    MillepedeOutputFile : "cosmictracks.bin"
+}
+
+END_PROLOG
