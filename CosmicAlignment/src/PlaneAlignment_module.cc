@@ -49,11 +49,11 @@ public:
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
 
-    override void beginJob();
-    override void endJob();
-    override void beginRun(art::Run const&);
+    void beginJob();
+    void endJob();
+    void beginRun(art::Run const&);
 
-    void analyze(art::Event const &) override;
+    void analyze(art::Event const &);
 
     explicit PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                             _diag(conf().diaglvl()),
