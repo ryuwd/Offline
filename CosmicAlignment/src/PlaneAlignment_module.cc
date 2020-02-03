@@ -187,8 +187,8 @@ void PlaneAlignment::analyze(art::Event const &event)
 
             double phi = rperp.theta();
             double drift_distance = _srep.driftTimeToDistance(straw_id, straw_hit.driftTime(), phi); //straw_hit.driftTime() * 0.065;
-            double residual = (PCA.LRambig() * PCA.dca()) - drift_prediction;
-            double residual_error = _srep.driftDistanceError(straw_id, drift_prediction, phi, PCA.dca());
+            double residual = (PCA.LRambig() * PCA.dca()) - drift_distance;
+            double residual_error = _srep.driftDistanceError(straw_id, drift_distance, phi, PCA.dca());
 
             if (isnan(residual)) continue;
 
