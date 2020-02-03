@@ -1,3 +1,26 @@
+
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+#include "TrkDiag/fcl/prolog.fcl"
 #include "CosmicAlignment/fcl/prolog.fcl"
 
 
+process_name : PlaneAlignment
+
+source : { module_type : RootInput }
+
+services : @local::Services.Reco
+
+physics :
+{
+  producers : { @table::CosmicTracking.FindCosmics }
+  analyzers : {
+     PlaneAlign : { @table::PlaneAlignment }
+  }
+}
+
+physics.TrkAnaTrigPath : [ @sequence::CosmicTracking.FindCosmics ]
+physics.TrkAnaEndPath : [ PlaneAlign ]
+
+services.TFileService.fileName: "PlaneAlignment.root"
