@@ -35,8 +35,8 @@ private:
 
 
 public:
-    const int _dof_per_plane = 6; // dx, dy, dz, a, b, g (translation, rotation)
-    const int _ndof = StrawId::_nplanes * _dof_per_plane;
+    const size_t _dof_per_plane = 6; // dx, dy, dz, a, b, g (translation, rotation)
+    const size_t _ndof = StrawId::_nplanes * _dof_per_plane;
 
     struct Config
     {
