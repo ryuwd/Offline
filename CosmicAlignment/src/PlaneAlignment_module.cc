@@ -4,6 +4,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art_root_io/TFileService.h"
 
+#include "GeometryService/inc/GeomHandle.hh"
 #include "ProditionsService/inc/ProditionsHandle.hh"
 #include "TrackerGeom/inc/Tracker.hh"
 
@@ -45,7 +46,7 @@ public:
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
         fhicl::Atom<std::string> millefile{Name("MillepedeOutputFile"), Comment("Output filename for Millepede data file")};
-        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker, 0 to use nominal tracker (set 0 if performing alignment validation)")};
+        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker, 0 to use nominal tracker (set 0 if performing MC alignment validation)")};
 
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
@@ -58,9 +59,9 @@ public:
 
     explicit PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                             _diag(conf().diaglvl()),
+                                            _use_proditions(conf().use_proditions()),
                                             _costag(conf().costag()),
-                                            _outfilename(conf().millefile(),
-                                                    _use_proditions(conf().use_proditions())
+                                            _output_filename(conf().millefile())
     {
         // generate hashtable of plane number to DOF labels for planes
 
@@ -80,7 +81,7 @@ public:
         }
     }
 
-    virtual ~PlaneAlignment() = default;
+    virtual ~PlaneAlignment() { }
 
     Config _conf;
 
@@ -90,7 +91,7 @@ public:
     art::InputTag _costag;
     const CosmicTrackSeedCollection *_coscol;
 
-    std::string _outfilename;
+    std::string _output_filename;
     std::unique_ptr<Mille> millepede;
 
     // We need both Trackers. Why?
@@ -98,11 +99,14 @@ public:
     // 2. However, in alignment validation and alignment generally we should not presume to know
     //     what that misaligned geometry is.
     // In actual running, we use Proditions likely with some seed survey measurements
-    // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco
+    // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco.
     // Since in validation we are trying to determine the alignment constants that we misaligned to start with,
     // our input to Millepede should use nominal Tracker Straw and Plane position information, not Proditions.
     // Millepede then calculates the global alignment constant corrections, which hopefully resemble those
     // we applied in Proditions to misalign the Tracker.
+
+    // Additional consideration: If we can use Millepede to provide starting alignment, then perhaps Proditions shouldn't
+    // be used at all - however, Proditions seems like the most intuitive interface for people to work with.
 
     ProditionsHandle<Tracker> _alignedTracker_h;
     GeomHandle<Tracker> _nominalTracker_h;
@@ -113,7 +117,7 @@ public:
 
 void PlaneAlignment::beginJob()
 {
-    millepede = std::make_unique<Mille>(_outfilename.c_str());
+    millepede = std::make_unique<Mille>(_output_filename.c_str());
 
     if (_diag > 0)
     {
@@ -136,10 +140,13 @@ void PlaneAlignment::endJob()
 void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
+
+
+    const Tracker * t_ptr = _nominalTracker_h.get();
     if (_use_proditions)
-        Tracker const& tracker = _alignedTracker_h.get(event.id());
-    else
-        Tracker const& tracker = *_nominalTracker_h;
+        t_ptr = _alignedTracker_h.getPtr(event.id()).get();
+
+    Tracker const& tracker = *t_ptr;
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
@@ -149,7 +156,7 @@ void PlaneAlignment::analyze(art::Event const &event)
         CosmicTrack const& st = sts._track;
         TrkFitFlag const& status = sts._status;
 
-        if (!status.hasAllProperties(TrkFitFlag::helixOK) ){continue;}
+        if (!status.hasAllProperties(TrkFitFlag::helixOK) ) {continue;}
         if (!st.converged or !st.minuit_converged) { continue;}
 
         if (isnan(st.MinuitFitParams.A0)) continue;
@@ -183,7 +190,7 @@ void PlaneAlignment::analyze(art::Event const &event)
 
                 // warning: this is not changed in AlignedTrackerMaker
                 // this is a problem if our starting geometry is not simply the nominal geometry
-                // e.g. if we have survey measurements
+                // e.g. if we have survey measurements we wish to take into account
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
              );
 
