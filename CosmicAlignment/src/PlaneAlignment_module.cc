@@ -1,5 +1,5 @@
 // Ryunosuke O'Neil, 2019
-// Module calling the MilleWrapper to set up plane alignment
+// Module calling upon Mille to set up bootstrap alignment
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art_root_io/TFileService.h"
@@ -45,6 +45,7 @@ public:
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
         fhicl::Atom<std::string> millefile{Name("MillepedeOutputFile"), Comment("Output filename for Millepede data file")};
+        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker, 0 to use nominal tracker (set 0 if performing alignment validation)")};
 
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
@@ -58,7 +59,8 @@ public:
     explicit PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                             _diag(conf().diaglvl()),
                                             _costag(conf().costag()),
-                                            _outfilename(conf().millefile())
+                                            _outfilename(conf().millefile(),
+                                                    _use_proditions(conf().use_proditions())
     {
         // generate hashtable of plane number to DOF labels for planes
 
@@ -83,12 +85,27 @@ public:
     Config _conf;
 
     int _diag;
+    int _use_proditions;
+
     art::InputTag _costag;
     const CosmicTrackSeedCollection *_coscol;
 
     std::string _outfilename;
     std::unique_ptr<Mille> millepede;
+
+    // We need both Trackers. Why?
+    // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
+    // 2. However, in alignment validation and alignment generally we should not presume to know
+    //     what that misaligned geometry is.
+    // In actual running, we use Proditions likely with some seed survey measurements
+    // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco
+    // Since in validation we are trying to determine the alignment constants that we misaligned to start with,
+    // our input to Millepede should use nominal Tracker Straw and Plane position information, not Proditions.
+    // Millepede then calculates the global alignment constant corrections, which hopefully resemble those
+    // we applied in Proditions to misalign the Tracker.
+
     ProditionsHandle<Tracker> _alignedTracker_h;
+    GeomHandle<Tracker> _nominalTracker_h;
 
     std::unordered_map<uint16_t, std::vector<int>> dof_labels;
     ProditionsHandle<StrawResponse> srep_h;
@@ -119,7 +136,10 @@ void PlaneAlignment::endJob()
 void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
-    Tracker const& tracker = _alignedTracker_h.get(event.id());
+    if (_use_proditions)
+        Tracker const& tracker = _alignedTracker_h.get(event.id());
+    else
+        Tracker const& tracker = *_nominalTracker_h;
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
@@ -160,8 +180,12 @@ void PlaneAlignment::analyze(art::Event const &event)
                 st.MinuitFitParams.B1,
                 straw_mp.x(), straw_mp.y(), straw_mp.z(),
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
+
+                // warning: this is not changed in AlignedTrackerMaker
+                // this is a problem if our starting geometry is not simply the nominal geometry
+                // e.g. if we have survey measurements
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
-                );
+             );
 
             auto derivativesGlobal = RigidBodyDOCADerivatives_global(
                 st.MinuitFitParams.A0,
@@ -171,7 +195,7 @@ void PlaneAlignment::analyze(art::Event const &event)
                 straw_mp.x(), straw_mp.y(), straw_mp.z(),
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
-                );
+            );
 
             Hep3Vector td(st.MinuitFitParams.A1, st.MinuitFitParams.B1, 1);
             td = td.unit();
@@ -192,7 +216,7 @@ void PlaneAlignment::analyze(art::Event const &event)
 
             if (isnan(residual)) continue;
 
-            // write the track hit to the track buffer
+            // write the hit to the track buffer
             millepede->mille(
                     derivativesLocal.size(),
                     derivativesLocal.data(),
