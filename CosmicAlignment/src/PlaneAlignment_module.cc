@@ -1,6 +1,8 @@
 // Ryunosuke O'Neil, 2019
 // Module calling upon Mille to set up bootstrap alignment
 
+#include <fstream>
+
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art_root_io/TFileService.h"
 
@@ -45,8 +47,10 @@ public:
         using Comment = fhicl::Comment;
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
-        fhicl::Atom<std::string> millefile{Name("MillepedeOutputFile"), Comment("Output filename for Millepede data file")};
-        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker, 0 to use nominal tracker (set 0 if performing MC alignment validation)")};
+        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker alignment constants as input. Set 0 if performing MC alignment validation")};
+        fhicl::Atom<std::string> millefile{Name("TrackDataOutputFile"), Comment("Output filename for Millepede track data file")};
+        fhicl::Atom<std::string> constraintsfile{Name("ConstraintsOutputFile"), Comment("Output filename for Millepede constraints file")};
+        fhicl::Atom<bool> plane_translation_only{Name("PlaneTranslateOnly"), Comment("Only align for plane translation DOFs if set to true.")};
 
     };
     typedef art::EDAnalyzer::Table<Config> Parameters;
@@ -57,11 +61,13 @@ public:
 
     void analyze(art::Event const &);
 
-    explicit PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
+    PlaneAlignment(const Parameters &conf) : art::EDAnalyzer(conf),
                                             _diag(conf().diaglvl()),
                                             _use_proditions(conf().use_proditions()),
                                             _costag(conf().costag()),
-                                            _output_filename(conf().millefile())
+                                            _output_filename(conf().millefile()),
+                                            _constr_filename(conf().constraintsfile()),
+                                            _plane_translation_only(conf().plane_translation_only())
     {
         // generate hashtable of plane number to DOF labels for planes
 
@@ -78,6 +84,9 @@ public:
         {
             std::cout << "PlaneAlignment: Total number of plane degrees of freedom = " << _ndof << std::endl;
             std::cout << "PlaneAlignment: Plane d.o.f. labels occupy range [0," << counter - 1 << "] inclusive" << std::endl;
+
+            if (_plane_translation_only)
+                std::cout << "PlaneAlignment: Rotation degrees of freedom are disabled." << std::endl;
         }
     }
 
@@ -87,26 +96,30 @@ public:
 
     int _diag;
     int _use_proditions;
-
     art::InputTag _costag;
-    const CosmicTrackSeedCollection *_coscol;
-
     std::string _output_filename;
+    std::string _constr_filename;
+    bool _plane_translation_only;
+
     std::unique_ptr<Mille> millepede;
+    const CosmicTrackSeedCollection *_coscol;
 
     // We need both Trackers. Why?
     // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
     // 2. However, in alignment validation and alignment generally we should not presume to know
     //     what that misaligned geometry is.
-    // In actual running, we use Proditions likely with some seed survey measurements
+    // In actual running, we use Proditions likely with some seed survey measurements - these go to Millepede as a
+    // 'Parameter' directive.
+
     // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco.
-    // Since in validation we are trying to determine the alignment constants that we misaligned to start with,
+    // Since we are trying to determine the alignment constants that we misaligned to start with,
     // our input to Millepede should use nominal Tracker Straw and Plane position information, not Proditions.
     // Millepede then calculates the global alignment constant corrections, which hopefully resemble those
     // we applied in Proditions to misalign the Tracker.
 
     // Additional consideration: If we can use Millepede to provide starting alignment, then perhaps Proditions shouldn't
     // be used at all - however, Proditions seems like the most intuitive interface for people to work with.
+    //
 
     ProditionsHandle<Tracker> _alignedTracker_h;
     GeomHandle<Tracker> _nominalTracker_h;
@@ -121,6 +134,7 @@ void PlaneAlignment::beginJob()
 
     if (_diag > 0)
     {
+        // TODO: extend these diagnostics
         art::ServiceHandle<art::TFileService> tfs;
         residuum = tfs->make<TH1F>("residuum","Straw Hit Residuals ",100,-40, 25);
         residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance) (mm)");
@@ -129,6 +143,21 @@ void PlaneAlignment::beginJob()
 
 void PlaneAlignment::beginRun(art::Run const&)
 {
+    // write a constraints txt file
+
+    // constrain average translation of planes to zero
+    // Constraint    0 ! Average Translation = Zero
+    // dof_label     1
+
+    std::ofstream constraints_file(_constr_filename);
+
+    constraints_file << "Constraint    0" << std::endl;
+    for (uint16_t p = 0; p < StrawId::_nplanes; ++p)
+        for (size_t l_idx = 0; l_idx < 3; ++l_idx)
+            constraints_file << dof_labels[p][l_idx] << "    1" << std::endl;
+
+    constraints_file.close();
+
 }
 
 void PlaneAlignment::endJob()
@@ -140,27 +169,25 @@ void PlaneAlignment::endJob()
 void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
-
-
-    const Tracker * t_ptr = _nominalTracker_h.get();
-    if (_use_proditions)
-        t_ptr = _alignedTracker_h.getPtr(event.id()).get();
-
-    Tracker const& tracker = *t_ptr;
+    Tracker const& tracker = *_nominalTracker_h;
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
+
+    // rotation DOFs occupy the last three positions
+    // in the relevant array
+    int removed_dof = (_plane_translation_only ? 3 : 0);
 
     for (CosmicTrackSeed const& sts : *_coscol)
     {
         CosmicTrack const& st = sts._track;
         TrkFitFlag const& status = sts._status;
 
-        if (!status.hasAllProperties(TrkFitFlag::helixOK) ) {continue;}
-        if (!st.converged or !st.minuit_converged) { continue;}
+        if (!status.hasAllProperties(TrkFitFlag::helixOK) ) { continue; }
+        if (!st.converged || !st.minuit_converged) { continue; }
+        if (isnan(st.MinuitFitParams.A0)) { continue; }
 
-        if (isnan(st.MinuitFitParams.A0)) continue;
-
+        // TODO: work with Richie and Sophie on making best use of the fit
         XYZVec track_pos(st.MinuitFitParams.A0, st.MinuitFitParams.B0, 0);
         XYZVec track_dir(st.MinuitFitParams.A1, st.MinuitFitParams.B1, 1);
 
@@ -192,7 +219,7 @@ void PlaneAlignment::analyze(art::Event const &event)
                 // this is a problem if our starting geometry is not simply the nominal geometry
                 // e.g. if we have survey measurements we wish to take into account
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
-             );
+            );
 
             auto derivativesGlobal = RigidBodyDOCADerivatives_global(
                 st.MinuitFitParams.A0,
@@ -223,11 +250,12 @@ void PlaneAlignment::analyze(art::Event const &event)
 
             if (isnan(residual)) continue;
 
+
             // write the hit to the track buffer
             millepede->mille(
-                    derivativesLocal.size(),
+                    derivativesLocal.size() - removed_dof,
                     derivativesLocal.data(),
-                    derivativesGlobal.size(),
+                    derivativesGlobal.size() - removed_dof,
                     derivativesGlobal.data(),
                     dof_labels[plane_id].data(),
                     residual,
