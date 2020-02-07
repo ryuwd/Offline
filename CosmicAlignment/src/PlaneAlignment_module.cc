@@ -160,7 +160,7 @@ void PlaneAlignment::beginRun(art::Run const&)
     constraints_file << std::endl << "Parameter" << std::endl;
     for (uint16_t p = 0; p < StrawId::_nplanes; ++p)
     {
-        for (size_t l_idx = 0; l_idx < _ndof - 1; ++l_idx)
+        for (size_t l_idx = 0; l_idx < dof_labels[p].size(); ++l_idx)
         {
             if (l_idx > 2 && _plane_translation_only) // fix rotation degrees of freedom
             {
