@@ -103,8 +103,9 @@ public:
 
     std::unique_ptr<Mille> millepede;
     const CosmicTrackSeedCollection *_coscol;
-
     const Tracker * _tracker;
+
+    size_t tracks_written = 0;
 
     // We have both Trackers. Why?
     // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
@@ -188,6 +189,10 @@ void PlaneAlignment::endJob()
 {
     // ensure the file is closed once the job finishes
     millepede->~Mille();
+
+
+    if (_diag > 0)
+        std::cout << "PlaneAlignment: wrote " << tracks_written << " tracks to " << _output_filename << std::endl;
 }
 
 void PlaneAlignment::analyze(art::Event const &event)
@@ -286,6 +291,7 @@ void PlaneAlignment::analyze(art::Event const &event)
             // diagnostic information
             if (_diag > 0)
             {
+                tracks_written++;
                 residuum->Fill(residual);
             }
         }
