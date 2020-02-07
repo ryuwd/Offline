@@ -20,7 +20,7 @@ physics :
   }
 }
 
-physics.TrkAnaTrigPath : [ @sequence::CosmicTracking.FindCosmics ]
+physics.TrkAnaTrigPath : [ makeSH, @sequence::CosmicTracking.FindCosmics ]
 physics.TrkAnaEndPath : [ PlaneAlign ]
 
-services.TFileService.fileName: "PlaneAlignment.root"
+services.TFileService.fileName: "rec.owner.bootstrap-alignment.inputstep-planealignment.sequencer.root"
