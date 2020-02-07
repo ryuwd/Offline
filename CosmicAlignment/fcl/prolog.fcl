@@ -6,7 +6,10 @@ PlaneAlignment : {
     module_type		: PlaneAlignment
     diagLevel : 2
     CosmicTrackSeedCollection : "CosmicTrackFinder"
-    MillepedeOutputFile : "cosmictracks.bin"
+    UseProditions : 0
+    PlaneTranslateOnly: false
+    TrackDataOutputFile : "cosmictracks.bin"
+    ConstraintsOutputFile : "constraints.txt"
 }
 
 END_PROLOG

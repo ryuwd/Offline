@@ -3,6 +3,7 @@
 #include "fcl/standardProducers.fcl"
 #include "fcl/standardServices.fcl"
 #include "TrkDiag/fcl/prolog.fcl"
+#include "CosmicReco/fcl/prolog.fcl"
 #include "CosmicAlignment/fcl/prolog.fcl"
 
 
@@ -14,13 +15,17 @@ services : @local::Services.Reco
 
 physics :
 {
-  producers : { @table::CosmicTracking.FindCosmics }
+  producers :
+  {
+    @table::TrkHitReco.producers
+    @table::CosmicTracking.producers
+  }
   analyzers : {
      PlaneAlign : { @table::PlaneAlignment }
   }
 }
 
-physics.TrkAnaTrigPath : [ makeSH, @sequence::CosmicTracking.FindCosmics ]
+physics.TrkAnaTrigPath : [ @sequence::TrkHitReco.PrepareHits,  @sequence::CosmicTracking.FindCosmics ]
 physics.TrkAnaEndPath : [ PlaneAlign ]
 
 services.TFileService.fileName: "rec.owner.bootstrap-alignment.inputstep-planealignment.sequencer.root"
