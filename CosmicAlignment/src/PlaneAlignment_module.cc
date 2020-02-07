@@ -106,7 +106,7 @@ public:
 
     const Tracker * _tracker;
 
-    // We use the nominal Tracker. Why?
+    // We have both Trackers. Why?
     // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
     // 2. In alignment validation and alignment generally we should not presume to know
     //     what that misaligned geometry is.
@@ -124,6 +124,8 @@ public:
     //
 
     std::unordered_map<uint16_t, std::vector<int>> dof_labels;
+
+    ProditionsHandle<Tracker> _proditionsTracker_h;
     ProditionsHandle<StrawResponse> srep_h;
 };
 
@@ -171,7 +173,9 @@ void PlaneAlignment::endJob()
 void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
-    Tracker const& tracker = *_tracker;
+
+    Tracker const& tracker = (_use_proditions ? _proditionsTracker_h.get(event.id()) : *_tracker);
+
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
