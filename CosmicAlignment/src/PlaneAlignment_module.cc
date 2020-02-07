@@ -157,8 +157,22 @@ void PlaneAlignment::beginRun(art::Run const&)
         for (size_t l_idx = 0; l_idx < 3; ++l_idx)
             constraints_file << dof_labels[p][l_idx] << "    1" << std::endl;
 
+    constraints_file << std::endl << "Parameter" << std::endl;
+    for (uint16_t p = 0; p < StrawId::_nplanes; ++p)
+        for (size_t l_idx = 0; l_idx < _ndof; ++l_idx)
+        {
+            if (l_idx > 2 && _plane_translation_only) // fix rotation degrees of freedom
+            {
+                constraints_file << dof_labels[p][l_idx] << "    0     -1.0" << std::endl;
+                continue;
+            }
+            constraints_file << dof_labels[p][l_idx] << "    0     0" << std::endl;
+        }
+
+    constraints_file << "end" << std::endl;
     constraints_file.close();
 
+    std::cout << "PlaneAlignment: wrote constraints file to " << _constr_filename << std::endl;
 
     _tracker = GeomHandle<Tracker>().get();
 
@@ -179,10 +193,6 @@ void PlaneAlignment::analyze(art::Event const &event)
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
-
-    // rotation DOFs occupy the last three positions
-    // in the relevant array
-    int removed_dof = (_plane_translation_only ? 3 : 0);
 
     for (CosmicTrackSeed const& sts : *_coscol)
     {
@@ -259,9 +269,9 @@ void PlaneAlignment::analyze(art::Event const &event)
 
             // write the hit to the track buffer
             millepede->mille(
-                    derivativesLocal.size() - removed_dof,
+                    derivativesLocal.size(),
                     derivativesLocal.data(),
-                    derivativesGlobal.size() - removed_dof,
+                    derivativesGlobal.size(),
                     derivativesGlobal.data(),
                     dof_labels[plane_id].data(),
                     residual,
