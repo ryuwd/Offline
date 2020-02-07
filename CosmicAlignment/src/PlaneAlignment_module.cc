@@ -104,12 +104,14 @@ public:
     std::unique_ptr<Mille> millepede;
     const CosmicTrackSeedCollection *_coscol;
 
-    // We need both Trackers. Why?
+    const Tracker * _tracker;
+
+    // We use the nominal Tracker. Why?
     // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
-    // 2. However, in alignment validation and alignment generally we should not presume to know
+    // 2. In alignment validation and alignment generally we should not presume to know
     //     what that misaligned geometry is.
-    // In actual running, we use Proditions likely with some seed survey measurements - these go to Millepede as a
-    // 'Parameter' directive.
+    // TODO: In actual running, we use Proditions likely with some seed survey measurements - these should be funnelled to Millepede as a
+    // 'Parameter' directive setting the appropriate degrees of freedom as necessary.
 
     // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco.
     // Since we are trying to determine the alignment constants that we misaligned to start with,
@@ -120,9 +122,6 @@ public:
     // Additional consideration: If we can use Millepede to provide starting alignment, then perhaps Proditions shouldn't
     // be used at all - however, Proditions seems like the most intuitive interface for people to work with.
     //
-
-    ProditionsHandle<Tracker> _alignedTracker_h;
-    GeomHandle<Tracker> _nominalTracker_h;
 
     std::unordered_map<uint16_t, std::vector<int>> dof_labels;
     ProditionsHandle<StrawResponse> srep_h;
@@ -158,6 +157,9 @@ void PlaneAlignment::beginRun(art::Run const&)
 
     constraints_file.close();
 
+
+    _tracker = GeomHandle<Tracker>().get();
+
 }
 
 void PlaneAlignment::endJob()
@@ -169,7 +171,7 @@ void PlaneAlignment::endJob()
 void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
-    Tracker const& tracker = *_nominalTracker_h;
+    Tracker const& tracker = *_tracker;
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
 	_coscol = stH.product();
