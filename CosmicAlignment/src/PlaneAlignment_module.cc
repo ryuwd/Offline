@@ -47,7 +47,7 @@ public:
         using Comment = fhicl::Comment;
         fhicl::Atom<int> diaglvl { Name("diagLevel"), Comment("diagnostic level")};
         fhicl::Atom<art::InputTag> costag{Name("CosmicTrackSeedCollection"), Comment("tag for cosmic track seed collection")};
-        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set to 1 to use Proditions AlignedTracker alignment constants as input. Set 0 if performing MC alignment validation")};
+        fhicl::Atom<int> use_proditions { Name("UseProditions"), Comment("Set 1 to use Proditions Geometry")};
         fhicl::Atom<std::string> millefile{Name("TrackDataOutputFile"), Comment("Output filename for Millepede track data file")};
         fhicl::Atom<std::string> constraintsfile{Name("ConstraintsOutputFile"), Comment("Output filename for Millepede constraints file")};
         fhicl::Atom<bool> plane_translation_only{Name("PlaneTranslateOnly"), Comment("Only align for plane translation DOFs if set to true.")};
@@ -107,23 +107,6 @@ public:
 
     size_t tracks_written = 0;
 
-    // We have both Trackers. Why?
-    // 1. Misalignments are simulated by modifications to the Proditions Tracker geometry.
-    // 2. In alignment validation and alignment generally we should not presume to know
-    //     what that misaligned geometry is.
-    // TODO: In actual running, we use Proditions likely with some seed survey measurements - these should be funnelled to Millepede as a
-    // 'Parameter' directive setting the appropriate degrees of freedom as necessary.
-
-    // In alignment validation, we use Proditions to apply misalignments to the Tracker used in track reco.
-    // Since we are trying to determine the alignment constants that we misaligned to start with,
-    // our input to Millepede should use nominal Tracker Straw and Plane position information, not Proditions.
-    // Millepede then calculates the global alignment constant corrections, which hopefully resemble those
-    // we applied in Proditions to misalign the Tracker.
-
-    // Additional consideration: If we can use Millepede to provide starting alignment, then perhaps Proditions shouldn't
-    // be used at all - however, Proditions seems like the most intuitive interface for people to work with.
-    //
-
     std::unordered_map<uint16_t, std::vector<int>> dof_labels;
 
     ProditionsHandle<Tracker> _proditionsTracker_h;
@@ -181,8 +164,6 @@ void PlaneAlignment::beginJob()
 void PlaneAlignment::beginRun(art::Run const&)
 {
 
-    _tracker = GeomHandle<Tracker>().get();
-
 }
 
 void PlaneAlignment::endJob()
@@ -199,7 +180,7 @@ void PlaneAlignment::analyze(art::Event const &event)
 {
     StrawResponse const& _srep = srep_h.get(event.id());
 
-    Tracker const& tracker = (_use_proditions ? _proditionsTracker_h.get(event.id()) : *_tracker);
+    Tracker const& tracker = _proditionsTracker_h.get(event.id());
 
 
     auto stH = event.getValidHandle<CosmicTrackSeedCollection>(_costag);
@@ -244,7 +225,6 @@ void PlaneAlignment::analyze(art::Event const &event)
 
                 // warning: this is not changed in AlignedTrackerMaker
                 // this is a problem if our starting geometry is not simply the nominal geometry
-                // e.g. if we have survey measurements we wish to take into account
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
             );
 
@@ -255,6 +235,9 @@ void PlaneAlignment::analyze(art::Event const &event)
                 st.MinuitFitParams.B1,
                 straw_mp.x(), straw_mp.y(), straw_mp.z(),
                 wire_dir.x(), wire_dir.y(), wire_dir.z(),
+
+                // warning: this is not changed in AlignedTrackerMaker
+                // this is a problem if our starting geometry is not simply the nominal geometry
                 plane_origin.x(), plane_origin.y(), plane_origin.z()
             );
 
