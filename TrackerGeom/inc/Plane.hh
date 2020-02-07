@@ -23,7 +23,7 @@
 namespace mu2e {
 
   class Plane{
-
+    friend class AlignedTrackerMaker;
     friend class TrackerMaker;
     friend class Tracker; // needed for deep copy
 

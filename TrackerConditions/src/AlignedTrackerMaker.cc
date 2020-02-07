@@ -66,6 +66,15 @@ namespace mu2e {
       HepTransform plane_temp = align_tracker
 	* (plane_to_tracker * align_plane);
 
+	{
+		// change now the plane origin
+		// the plane origin is unaffected by rotation
+		// TODO: add nonconst plane accessor to Tracker
+		Plane &p = const_cast<Plane &>(plane);
+		p._origin += align_plane.displacement();
+	}
+
+
       for(auto panel_p : plane.getPanels()) {
 	auto& panel = *panel_p;
 	auto const& rowpa = tapa_p->rowAt( panel.id().uniquePanel() );
@@ -85,7 +94,7 @@ namespace mu2e {
 	for(size_t istr=0; istr< StrawId::_nstraws; istr++) {
           // access strawId from Panel since it performs necessary checks
           Straw &straw = tracker.getStraw(panel.getStraw(istr).id());
-	  
+
           // how to place the straw in the panel
 	  double dx = straw.getMidPoint().perp()
 	    - panel.straw0MidPoint().perp();
