@@ -133,17 +133,6 @@ void PlaneAlignment::beginJob()
 {
     millepede = std::make_unique<Mille>(_output_filename.c_str());
 
-    if (_diag > 0)
-    {
-        // TODO: extend these diagnostics
-        art::ServiceHandle<art::TFileService> tfs;
-        residuum = tfs->make<TH1F>("residuum","Straw Hit Residuals ",100,-40, 25);
-        residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance) (mm)");
-    }
-}
-
-void PlaneAlignment::beginRun(art::Run const&)
-{
     // write a constraints txt file
 
     // constrain average translation of planes to zero
@@ -176,6 +165,20 @@ void PlaneAlignment::beginRun(art::Run const&)
     constraints_file.close();
 
     std::cout << "PlaneAlignment: wrote constraints file to " << _constr_filename << std::endl;
+
+
+    if (_diag > 0)
+    {
+        // TODO: extend these diagnostics
+        art::ServiceHandle<art::TFileService> tfs;
+        residuum = tfs->make<TH1F>("residuum","Straw Hit Residuals ",100,-40, 25);
+        residuum->GetXaxis()->SetTitle("Residual (DOCA - Estimated Drift Distance) (mm)");
+    }
+
+}
+
+void PlaneAlignment::beginRun(art::Run const&)
+{
 
     _tracker = GeomHandle<Tracker>().get();
 
