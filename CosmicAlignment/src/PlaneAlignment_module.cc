@@ -71,7 +71,7 @@ public:
     {
         // generate hashtable of plane number to DOF labels for planes
 
-        int counter = 0;
+        int counter = 1; // labels start at 1.
         for (uint16_t i = 0; i < StrawId::_nplanes; i++)
         {
             std::vector<int> labels;
@@ -83,7 +83,7 @@ public:
         if (_diag > 0)
         {
             std::cout << "PlaneAlignment: Total number of plane degrees of freedom = " << _ndof << std::endl;
-            std::cout << "PlaneAlignment: Plane d.o.f. labels occupy range [0," << counter - 1 << "] inclusive" << std::endl;
+            std::cout << "PlaneAlignment: Plane d.o.f. labels occupy range [1," << counter - 1 << "] inclusive" << std::endl;
 
             if (_plane_translation_only)
                 std::cout << "PlaneAlignment: Rotation degrees of freedom are disabled." << std::endl;
