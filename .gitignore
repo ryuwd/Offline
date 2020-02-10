@@ -38,7 +38,6 @@ EMFCAnalysis
 .tup
 .buildopts
 tags
-.vscode/c_cpp_properties.json
 .vscode/*
 .vscode/settings.json
 .vscode/tasks.json
