@@ -5,7 +5,7 @@
 #include "DataProducts/inc/PDGCode.hh"
 #include "DataProducts/inc/StrawEnd.hh"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
+#include "MCDataProducts/inc/StepPointMCCollection.hh"    
 #include "MCDataProducts/inc/StrawDigiMCCollection.hh"
 #include "RecoDataProducts/inc/CaloDigiCollection.hh"
 #include "RecoDataProducts/inc/ComboHit.hh"
