@@ -18,7 +18,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art_root_io/TFileService.h"
-#include "fhiclcpp/ParSet.h"
+#include "fhiclcpp/ParameterSet.h"
 #include <iostream>
 #include <map>
 #include <set>
@@ -33,7 +33,7 @@ using namespace std;
 
 namespace mu2e {
 
-  class CosmicMuonInfo : public art::Dter {
+  class CosmicMuonInfo : public art::EDFilter {
   public:
 
     explicit CosmicMuonInfo(fhicl::ParameterSet const& pset);
@@ -352,7 +352,7 @@ bool mu2e::CosmicMuonInfo::filter(art::Event& event) {
     //const double phi_start = atan(sim.startMomentum().vect().y()/sim.startMomentum().vect().x());
 
     if ( isMuon ) {
-      _hnDigisPerMuon->Fil( trkinfo.second.digi_indices.size() );
+      _hnDigisPerMuon->Fill( trkinfo.second.digi_indices.size() );
       _hMomentumAll->Fill(p);
      // _phiMC->Fill(phi_start);
       //_phiMC->SetStats(0);
