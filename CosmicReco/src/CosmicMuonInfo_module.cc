@@ -33,7 +33,7 @@ using namespace std;
 
 namespace mu2e {
 
-  class CosmicMuonInfo : public art::EDFilter {
+  class CosmicMuonInfo : public art::Dter {
   public:
 
     explicit CosmicMuonInfo(fhicl::ParameterSet const& pset);
@@ -352,7 +352,7 @@ bool mu2e::CosmicMuonInfo::filter(art::Event& event) {
     //const double phi_start = atan(sim.startMomentum().vect().y()/sim.startMomentum().vect().x());
 
     if ( isMuon ) {
-      _hnDigisPerMuon->Fill( trkinfo.second.digi_indices.size() );
+      _hnDigisPerMuon->Fil( trkinfo.second.digi_indices.size() );
       _hMomentumAll->Fill(p);
      // _phiMC->Fill(phi_start);
       //_phiMC->SetStats(0);
