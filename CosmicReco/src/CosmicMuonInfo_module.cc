@@ -18,7 +18,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art_root_io/TFileService.h"
-#include "fhiclcpp/ParamerSet.h"
+#include "fhiclcpp/ParamrSet.h"
 #include <iostream>
 #include <map>
 #include <set>
