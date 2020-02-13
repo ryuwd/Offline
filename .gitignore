@@ -41,8 +41,6 @@ tags
 .vscode/*
 .vscode/settings.json
 .vscode/tasks.json
-output_resids.txt
-CosmicAnalysis.csv
 .cquery
 .gitignore
 compile_commands.json
