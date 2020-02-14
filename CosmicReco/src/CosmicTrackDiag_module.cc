@@ -113,11 +113,13 @@ namespace mu2e
       Float_t _mct0;
       Int_t _mcnsh;
       Int_t _hitsok, _chifitok, _chifitconverged, _minuitok, _minuitconverged;
+      Int_t _hitused;
 
       // hit tree 
       Float_t _chidoca, _chiangle, _seeddoca, _seedangle, _minuitdoca, _minuitangle;
-      Float_t _hittruedoca, _hitmcdoca, _hitseeddoca, _hitminuitdoca;
+      Float_t _hittruedoca, _hitmcdoca, _hitchidoca, _hitseeddoca, _hitminuitdoca;
       Float_t _hitmcdpocat, _hitseeddpocat, _hitminuitdpocat;
+      Float_t _hittruelong, _hitmclong, _hitseedlong, _hitminuitlong;
       Int_t _hitbackground;
 
 
@@ -181,8 +183,18 @@ namespace mu2e
       }
 
       _hitT=tfs->make<TTree>("hitT","Hit tree");
+      _hitT->Branch("chidoca",&_hitchidoca,"chidoca/F");
       _hitT->Branch("seeddoca",&_hitseeddoca,"seeddoca/F");
       _hitT->Branch("minuitdoca",&_hitminuitdoca,"minuitdoca/F");
+      _hitT->Branch("hitsok",&_hitsok,"hitsok/I");
+      _hitT->Branch("chifitok",&_chifitok,"chifitok/I");
+      _hitT->Branch("chifitconverged",&_chifitconverged,"chifitconverged/I");
+      _hitT->Branch("minuitok",&_minuitok,"minuitok/I");
+      _hitT->Branch("minuitconverged",&_minuitconverged,"minuitconverged/I");
+      _hitT->Branch("hitused",&_hitused,"hitused/I");
+      _hitT->Branch("seedlong",&_hitseedlong,"seedlong/F");
+      _hitT->Branch("minuitlong",&_hitminuitlong,"minuitlong/F");
+
       if (_mcdiag){
         _hitT->Branch("background",&_hitbackground,"background/I");
         _hitT->Branch("truedoca",&_hittruedoca,"truedoca/F");
@@ -190,6 +202,8 @@ namespace mu2e
         _hitT->Branch("mcdpocat",&_hitmcdpocat,"mcdpocat/F");
         _hitT->Branch("seeddpocat",&_hitseeddpocat,"seeddpocat/F");
         _hitT->Branch("minuitdpocat",&_hitminuitdpocat,"minuitdpocat/F");
+        _hitT->Branch("truelong",&_hittruelong,"truelong/F");
+        _hitT->Branch("mclong",&_hitmclong,"mclong/F");
       }
     }
   } 
@@ -422,6 +436,7 @@ namespace mu2e
 
 
       for (size_t k=0;k<shids.size();k++){
+        _hitchidoca = -999;
         _hitseeddoca = -999;
         _hitminuitdoca = -999;
         _hitbackground = 1;
@@ -429,6 +444,11 @@ namespace mu2e
         _hitmcdoca = -999;
         _hitmcdpocat = -999;
         _hitminuitdpocat = -999;
+        _hitused = 0;
+        _hittruelong = -999;
+        _hitmclong = -999;
+        _hitseedlong = -999;
+        _hitminuitlong = -999;
 
 
         const ComboHit &sh = strawhits[k];
@@ -438,49 +458,64 @@ namespace mu2e
           CosmicTrackSeed sts =(*_coscol)[ist];
           CosmicTrack st = sts._track;
 
+          for(size_t isc=0; isc<sts._straw_chits.size();isc++){
+            ComboHit const& chit = sts._straw_chits[isc];
+            if (chit.strawId() == sh.strawId())
+              _hitused = 1;
+          }
+
+          auto chipos = CLHEP::Hep3Vector(st.FitEquationXYZ.Pos.X(),st.FitEquationXYZ.Pos.Y(),0);
+          auto chidir = CLHEP::Hep3Vector(st.FitEquationXYZ.Dir.X(),st.FitEquationXYZ.Dir.Y(),1).unit();
+
           auto seedpos = CLHEP::Hep3Vector(st.FitParams.A0,st.FitParams.B0,0);
           auto seeddir = CLHEP::Hep3Vector(st.FitParams.A1,st.FitParams.B1,1).unit();
 
           auto minuitpos = CLHEP::Hep3Vector(st.MinuitFitParams.A0,st.MinuitFitParams.B0,0);
           auto minuitdir = CLHEP::Hep3Vector(st.MinuitFitParams.A1,st.MinuitFitParams.B1,1).unit();
 
+          TwoLinePCA pca3( straw.getMidPoint(), straw.getDirection(),
+              chipos, chidir);
+          _hitchidoca = pca3.dca();
+
           TwoLinePCA pca4( straw.getMidPoint(), straw.getDirection(),
               seedpos, seeddir);
           _hitseeddoca = pca4.dca();
-//          if (_mcdiag)
-//            _hitseeddpocat = sqrt((pca.point2()-pca4.point2()).mag2()-pow((pca.point2()-pca4.point2()).dot(straw.getDirection()),2));
 
           TwoLinePCA pca5( straw.getMidPoint(), straw.getDirection(),
               minuitpos, minuitdir);
           _hitminuitdoca = pca5.dca();
-//          if (_mcdiag)
-//            _hitminuitdpocat = sqrt((pca.point2()-pca5.point2()).mag2()-pow((pca.point2()-pca5.point2()).dot(straw.getDirection()),2));
-        }
 
 
-        if (_mcdiag){
-          const StrawDigiMC &mcdigi = _mcdigis->at(shids[k]);
+          if (_mcdiag){
+            const StrawDigiMC &mcdigi = _mcdigis->at(shids[k]);
 
-          auto const& sgsptr = mcdigi.earlyStrawGasStep();
-          auto const& sgs = *sgsptr;
-          auto const& sp = *sgs.simParticle();
+            auto const& sgsptr = mcdigi.earlyStrawGasStep();
+            auto const& sgs = *sgsptr;
+            auto const& sp = *sgs.simParticle();
 
-          if (sp.creationCode() == 56){
-            _hitbackground = 0;
+            if (sp.creationCode() == 56){
+              _hitbackground = 0;
+            }
+
+            // Get the actual DOCA of the MC step
+            TwoLinePCA pca( straw.getMidPoint(), straw.getDirection(),
+                Geom::Hep3Vec(sgs.startPosition()), Geom::Hep3Vec(sgs.endPosition()-sgs.startPosition()) );
+            _hittruedoca = pca.dca(); 
+            _hittruelong = (Geom::Hep3Vec(sgs.startPosition())-straw.getMidPoint()).dot(straw.getDirection());
+
+            // Get the DOCA from the MC straight line track
+            TwoLinePCA pca1( straw.getMidPoint(), straw.getDirection(),
+                _mcpos, _mcdir);
+            _hitmcdoca = pca1.dca(); 
+            // get the delta transverse distance between POCA of step and POCA of track
+            _hitmcdpocat = sqrt((pca.point2()-pca1.point2()).mag2()-pow((pca.point2()-pca1.point2()).dot(straw.getDirection()),2));
+            _hitmclong = (pca1.point1()-straw.getMidPoint()).dot(straw.getDirection());
+            
+            _hitseeddpocat = sqrt((pca.point2()-pca4.point2()).mag2()-pow((pca.point2()-pca4.point2()).dot(straw.getDirection()),2));
+            _hitseedlong = (pca4.point1()-straw.getMidPoint()).dot(straw.getDirection());
+            _hitminuitdpocat = sqrt((pca.point2()-pca5.point2()).mag2()-pow((pca.point2()-pca5.point2()).dot(straw.getDirection()),2));
+            _hitminuitlong = (pca5.point1()-straw.getMidPoint()).dot(straw.getDirection());
           }
-
-          // Get the actual DOCA of the MC step
-          TwoLinePCA pca( straw.getMidPoint(), straw.getDirection(),
-              Geom::Hep3Vec(sgs.startPosition()), Geom::Hep3Vec(sgs.endPosition()-sgs.startPosition()) );
-          _hittruedoca = pca.dca(); 
-          //double true_long = (Geom::Hep3Vec(sgs.startPosition())-straw.getMidPoint()).dot(straw.getDirection());
-
-          // Get the DOCA from the MC straight line track
-          TwoLinePCA pca1( straw.getMidPoint(), straw.getDirection(),
-              _mcpos, _mcdir);
-          _hitmcdoca = pca1.dca(); 
-          // get the delta transverse distance between POCA of step and POCA of track
-          _hitmcdpocat = sqrt((pca.point2()-pca1.point2()).mag2()-pow((pca.point2()-pca1.point2()).dot(straw.getDirection()),2));
         }
         _hitT->Fill();
       }
