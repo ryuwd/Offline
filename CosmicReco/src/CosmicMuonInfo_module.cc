@@ -33,7 +33,7 @@ using namespace std;
 
 namespace mu2e {
 
-  class CosmicMuonInfo : public art::DFilter {
+  class CosmicMuonInfo : public art::EDFilter {
   public:
 
     explicit CosmicMuonInfo(fhicl::ParameterSet const& pset);
