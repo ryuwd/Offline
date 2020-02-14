@@ -31,7 +31,7 @@
 #include "Math/VectorUtil.h"
 using namespace std;
 
-namespace mu2e {
+namespace mu2e {    
 
   class CosmicMuonInfo : public art::EDFilter {
   public:
