@@ -34,6 +34,7 @@
 #include "RecoDataProducts/inc/TrkFitFlag.hh"
 #include "TrkReco/inc/TrkTimeCalculator.hh"
 #include "ProditionsService/inc/ProditionsHandle.hh"
+#include "RecoDataProducts/inc/LineSeed.hh"
 //utils:
 #include "Mu2eUtilities/inc/ParametricFit.hh"
 //For Drift:
@@ -99,10 +100,12 @@ namespace mu2e{
               fhicl::Atom<int> printfreq{Name("printFrequency"), Comment("print frquency"), 101};
     	      fhicl::Atom<int> minnsh {Name("minNStrawHits"), Comment("minimum number of straw hits "),2};
     	      fhicl::Atom<int> minnch {Name("minNComboHits"), Comment("number of combohits allowed"),8};
+              fhicl::Atom<int> minseedsize {Name("minSeedSize"), Comment("Minimum accumulator value from seed"), 3};
     	      fhicl::Atom<TrkFitFlag> saveflag {Name("SaveTrackFlag"),Comment("if set to OK then save the track"), TrkFitFlag::helixOK};
               fhicl::Atom<int> minNHitsTimeCluster{Name("minNHitsTimeCluster"),Comment("minium allowed time cluster"), 1 };
     	      fhicl::Atom<art::InputTag> chToken{Name("ComboHitCollection"),Comment("tag for combo hit collection")};
 	      fhicl::Atom<art::InputTag> tcToken{Name("TimeClusterCollection"),Comment("tag for time cluster collection")};
+              fhicl::Atom<art::InputTag> lsToken{Name("LineSeedCollection"),Comment("tag for line seed collection")};
 	      fhicl::Atom<art::InputTag> mcToken{Name("StrawDigiMCCollection"),Comment("StrawDigi collection tag")};
 	      fhicl::Atom<bool> DoDrift{Name("DoDrift"),Comment("turn on for drift fit")};
 	      fhicl::Table<CosmicTrackFit::Config> tfit{Name("CosmicTrackFit"), Comment("fit")};
@@ -126,6 +129,7 @@ namespace mu2e{
     int                                 _printfreq;
     int 				_minnsh; // minimum # of strawHits in CH
     int 				_minnch; // minimum # of ComboHits for viable fit
+    int                                 _minSeedSize;
     TrkFitFlag				_saveflag;//write tracks that satisfy these flags
     
     int 				_minNHitsTimeCluster; //min number of hits in a viable time cluster
@@ -133,6 +137,7 @@ namespace mu2e{
     
     art::InputTag  _chToken;
     art::InputTag  _tcToken;
+    art::InputTag  _lsToken;
     art::InputTag  _mcToken;
     bool 	   _DoDrift;
     CosmicTrackFit     _tfit;
@@ -156,16 +161,19 @@ namespace mu2e{
     	_printfreq  (conf().printfreq()),
     	_minnsh   (conf().minnsh()),
     	_minnch  (conf().minnch()),
+        _minSeedSize (conf().minseedsize()),
     	_saveflag  (conf().saveflag()),
     	_minNHitsTimeCluster(conf().minNHitsTimeCluster()),
     	_chToken (conf().chToken()),
 	_tcToken (conf().tcToken()),
+        _lsToken (conf().lsToken()),
 	_mcToken (conf().mcToken()),
 	_DoDrift (conf().DoDrift()),
 	_tfit (conf().tfit())
 {
 	    consumes<ComboHitCollection>(_chToken);
 	    consumes<TimeClusterCollection>(_tcToken);
+            consumes<LineSeedCollection>(_lsToken);
 	    consumes<StrawDigiMCCollection>(_mcToken);
 	    produces<CosmicTrackSeedCollection>();
 	    
@@ -214,6 +222,8 @@ namespace mu2e{
      const ComboHitCollection& chcol(*chH);
      auto  const& tcH = event.getValidHandle<TimeClusterCollection>(_tcToken);
      const TimeClusterCollection& tccol(*tcH);
+     auto  const& lsH = event.getValidHandle<LineSeedCollection>(_lsToken);
+     const LineSeedCollection& lscol(*lsH);
      
      if(_mcdiag>0){ 	 
            auto const& mcdH = event.getValidHandle<StrawDigiMCCollection>(_mcToken);
@@ -234,9 +244,10 @@ namespace mu2e{
 }
 //////////////////////////////////*/
 
-    for (size_t index=0;index< tccol.size();++index) {
+    for (size_t index=0;index< lscol.size();++index) {
       int   nGoodTClusterHits(0);
-      const auto& tclust = tccol[index];
+      const auto& lseed = lscol[index];
+      auto tclust = (*lseed._timeCluster);
       nGoodTClusterHits     = goodHitsTimeCluster(tclust,chcol);
     
       if ( nGoodTClusterHits < _minNHitsTimeCluster)         continue;
@@ -280,9 +291,20 @@ namespace mu2e{
      title << "Run: " << event.id().run()
      << "  Subrun: " << event.id().subRun()
      << "  Event: " << event.id().event()<<".root";
-     _tfit.BeginFit(title.str().c_str(), _stResult);
+//     _tfit.BeginFit(title.str().c_str(), _stResult);
+     XYZVec spos = Geom::toXYZVec(lseed._seedInt - lseed._seedDir*lseed._seedInt.z()/(lseed._seedDir.z()+1e-9));
+     XYZVec sdir = Geom::toXYZVec(lseed._seedDir/(lseed._seedDir.z()+1e-9));
+     TrackEquation teq(spos,sdir);
 
-      if (_stResult._tseed._status.hasAnyProperty(TrkFitFlag::helixOK) && _stResult._tseed._status.hasAnyProperty(TrkFitFlag::helixConverged) && _stResult._tseed._track.converged == true ) { 
+    _stResult._tseed._track.SetTrackEquationXYZ(teq);
+
+
+//      if (_stResult._tseed._status.hasAnyProperty(TrkFitFlag::helixOK) && _stResult._tseed._status.hasAnyProperty(TrkFitFlag::helixConverged) && _stResult._tseed._track.converged == true ) { 
+    if (lseed._seedSize > _minSeedSize){
+
+      _stResult._tseed._status.merge(TrkFitFlag::helixOK);
+      _stResult._tseed._status.merge(TrkFitFlag::helixConverged);
+      _stResult._tseed._track.converged = true;
 	       std::vector<CosmicTrackSeed>          track_seed_vec;
 	       
 	      fillGoodHits(_stResult);

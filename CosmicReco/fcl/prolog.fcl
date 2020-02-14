@@ -53,11 +53,20 @@ CHD : {
 	StrawHitFlagCollection : "FlagBkgHits:ComboHits"
 	TimeOffsets : {inputs : [ @sequence::DigiCompression.NoCosmicTimeMaps ]}
 }
+
+LineFinder : {
+    module_type : LineFinder
+    ComboHitCollection : "makePH"
+    TimeClusterCollection : "TimeClusterFinderCosmics"
+}
+
+
 CosmicTrackFinder : {
     module_type		: CosmicTrackFinder
     ComboHitCollection     : "makePH"
     TimeClusterCollection  : "TimeClusterFinderCosmics"
     StrawDigiMCCollection : "compressDigiMCs"
+    LineSeedCollection : "LineFinder"
     DoDrift : true
 }
 
@@ -124,6 +133,7 @@ CosmicTracking : {
     TimeClusterFinderCosmics  : @local::TimeClusterFinderCosmics
     CosmicTrackFinder  : @local::CosmicTrackFinder
     SimpleTimeCluster : @local::SimpleTimeCluster
+    LineFinder : @local::LineFinder
  }
   analyzers : {
       

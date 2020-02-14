@@ -52,10 +52,14 @@ namespace MinuitDriftFitter{
 	  seed[4] = trackdata._tseed._t0.t0();
 	  
 	  //Seed errors = covarience of parameters in seed fit
-	  errors[0] = trackdata._tseed._track.FitParams.Covarience.sigA0; 
-	  errors[1] = trackdata._tseed._track.FitParams.Covarience.sigA1;
-	  errors[2] = trackdata._tseed._track.FitParams.Covarience.sigB0;
-	  errors[3] = trackdata._tseed._track.FitParams.Covarience.sigB1;
+//	  errors[0] = trackdata._tseed._track.FitParams.Covarience.sigA0; 
+//	  errors[1] = trackdata._tseed._track.FitParams.Covarience.sigA1;
+//	  errors[2] = trackdata._tseed._track.FitParams.Covarience.sigB0;
+//	  errors[3] = trackdata._tseed._track.FitParams.Covarience.sigB1;
+          errors[0] = 10;
+          errors[1] = 10;
+          errors[2] = 10;
+          errors[3] = 10;
 	  errors[4] = trackdata._tseed._t0.t0Err();
 	  //Constrain to mean = 0 for 4 parameters (T0 might not be so...)
 	  std::vector<double> constraint_means(5,0);
@@ -74,10 +78,9 @@ namespace MinuitDriftFitter{
 	  migrad.SetLimits((signed) 2,-5000, 5000 ); 
 	  migrad.SetLimits((signed) 3, -10,10);
 	  migrad.Fix((unsigned) 4); 
-	  int maxfcn = MaxLogL;
-	  double tolerance = 1000;
+	  double tolerance = 0.1;
           //Define Minimization method as "MIGRAD" (see minuit documentation)
-	  ROOT::Minuit2::FunctionMinimum min = migrad(maxfcn, tolerance);
+	  ROOT::Minuit2::FunctionMinimum min = migrad(0, tolerance);
 	  if(_diag > 1){
 	  	ROOT::Minuit2::MnPrint::SetLevel(3);
 	  	ROOT::Minuit2::operator<<(cout, min);
@@ -156,7 +159,7 @@ namespace MinuitDriftFitter{
 	 newmigrad.Fix((unsigned) 4); 
 	 
          //Define Minimization method as "MIGRAD" (see minuit documentation)
-	 min = newmigrad(MaxLogL, tolerance);
+	 min = newmigrad(0, tolerance);
 	
 	 //Will be the results of the fit routine:
 	 results = min.UserParameters();
