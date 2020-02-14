@@ -80,7 +80,7 @@ namespace mu2e
     int _debug;
     int _diag;
     int _printfreq;
-    int _cprmode;
+    int     _cprmode;
     bool _saveall,_addhits;
     vector<double> _zsave;
     // event object tokens
