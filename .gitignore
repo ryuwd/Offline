@@ -38,3 +38,6 @@ EMFCAnalysis
 .tup
 .buildopts
 tags
+.idea/*
+cmake-build-debug/CMakeFiles/clion-log.txt
+.gitignore
