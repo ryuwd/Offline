@@ -57,14 +57,14 @@ CHD : {
 LineFinder : {
     module_type : LineFinder
     ComboHitCollection : "makePH"
-    TimeClusterCollection : "TimeClusterFinderCosmics"
+    TimeClusterCollection : "SimpleTimeCluster"
 }
 
 
 CosmicTrackFinder : {
     module_type		: CosmicTrackFinder
     ComboHitCollection     : "makePH"
-    TimeClusterCollection  : "TimeClusterFinderCosmics"
+    TimeClusterCollection  : "SimpleTimeCluster"
     StrawDigiMCCollection : "compressDigiMCs"
     LineSeedCollection : "LineFinder"
     DoDrift : true
@@ -73,7 +73,7 @@ CosmicTrackFinder : {
  CosmicAnalysis : {
 	module_type : CosmicAnalyzer
 	ComboHitCollection : "makePH"
-	TimeClusterCollection : TimeClusterFinderCosmics
+	TimeClusterCollection : SimpleTimeCluster
         CosmicTrackSeedCollection : CosmicTrackFinder
 	StrawDigiMCCollection : "compressDigiMCs"
 	TimeOffsets : {inputs : [ @sequence::DigiCompression.NoCosmicTimeMaps ]}
@@ -82,7 +82,7 @@ CosmicTrackFinder : {
 CosmicTrackDiag : {
 	module_type : CosmicTrackDiag
 	ComboHitCollection : "makePH"
-	TimeClusterCollection : TimeClusterFinderCosmics
+	TimeClusterCollection : SimpleTimeCluster
         CosmicTrackSeedCollection : CosmicTrackFinder
 	StrawDigiMCCollection : "compressDigiMCs"
 	TimeOffsets : {inputs : [ @sequence::DigiCompression.NoCosmicTimeMaps ]}
@@ -166,6 +166,6 @@ CosmicTracking : {
   }
 
 #production sequence to find straight track
-CosmicTracking.FindCosmics : [  TimeClusterFinderCosmics, CosmicTrackFinder ]
+CosmicTracking.FindCosmics : [  SimpleTimeCluster, LineFinder, CosmicTrackFinder ]
 
 END_PROLOG
