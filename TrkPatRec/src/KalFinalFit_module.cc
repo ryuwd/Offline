@@ -66,11 +66,11 @@ namespace mu2e
 {
   using namespace KalFinalFitTypes;
 
-  class KalFinalFit : public art::EDPducer
+  class KalFinalFit : public art::EDProducer
   {
   public:
     explicit KalFinalFit(fhicl::ParameterSet const&);
-    virtual ~KalFinalFit();
+    virtual    ~KalFinalFit();
     void beginRun(art::Run& aRun);
   private:
     void produce(art::Event& event) override;
@@ -84,7 +84,7 @@ namespace mu2e
     bool _saveall,_addhits;
     vector<double> _zsave;
     // event object tokens
-    art::Producoken<ComboHitCollection> const _shToken;
+    art::ProductToken<ComboHitCollection> const _shToken;
     art::InputTag const _shfTag;
     art::ProductToken<StrawHitFlagCollection> const _shfToken;
     art::ProductToken<KalSeedCollection> const _ksToken;
