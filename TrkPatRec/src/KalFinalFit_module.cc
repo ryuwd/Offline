@@ -84,7 +84,7 @@ namespace mu2e
     bool _saveall,_addhits;
     vector<double> _zsave;
     // event object tokens
-    art::ProductToken<ComboHitCollection> const _shToken;
+    art::Producoken<ComboHitCollection> const _shToken;
     art::InputTag const _shfTag;
     art::ProductToken<StrawHitFlagCollection> const _shfToken;
     art::ProductToken<KalSeedCollection> const _ksToken;
