@@ -33,7 +33,7 @@ using namespace std;
 
 namespace mu2e {
 
-  class CosmicMuonInfo : public art::EDFilter {
+  class CosmicMuonInfo : public art::EDFilter     {
   public:
 
     explicit CosmicMuonInfo(fhicl::ParameterSet const& pset);
@@ -222,7 +222,7 @@ mu2e::CosmicMuonInfo::CosmicMuonInfo(fhicl::ParameterSet const& pset):
   _cuts(pset.get<fhicl::ParameterSet>("filterCuts")){
 
   art::ServiceHandle<art::TFileService> tfs;
-  
+
   _phiMC	  = tfs->make<TH1D>( "#phi_{MC}",   "Angle #phi_{MC} of Muon MC tracks All",  100, -3.141529,      3.141529 );
   _thetaMC        = tfs->make<TH1D>( "#theta_{MC}",   "Angle #theta_{MC} of Muon MC tracks All",  20, 0,      3.141529 );
   _phiMCcuts	  = tfs->make<TH1D>( "#phi_after_cuts_{MC}",   "Angle #phi_{MC} of Muon MC tracks after MC cuts",  100, -3.141529,      3.141529 );
@@ -347,10 +347,10 @@ bool mu2e::CosmicMuonInfo::filter(art::Event& event) {
     XYZVec momStart(sim.startMomentum().vect().x(),sim.startMomentum().vect().y(), sim.startMomentum().vect().z());
     //const double phi_start = atan2(sim.startMomentum().vect().y(),sim.startMomentum().vect().z());
     //double mag = sqrt((sim.startMomentum().vect().x()*sim.startMomentum().vect().x())+(sim.startMomentum().vect().x()*sim.startMomentum().vect().x())+(sim.startMomentum().vect().x()*sim.startMomentum().vect().x()));
-    
+
     //const double theta_start = acos(sim.startMomentum().vect().z()/mag);
     //const double phi_start = atan(sim.startMomentum().vect().y()/sim.startMomentum().vect().x());
-    
+
     if ( isMuon ) {
       _hnDigisPerMuon->Fill( trkinfo.second.digi_indices.size() );
       _hMomentumAll->Fill(p);
@@ -365,7 +365,7 @@ bool mu2e::CosmicMuonInfo::filter(art::Event& event) {
     for ( int i : trkinfo.second.digi_indices ){
       auto const& digi = strawDigis->at(i);
       planes.insert( digi.strawId().getPlane() );
-      
+
     }
     if ( _diagLevel > 2 ) {
       cout << " Evt: " << event.id().event()
@@ -385,13 +385,13 @@ bool mu2e::CosmicMuonInfo::filter(art::Event& event) {
       _hMomentumDelta->Fill(pDelta);
       _hnPlanes->Fill( planes.size() );
       //double mag = sqrt((sim.startMomentum().vect().x()*sim.startMomentum().vect().x())+(sim.startMomentum().vect().x()*sim.startMomentum().vect().x())+(sim.startMomentum().vect().x()*sim.startMomentum().vect().x()));
-    
+
       //const double theta_cuts = acos(sim.startMomentum().vect().z()/mag);
       //const double phi_cuts = atan(sim.startMomentum().vect().y()/sim.startMomentum().vect().x());
-    
+
       //_phiMCcuts->Fill(phi_cuts);
       //_thetaMCcuts->Fill(theta_cuts);
-    
+
 
       if ( planes.size() >= _cuts.minPlanes &&
            nBackground   >= _cuts.minBackground &&
