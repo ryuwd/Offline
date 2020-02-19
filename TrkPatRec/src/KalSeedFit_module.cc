@@ -98,7 +98,7 @@ namespace mu2e
     bool _foutliers; // filter hits far from the helix
     bool _fhoutliers; // filter hits found flagged as outliers in the helix fit
     double _maxAddDoca;   // rescue hits cut after fit
-    double _maxAddChi;    // cut for KalFit::AddHits
+    double     _maxAddChi;    // cut for KalFit::AddHits
     int    _rescueHits;   // search for missing hits after the fit is performed
     TrkParticle _tpart; // particle type being searched for
     TrkFitDirection _fdir;  // fit direction in search
