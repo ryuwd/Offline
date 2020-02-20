@@ -384,7 +384,7 @@ void KalSeedFit::produce(art::Event &event) {
                 // create a KalSeed object from this fit, recording the particle
                 // and fit direction
                 //	  KalSeed
-                //kseed(_tpart,_fdir,_result.krep->t0(),_result.krep->flt0(),seedok);
+                // kseed(_tpart,_fdir,_result.krep->t0(),_result.krep->flt0(),seedok);
 
                 KalSeed kseed(_result.krep->particleType(), _fdir,
                               _result.krep->t0(), _result.krep->flt0(),
