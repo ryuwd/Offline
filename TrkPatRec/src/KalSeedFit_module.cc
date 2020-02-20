@@ -191,7 +191,7 @@ KalSeedFit::KalSeedFit(fhicl::ParameterSet const& pset)
         _hmanager = std::make_unique<ModuleHistToolBase>();
 }
 
-KalSeedFit::~KalSeedFit() {}
+KalSeedFit::~KalSeedFit(   ) {}
 
 void KalSeedFit::beginRun(art::Run& run)
 {
