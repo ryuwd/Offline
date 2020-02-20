@@ -73,13 +73,13 @@ namespace mu2e {
 using namespace KalSeedFitTypes;
 
 class KalSeedFit : public art::EDProducer {
-public:
-    explicit KalSeedFit(fhicl::ParameterSet const&);
+  public:
+    explicit KalSeedFit(fhicl::ParameterSet const &);
     virtual ~KalSeedFit();
-    virtual void beginRun(art::Run&);
-    virtual void produce(art::Event& event);
+    virtual void beginRun(art::Run &);
+    virtual void produce(art::Event &event);
 
-private:
+  private:
     unsigned _iev;
     // configuration parameters
     int _debug;
@@ -90,32 +90,32 @@ private:
     // event object tags
     art::ProductToken<ComboHitCollection> const _shToken;
     art::ProductToken<HelixSeedCollection> const _hsToken;
-    TrkFitFlag _seedflag; // helix fit flag
-    unsigned _minnhits; // minimum # of hits
-    double _maxdoca; // outlier cut
-    bool _foutliers; // filter hits far from the helix
-    bool _fhoutliers; // filter hits found flagged as outliers in the helix fit
-    double _maxAddDoca; // rescue hits cut after fit
-    double _maxAddChi; // cut for KalFit::AddHits
-    int _rescueHits; // search for missing hits after the fit is performed
-    TrkParticle _tpart; // particle type being searched for
+    TrkFitFlag _seedflag;  // helix fit flag
+    unsigned _minnhits;    // minimum # of hits
+    double _maxdoca;       // outlier cut
+    bool _foutliers;       // filter hits far from the helix
+    bool _fhoutliers;      // filter hits found flagged as outliers in the helix fit
+    double _maxAddDoca;    // rescue hits cut after fit
+    double _maxAddChi;     // cut for KalFit::AddHits
+    int _rescueHits;       // search for missing hits after the fit is performed
+    TrkParticle _tpart;    // particle type being searched for
     TrkFitDirection _fdir; // fit direction in search
-    vector<double> _perr; // diagonal parameter errors to use in the fit
-    Helicity _helicity; // cached value of helicity expected for this fit
-    double _upz, _downz; // z positions to extend the segment
-    double _amsign; // cached sign of angular momentum WRT the z axis
-    double _bz000; // sign of the magnetic field at (0,0,0)
-    HepSymMatrix _hcovar; // cache of parameter error covariance matrix
-    TrkFitFlag _ksf; // default fit flag
+    vector<double> _perr;  // diagonal parameter errors to use in the fit
+    Helicity _helicity;    // cached value of helicity expected for this fit
+    double _upz, _downz;   // z positions to extend the segment
+    double _amsign;        // cached sign of angular momentum WRT the z axis
+    double _bz000;         // sign of the magnetic field at (0,0,0)
+    HepSymMatrix _hcovar;  // cache of parameter error covariance matrix
+    TrkFitFlag _ksf;       // default fit flag
     // cache of event objects
-    const ComboHitCollection* _chcol;
-    const HelixSeedCollection* _hscol;
+    const ComboHitCollection *_chcol;
+    const HelixSeedCollection *_hscol;
     // ouptut collections
     // Kalman fitter.  This will be configured for a least-squares fit (no
     // material or BField corrections).
     KalFit _kfit;
     KalFitData _result;
-    const Tracker* _tracker; // straw tracker geometry
+    const Tracker *_tracker; // straw tracker geometry
 
     ProditionsHandle<StrawResponse> _strawResponse_h;
     ProditionsHandle<Mu2eMaterial> _mu2eMaterial_h;
@@ -127,42 +127,27 @@ private:
     std::unique_ptr<ModuleHistToolBase> _hmanager;
 
     // helper functions
-    bool findData(const art::Event& e);
-    void filterOutliers(TrkDef& trkdef);
-    void findMissingHits(KalFitData& kalData);
+    bool findData(const art::Event &e);
+    void filterOutliers(TrkDef &trkdef);
+    void findMissingHits(KalFitData &kalData);
 };
 
-KalSeedFit::KalSeedFit(fhicl::ParameterSet const& pset)
-    : art::EDProducer{ pset }
-    , _debug(pset.get<int>("debugLevel", 0))
-    , _diag(pset.get<int>("diagLevel", 0))
-    , _printfreq(pset.get<int>("printFrequency", 101))
-    , _saveall(pset.get<bool>("saveall", false))
-    , _checkhelicity(pset.get<bool>("CheckHelicity", true))
-    , _shToken{ consumes<ComboHitCollection>(
-          pset.get<art::InputTag>("ComboHitCollection")) }
-    , _hsToken{ consumes<HelixSeedCollection>(
-          pset.get<art::InputTag>("SeedCollection")) }
-    , _seedflag(
-          pset.get<vector<string>>("HelixFitFlag", vector<string>{ "HelixOK" }))
-    , _minnhits(pset.get<unsigned>("MinNHits", 10))
-    , _maxdoca(pset.get<double>("MaxDoca", 40.0))
-    , _foutliers(pset.get<bool>("FilterOutliers", true))
-    , _fhoutliers(pset.get<bool>("FilterHelixOutliers", false))
-    , _maxAddDoca(pset.get<double>("MaxAddDoca"))
-    , _maxAddChi(pset.get<double>("MaxAddChi"))
-    , _rescueHits(pset.get<int>("rescueHits"))
-    , _tpart((TrkParticle::type)(
-          pset.get<int>("fitparticle", TrkParticle::e_minus)))
-    , _fdir((TrkFitDirection::FitDirection)(
-          pset.get<int>("fitdirection", TrkFitDirection::downstream)))
-    , _perr(pset.get<vector<double>>("ParameterErrors"))
-    , _upz(pset.get<double>("UpstreamZ", -1500))
-    , _downz(pset.get<double>("DownstreamZ", 1500))
-    , _ksf(TrkFitFlag::KSF)
-    , _kfit(pset.get<fhicl::ParameterSet>("KalFit", fhicl::ParameterSet()))
-    , _result()
-{
+KalSeedFit::KalSeedFit(fhicl::ParameterSet const &pset)
+    : art::EDProducer{pset}, _debug(pset.get<int>("debugLevel", 0)), _diag(pset.get<int>("diagLevel", 0)),
+      _printfreq(pset.get<int>("printFrequency", 101)), _saveall(pset.get<bool>("saveall", false)),
+      _checkhelicity(pset.get<bool>("CheckHelicity", true)), _shToken{consumes<ComboHitCollection>(
+                                                                 pset.get<art::InputTag>("ComboHitCollection"))},
+      _hsToken{consumes<HelixSeedCollection>(pset.get<art::InputTag>("SeedCollection"))},
+      _seedflag(pset.get<vector<string>>("HelixFitFlag", vector<string>{"HelixOK"})),
+      _minnhits(pset.get<unsigned>("MinNHits", 10)), _maxdoca(pset.get<double>("MaxDoca", 40.0)),
+      _foutliers(pset.get<bool>("FilterOutliers", true)), _fhoutliers(pset.get<bool>("FilterHelixOutliers", false)),
+      _maxAddDoca(pset.get<double>("MaxAddDoca")), _maxAddChi(pset.get<double>("MaxAddChi")),
+      _rescueHits(pset.get<int>("rescueHits")),
+      _tpart((TrkParticle::type)(pset.get<int>("fitparticle", TrkParticle::e_minus))),
+      _fdir((TrkFitDirection::FitDirection)(pset.get<int>("fitdirection", TrkFitDirection::downstream))),
+      _perr(pset.get<vector<double>>("ParameterErrors")), _upz(pset.get<double>("UpstreamZ", -1500)),
+      _downz(pset.get<double>("DownstreamZ", 1500)), _ksf(TrkFitFlag::KSF),
+      _kfit(pset.get<fhicl::ParameterSet>("KalFit", fhicl::ParameterSet())), _result() {
     // This following consumesMany call is necessary because
     // ComboHitCollection::fillStrawHitIndices calls getManyByType
     // under the covers.
@@ -170,9 +155,7 @@ KalSeedFit::KalSeedFit(fhicl::ParameterSet const& pset)
     produces<KalSeedCollection>();
     // check dimensions
     if (_perr.size() != HelixTraj::NHLXPRM)
-        throw cet::exception("RECO")
-            << "mu2e::KalSeedFit: parameter error vector has wrong size"
-            << endl;
+        throw cet::exception("RECO") << "mu2e::KalSeedFit: parameter error vector has wrong size" << endl;
     // mock covariance matrix, all diagonal
     _hcovar = HepSymMatrix(HelixTraj::NHLXPRM, 0);
     for (size_t ipar = 0; ipar < HelixTraj::NHLXPRM; ++ipar) {
@@ -185,16 +168,14 @@ KalSeedFit::KalSeedFit(fhicl::ParameterSet const& pset)
     _data.result = &_result;
 
     if (_diag != 0)
-        _hmanager = art::make_tool<ModuleHistToolBase>(
-            pset.get<fhicl::ParameterSet>("diagPlugin"));
+        _hmanager = art::make_tool<ModuleHistToolBase>(pset.get<fhicl::ParameterSet>("diagPlugin"));
     else
         _hmanager = std::make_unique<ModuleHistToolBase>();
 }
 
-KalSeedFit::~KalSeedFit(   ) {}
+KalSeedFit::~KalSeedFit() {}
 
-void KalSeedFit::beginRun(art::Run& run)
-{
+void KalSeedFit::beginRun(art::Run &run) {
     // calculate the helicity
     GeomHandle<BFieldManager> bfmgr;
     GeomHandle<DetectorSystem> det;
@@ -215,8 +196,7 @@ void KalSeedFit::beginRun(art::Run& run)
     _helicity = Helicity(static_cast<float>(_fdir.dzdt() * _amsign));
 }
 
-void KalSeedFit::produce(art::Event& event)
-{
+void KalSeedFit::produce(art::Event &event) {
 
     auto srep = _strawResponse_h.getPtr(event.id());
     auto detmodel = _mu2eDetector_h.getPtr(event.id());
@@ -232,8 +212,7 @@ void KalSeedFit::produce(art::Event& event)
         cout << "KalSeedFit: event=" << _iev << endl;
     // find the data
     if (!findData(event)) {
-        throw cet::exception("RECO")
-            << "mu2e::KalSeedFit: data missing or incomplete" << endl;
+        throw cet::exception("RECO") << "mu2e::KalSeedFit: data missing or incomplete" << endl;
     }
     if (_diag) {
         _data.event = &event;
@@ -252,7 +231,7 @@ void KalSeedFit::produce(art::Event& event)
     // loop over the Helices
     for (size_t iseed = 0; iseed < _hscol->size(); ++iseed) {
         // convert the HelixSeed to a TrkDef
-        HelixSeed const& hseed(_hscol->at(iseed));
+        HelixSeed const &hseed(_hscol->at(iseed));
 
         if (hseed.caloCluster())
             _result.caloCluster = hseed.caloCluster().get();
@@ -266,9 +245,7 @@ void KalSeedFit::produce(art::Event& event)
         TrkParticle tpart(_tpart);
         if (_helicity != hseed.helix().helicity()) {
             if (_checkhelicity)
-                throw cet::exception("RECO")
-                    << "mu2e::KalSeedFit: helicity doesn't match configuration"
-                    << endl;
+                throw cet::exception("RECO") << "mu2e::KalSeedFit: helicity doesn't match configuration" << endl;
             TrkParticle::type t = (TrkParticle::type)(-(int)_tpart.particleType());
             tpart = TrkParticle(t);
         }
@@ -287,17 +264,15 @@ void KalSeedFit::produce(art::Event& event)
             // update the covariance matrix
             if (_debug > 1)
                 //	  hstraj.printAll(cout);
-                cout << "Seed Fit HelixTraj parameters "
-                     << hstraj.parameters()->parameter() << "and covariance "
+                cout << "Seed Fit HelixTraj parameters " << hstraj.parameters()->parameter() << "and covariance "
                      << hstraj.parameters()->covariance() << endl;
             // build a time cluster: exclude the outlier hits
             TimeCluster tclust;
             tclust._t0 = hseed._t0;
             for (uint16_t ihit = 0; ihit < hseed.hits().size(); ++ihit) {
-                ComboHit const& ch = hseed.hits()[ihit];
+                ComboHit const &ch = hseed.hits()[ihit];
                 if ((!_fhoutliers) || (!ch.flag().hasAnyProperty(StrawHitFlag::outlier)))
-                    hseed.hits().fillStrawHitIndices(event, ihit,
-                        tclust._strawHitIdxs);
+                    hseed.hits().fillStrawHitIndices(event, ihit, tclust._strawHitIdxs);
             }
             // create a TrkDef; it should be possible to build a fit from the
             // helix seed directly FIXME!
@@ -307,7 +282,7 @@ void KalSeedFit::produce(art::Event& event)
             // positions
             if (_foutliers)
                 filterOutliers(seeddef);
-            const HelixTraj* htraj = &seeddef.helix();
+            const HelixTraj *htraj = &seeddef.helix();
             double flt0 = htraj->zFlight(0.0);
             double mom = TrkMomCalculator::vecMom(*htraj, _kfit.bField(), flt0).mag();
             double vflt = seeddef.particle().beta(mom) * CLHEP::c_light;
@@ -319,12 +294,11 @@ void KalSeedFit::produce(art::Event& event)
             kf._helix = art::Ptr<HelixSeed>(hsH, iseed);
             // extract the hits from the rep and put the hitseeds into the
             // KalSeed
-            int nsh = seeddef.strawHitIndices()
-                          .size(); // tclust._strawHitIdxs.size();
+            int nsh = seeddef.strawHitIndices().size(); // tclust._strawHitIdxs.size();
             for (int i = 0; i < nsh; ++i) {
                 size_t istraw = seeddef.strawHitIndices().at(i);
-                const ComboHit& strawhit(_chcol->at(istraw));
-                const Straw& straw = _tracker->getStraw(strawhit.strawId());
+                const ComboHit &strawhit(_chcol->at(istraw));
+                const Straw &straw = _tracker->getStraw(strawhit.strawId());
                 double fltlen = htraj->zFlight(straw.getMidPoint().z());
                 double propTime = (fltlen - flt0) / vflt;
 
@@ -348,10 +322,9 @@ void KalSeedFit::produce(art::Event& event)
                 TrkUtilities::fillSegment(*htraj, momerr, 0.0, kseg);
                 kf._segments.push_back(kseg);
             } else {
-                throw cet::exception("RECO")
-                    << "mu2e::KalSeedFit: Can't extract helix traj from seed "
-                       "fit"
-                    << endl;
+                throw cet::exception("RECO") << "mu2e::KalSeedFit: Can't extract helix traj from seed "
+                                                "fit"
+                                             << endl;
             }
 
             // now, fit the seed helix from the filtered hits
@@ -365,8 +338,7 @@ void KalSeedFit::produce(art::Event& event)
                 if (_result.krep == 0)
                     cout << "No Seed fit produced " << endl;
                 else
-                    cout << "Seed Fit result " << _result.krep->fitStatus()
-                         << endl;
+                    cout << "Seed Fit result " << _result.krep->fitStatus() << endl;
             }
             if (_result.krep != 0 && (_result.krep->fitStatus().success() || _saveall)) {
                 if (_rescueHits) {
@@ -386,9 +358,8 @@ void KalSeedFit::produce(art::Event& event)
                 //	  KalSeed
                 // kseed(_tpart,_fdir,_result.krep->t0(),_result.krep->flt0(),seedok);
 
-                KalSeed kseed(_result.krep->particleType(), _fdir,
-                    _result.krep->t0(), _result.krep->flt0(),
-                    kf.status());
+                KalSeed kseed(_result.krep->particleType(), _fdir, _result.krep->t0(), _result.krep->flt0(),
+                              kf.status());
                 kseed._status.merge(_ksf);
 
                 // add CaloCluster if present
@@ -398,8 +369,7 @@ void KalSeedFit::produce(art::Event& event)
                 kseed._helix = art::Ptr<HelixSeed>(hsH, iseed);
                 // extract the hits from the rep and put the hitseeds into the
                 // KalSeed
-                TrkUtilities::fillStrawHitSeeds(_result.krep, *_chcol,
-                    kseed._hits);
+                TrkUtilities::fillStrawHitSeeds(_result.krep, *_chcol, kseed._hits);
                 if (_result.krep->fitStatus().success())
                     kseed._status.merge(TrkFitFlag::seedOK);
                 if (_result.krep->fitStatus().success() == 1)
@@ -412,17 +382,15 @@ void KalSeedFit::produce(art::Event& event)
                 kseed._fitcon = _result.krep->chisqConsistency().significanceLevel();
                 // extract the helix trajectory from the fit (there is just 1)
                 double locflt;
-                const HelixTraj* htraj = dynamic_cast<const HelixTraj*>(
-                    _result.krep->localTrajectory(_result.krep->flt0(),
-                        locflt));
+                const HelixTraj *htraj =
+                    dynamic_cast<const HelixTraj *>(_result.krep->localTrajectory(_result.krep->flt0(), locflt));
                 // use this to create segment.  This will be the only segment in
                 // this track
                 if (htraj != 0) {
                     KalSegment kseg;
                     // sample the momentum at this point
                     BbrVectorErr momerr = _result.krep->momentumErr(_result.krep->flt0());
-                    TrkUtilities::fillSegment(
-                        *htraj, momerr, locflt - _result.krep->flt0(), kseg);
+                    TrkUtilities::fillSegment(*htraj, momerr, locflt - _result.krep->flt0(), kseg);
                     // extend the segment
                     double upflt(0.0), downflt(0.0);
                     TrkHelixUtils::findZFltlen(*htraj, _upz, upflt);
@@ -447,10 +415,9 @@ void KalSeedFit::produce(art::Event& event)
                         cout << endl;
                     }
                 } else {
-                    throw cet::exception("RECO")
-                        << "mu2e::KalSeedFit: Can't extract helix traj from "
-                           "seed fit"
-                        << endl;
+                    throw cet::exception("RECO") << "mu2e::KalSeedFit: Can't extract helix traj from "
+                                                    "seed fit"
+                                                 << endl;
                 }
             }
             // cleanup the seed fit KalRep.  Optimally the krep should be a data
@@ -464,8 +431,7 @@ void KalSeedFit::produce(art::Event& event)
 }
 
 // find the input data objects
-bool KalSeedFit::findData(const art::Event& evt)
-{
+bool KalSeedFit::findData(const art::Event &evt) {
     _chcol = 0;
     _hscol = 0;
 
@@ -477,8 +443,7 @@ bool KalSeedFit::findData(const art::Event& evt)
     return _chcol != 0 && _hscol != 0;
 }
 
-void KalSeedFit::filterOutliers(TrkDef& mydef)
-{
+void KalSeedFit::filterOutliers(TrkDef &mydef) {
     // for now filter on DOCA.  In future this shoudl be an MVA using time and
     // position FIXME!
     //  Trajectory info
@@ -487,13 +452,13 @@ void KalSeedFit::filterOutliers(TrkDef& mydef)
     double flt0 = mydef.helix().zFlight(0.0);
     mydef.helix().getInfo(flt0, tposp, tdir);
     // tracker and conditions
-    const Tracker& tracker = *_tracker;
+    const Tracker &tracker = *_tracker;
 
-    const vector<StrawHitIndex>& indices = mydef.strawHitIndices();
+    const vector<StrawHitIndex> &indices = mydef.strawHitIndices();
     vector<StrawHitIndex> goodhits;
     for (unsigned ihit = 0; ihit < indices.size(); ++ihit) {
-        ComboHit const& sh = _chcol->at(indices[ihit]);
-        Straw const& straw = tracker.getStraw(sh.strawId());
+        ComboHit const &sh = _chcol->at(indices[ihit]);
+        Straw const &straw = tracker.getStraw(sh.strawId());
         CLHEP::Hep3Vector hpos = straw.getMidPoint();
         CLHEP::Hep3Vector hdir = straw.getDirection();
         // convert to HepPoint to satisfy antique BaBar interface: FIXME!!!
@@ -520,15 +485,14 @@ void KalSeedFit::filterOutliers(TrkDef& mydef)
 // look at all hits included into the corresponding time cluster
 // first reactivate already associated hits
 //-----------------------------------------------------------------------------
-void KalSeedFit::findMissingHits(KalFitData& kalData)
-{
+void KalSeedFit::findMissingHits(KalFitData &kalData) {
 
-    const char* oname = "KalSeedFit::findMissingHits";
+    const char *oname = "KalSeedFit::findMissingHits";
 
-    mu2e::TrkStrawHit* hit;
+    mu2e::TrkStrawHit *hit;
     int hit_index;
-    const ComboHit* sh;
-    const Straw* straw;
+    const ComboHit *sh;
+    const Straw *straw;
 
     Hep3Vector tdir;
     HepPoint tpos;
@@ -537,12 +501,12 @@ void KalSeedFit::findMissingHits(KalFitData& kalData)
     if (_debug > 0)
         printf("[%s]: BEGIN\n", oname);
 
-    const KalRep* krep = kalData.krep;
+    const KalRep *krep = kalData.krep;
 
     kalData.missingHits.clear();
 
-    const TrkDifTraj& trajectory = krep->traj();
-    const vector<TrkHit*>& trackHits = krep->hitVector();
+    const TrkDifTraj &trajectory = krep->traj();
+    const vector<TrkHit *> &trackHits = krep->hitVector();
     //-----------------------------------------------------------------------------
     // get track position and direction at S=0
     //-----------------------------------------------------------------------------
@@ -550,8 +514,8 @@ void KalSeedFit::findMissingHits(KalFitData& kalData)
     //-----------------------------------------------------------------------------
     // look for so far unused hits around the trajectory
     //-----------------------------------------------------------------------------
-    const HelixSeed* hseed = kalData.helixSeed;
-    const std::vector<StrawHitIndex>& tchits = hseed->timeCluster()->hits();
+    const HelixSeed *hseed = kalData.helixSeed;
+    const std::vector<StrawHitIndex> &tchits = hseed->timeCluster()->hits();
 
     int n = tchits.size();
     for (int i = 0; i < n; ++i) {
@@ -562,8 +526,8 @@ void KalSeedFit::findMissingHits(KalFitData& kalData)
         }
         straw = &_tracker->getStraw(sh->strawId());
 
-        const CLHEP::Hep3Vector& wpos = straw->getMidPoint();
-        const CLHEP::Hep3Vector& wdir = straw->getDirection();
+        const CLHEP::Hep3Vector &wpos = straw->getMidPoint();
+        const CLHEP::Hep3Vector &wdir = straw->getDirection();
 
         HepPoint wpt(wpos.x(), wpos.y(), wpos.z());
         TrkLineTraj wire(wpt, wdir, -20, 20);
@@ -582,7 +546,7 @@ void KalSeedFit::findMissingHits(KalFitData& kalData)
         if (std::fabs(doca) < _maxAddDoca) {
             found = 0;
             for (auto it = trackHits.begin(); it < trackHits.end(); it++) {
-                hit = dynamic_cast<mu2e::TrkStrawHit*>(*it);
+                hit = dynamic_cast<mu2e::TrkStrawHit *>(*it);
                 if (hit == 0)
                     continue; // it means that "hit" is a TrkCaloHit
                 int shIndex = int(hit->index());
