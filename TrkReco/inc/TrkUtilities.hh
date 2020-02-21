@@ -15,15 +15,15 @@ class BbrVectorErr;
 class KalRep;
 class TrkDifPieceTraj;
 namespace mu2e {
-  class RobustHelix;
-  class KalSegment;
-  class KalSeed;
-  class HelixSeed;
-  class TrkStrawHitSeed;
-  class TrkStraw;
-  class TimeCluster;
+  struct RobustHelix;
+  struct KalSegment;
+  struct KalSeed;
+  struct HelixSeed;
+  struct TrkStrawHitSeed;
+  struct TrkStraw;
+  struct TimeCluster;
   class TrkCaloHit;
-  class TrkCaloHitSeed;
+  struct TrkCaloHitSeed;
   class ComboHitCollection;
   typedef std::vector<StrawHitIndex> SHIV;
   namespace TrkUtilities {

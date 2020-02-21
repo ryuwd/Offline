@@ -33,8 +33,8 @@ namespace mu2e {
 
     StrawHit():
       _strawId(StrawId(-1)),
-      _time{0.0,0.0},
-      _tot{0.0,0.0},
+      _time{{0.0,0.0}},
+      _tot{{0.0,0.0}},
       _energyDep(0.){
     }
 

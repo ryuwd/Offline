@@ -19,7 +19,7 @@ namespace fhicl {
 
 namespace mu2e {
 
-  class KalFitData;
+  struct KalFitData;
 
   namespace KalSeedFitTypes {
   

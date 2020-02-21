@@ -12,7 +12,7 @@
 // C++
 #include <ostream>
 namespace mu2e {
-  class HelixVal;
+  struct HelixVal;
   struct RobustHelix {
     RobustHelix(Float_t rcent, Float_t fcent, Float_t radius, Float_t lambda, Float_t fz0) :
       _rcent(rcent), _fcent(fcent), _radius(radius), _lambda(lambda), _fz0(fz0) {}
