@@ -14,11 +14,12 @@
 #include "canvas/Persistency/Common/Ptr.h"
 #include <vector>
 
-namespace mu2e {
-  class CaloCluster;
-  struct TimeCluster;
+namespace mu2e
+{
+class CaloCluster;
+struct TimeCluster;
 
-  struct HelixSeed {
+struct HelixSeed {
 
     TrkT0 const& t0() const { return _t0; }
     ComboHitCollection const& hits() const { return _hhits; }
@@ -27,13 +28,13 @@ namespace mu2e {
     art::Ptr<CaloCluster> const& caloCluster() const { return _timeCluster->caloCluster(); }
     art::Ptr<TimeCluster> const& timeCluster() const { return _timeCluster; }
 
-    TrkT0	             _t0;	      // t0 for this helix
-    ComboHitCollection       _hhits;	      // hits potentially used for this helix
-    RobustHelix              _helix;	     // robust helix created from these hits
-    TrkFitFlag	             _status;      // status of processes used to create this seed
-    art::Ptr<TimeCluster>    _timeCluster; // associated time cluster
-  };
-   typedef std::vector<mu2e::HelixSeed> HelixSeedCollection;
+    TrkT0 _t0;                          // t0 for this helix
+    ComboHitCollection _hhits;          // hits potentially used for this helix
+    RobustHelix _helix;                 // robust helix created from these hits
+    TrkFitFlag _status;                 // status of processes used to create this seed
+    art::Ptr<TimeCluster> _timeCluster; // associated time cluster
+};
+typedef std::vector<mu2e::HelixSeed> HelixSeedCollection;
 } // namespace mu2e
 
 #endif /* RecoDataProducts_HelixSeed_hh */
