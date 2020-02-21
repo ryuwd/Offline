@@ -15,7 +15,7 @@
 namespace mu2e
 {
   class SimpleConfig;
-  class StrawHit;
+  struct StrawHit;
   class Straw;
 // simple struct to hold output of timeToDistance function
   struct T2D {

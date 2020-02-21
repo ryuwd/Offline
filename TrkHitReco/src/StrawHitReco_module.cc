@@ -256,7 +256,7 @@ void StrawHitReco::produce(art::Event& event)
         } else
             flag.merge(StrawHitFlag::energysel);
         // time-over-threshold
-        TOTTimes tots{0.0, 0.0};
+        TOTTimes tots{{0.0, 0.0}};
         for (size_t iend = 0; iend < 2; ++iend) {
             tots[iend] = digi.TOT(_end[iend]) * srep.totLSB();
         }
