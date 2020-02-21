@@ -46,7 +46,7 @@
 namespace mu2e {
   using namespace TrkTypes;
 
-  class StrawHitReco : public art::EDProducer
+  class StrawHitReco :     public art::EDProducer
   {
      public:
        explicit StrawHitReco(fhicl::ParameterSet const& pset);
