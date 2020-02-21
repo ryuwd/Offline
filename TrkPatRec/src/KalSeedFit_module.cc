@@ -68,11 +68,13 @@ using namespace std;
 using CLHEP::Hep3Vector;
 using CLHEP::HepVector;
 
-namespace mu2e {
+namespace mu2e
+{
 
 using namespace KalSeedFitTypes;
 
-class KalSeedFit : public art::EDProducer {
+class KalSeedFit : public art::EDProducer
+{
   public:
     explicit KalSeedFit(fhicl::ParameterSet const&);
     virtual ~KalSeedFit();
@@ -176,7 +178,8 @@ KalSeedFit::KalSeedFit(fhicl::ParameterSet const& pset)
 
 KalSeedFit::~KalSeedFit() {}
 
-void KalSeedFit::beginRun(art::Run &run) {
+void KalSeedFit::beginRun(art::Run& run)
+{
     // calculate the helicity
     GeomHandle<BFieldManager> bfmgr;
     GeomHandle<DetectorSystem> det;
@@ -197,7 +200,8 @@ void KalSeedFit::beginRun(art::Run &run) {
     _helicity = Helicity(static_cast<float>(_fdir.dzdt() * _amsign));
 }
 
-void KalSeedFit::produce(art::Event &event) {
+void KalSeedFit::produce(art::Event& event)
+{
 
     auto srep = _strawResponse_h.getPtr(event.id());
     auto detmodel = _mu2eDetector_h.getPtr(event.id());
@@ -432,7 +436,8 @@ void KalSeedFit::produce(art::Event &event) {
 }
 
 // find the input data objects
-bool KalSeedFit::findData(const art::Event &evt) {
+bool KalSeedFit::findData(const art::Event& evt)
+{
     _chcol = 0;
     _hscol = 0;
 
@@ -444,7 +449,8 @@ bool KalSeedFit::findData(const art::Event &evt) {
     return _chcol != 0 && _hscol != 0;
 }
 
-void KalSeedFit::filterOutliers(TrkDef &mydef) {
+void KalSeedFit::filterOutliers(TrkDef& mydef)
+{
     // for now filter on DOCA.  In future this shoudl be an MVA using time and
     // position FIXME!
     //  Trajectory info
@@ -486,7 +492,8 @@ void KalSeedFit::filterOutliers(TrkDef &mydef) {
 // look at all hits included into the corresponding time cluster
 // first reactivate already associated hits
 //-----------------------------------------------------------------------------
-void KalSeedFit::findMissingHits(KalFitData &kalData) {
+void KalSeedFit::findMissingHits(KalFitData& kalData)
+{
 
     const char* oname = "KalSeedFit::findMissingHits";
 
