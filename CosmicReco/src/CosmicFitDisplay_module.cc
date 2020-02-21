@@ -115,7 +115,7 @@ namespace mu2e
 	TNtuple* _ntHit = nullptr;
 
 	art::InputTag   _chtag;//combo
-	art::InputTag   _tctag;//timeclusters
+	art::InputTag                                  _tctag;//timeclusters
 	art::InputTag   _sttag;//Straight tracks
 	bool doDisplay_;
 	bool clickToAdvance_;
