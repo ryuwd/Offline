@@ -7,31 +7,35 @@
 class TH1F;
 class TH2F;
 
-namespace art {
-  class Event;
+namespace art
+{
+class Event;
 };
 
-namespace fhicl {
-  class ParameterSet;
+namespace fhicl
+{
+class ParameterSet;
 };
 
 #include "RecoDataProducts/inc/KalSeed.hh"
 
-namespace mu2e {
+namespace mu2e
+{
 
-  struct KalFitData;
+struct KalFitData;
 
-  namespace KalSeedFitTypes {
-  
-    struct Data_t {
-      const art::Event*               event;
-      KalFitData*                     result;
-      fhicl::ParameterSet*            timeOffsets;
-      
-      KalSeedCollection*              tracks;        // these report their momentum very unwillingly
-      std::vector<int>                nrescued;	     // per track
-      std::vector<float>              mom;
-    };
-  }
+namespace KalSeedFitTypes
+{
+
+struct Data_t {
+    const art::Event* event;
+    KalFitData* result;
+    fhicl::ParameterSet* timeOffsets;
+
+    KalSeedCollection* tracks; // these report their momentum very unwillingly
+    std::vector<int> nrescued; // per track
+    std::vector<float> mom;
+};
+}
 }
 #endif
