@@ -16,7 +16,7 @@
 
 namespace mu2e {
   class CaloCluster;
-  class TimeCluster;
+  struct TimeCluster;
 
   struct HelixSeed {
 

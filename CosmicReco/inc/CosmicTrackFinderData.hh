@@ -37,7 +37,7 @@ namespace mu2e {
     float _weight; // weight for this position
   };
 
-  class TimeCluster;
+  struct TimeCluster;
   class CosmicTrackFinderData {
   public:
     
