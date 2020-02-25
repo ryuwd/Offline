@@ -914,7 +914,7 @@ void CosmicFitDisplay::plot2d(const art::Event& event)
             auto rawyzplot = pad->DrawFrame(
                 minrawz - 100, minrawy - 100, maxrawz + 100,
                 maxrawy + 100); //-plotLimits,-plotLimits,plotLimits,plotLimits);//pad->DrawFrame(minrawz-100,
-                                //minrawy-100, maxrawz+100, maxrawy+100);
+                                // minrawy-100, maxrawz+100, maxrawy+100);
             rawyzplot->GetYaxis()->SetTitleOffset(1.25);
             rawyzplot->SetTitle("Raw Hits Y vs Z; Z(mm);Y(mm)");
             ihit = 0;
