@@ -4,17 +4,33 @@
 // Original author Rob Kutschke
 //
 
-#include "GeometryService/inc/GeomHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
+#include <exception>                            // for exception
+#include <math.h>                                      // for M_PI
+#include <stddef.h>                                    // for size_t
+#include <stdint.h>                                    // for uint16_t
 // C++ includes.
-#include <iostream>
-#include <iomanip>
-#include <string>
+#include <iostream>                                    // for operator<<
+#include <array>                                       // for array
+#include <vector>                                      // for allocator, vector
+
+#include "GeometryService/inc/GeomHandle.hh"           // for GeomHandle
+#include "TrackerGeom/inc/Tracker.hh"                  // for Tracker
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "CLHEP/Vector/ThreeVector.h"                  // for operator<<
+
+#include "DataProducts/inc/StrawId.hh"                 // for operator<<
+#include "TrackerGeom/inc/Panel.hh"                    // for Panel
+#include "TrackerGeom/inc/Plane.hh"                    // for Plane
+#include "TrackerGeom/inc/Straw.hh"                    // for Straw
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
+
+namespace art {
+class Event;
+class Run;
+}  // namespace art
 
 using namespace std;
 

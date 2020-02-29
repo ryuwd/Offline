@@ -2,34 +2,38 @@
 //
 // Zhengyun You, 2013-12-01
 
-#include <string>
-#include <vector>
-#include <set>
-#include <limits>
-#include <cmath>
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <set>                                              // for set, oper...
+#include <limits>                                           // for numeric_l...
+#include <algorithm>                                        // for max
+#include <iostream>                                         // for operator<<
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
 
-#include "cetlib_except/exception.h"
-#include "CLHEP/Vector/ThreeVector.h"
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+#include "TTree.h"                                          // for TTree
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "CLHEP/Vector/LorentzVector.h"                     // for HepLorent...
 
-#include "TDirectory.h"
-#include "TH1.h"
-#include "TTree.h"
-#include "TFile.h"
 
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
+#include "MCDataProducts/inc/ProcessCode.hh"                // for ProcessCode
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

@@ -8,19 +8,27 @@
 //  Original author Rob Kutschke
 //
 
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
+#include <iostream>                                           // for operator<<
+#include <memory>                                             // for unique_ptr
+#include <set>                                                // for set
+#include <string>                                             // for operator<<
+#include <typeinfo>                                           // for type_info
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Provenance.h"
+#include "art/Framework/Core/EDAnalyzer.h"                    // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                  // for DEFINE_...
+#include "art/Framework/Principal/Event.h"                    // for Event
+#include "art/Framework/Principal/Handle.h"                   // for Handle
+#include "art/Framework/Principal/Provenance.h"               // for Provenance
+#include "fhiclcpp/ParameterSet.h"                            // for Paramet...
+#include "fhiclcpp/ParameterSetRegistry.h"                    // for Paramet...
+#include "MCDataProducts/inc/GenParticle.hh"                  // for GenPart...
+#include "MCDataProducts/inc/SimParticle.hh"                  // for SimPart...
+#include "canvas/Persistency/Provenance/BranchDescription.h"  // for BranchD...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"         // for Allowed...
 
-#include "fhiclcpp/ParameterSet.h"
-#include "fhiclcpp/ParameterSetRegistry.h"
-
-#include <iostream>
+namespace fhicl {
+class ParameterSetID;
+}  // namespace fhicl
 
 using namespace std;
 

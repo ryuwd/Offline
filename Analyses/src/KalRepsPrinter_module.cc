@@ -4,25 +4,33 @@
 // Original author Rob Kutschke
 //
 
-#include "GeneralUtilities/inc/PathnameWithNextVersion.hh"
-#include "Mu2eUtilities/inc/decodeTrackPatRecType.hh"
-#include "Mu2eUtilities/inc/TrackPatRecType.hh"
+#include <exception>                                 // for exception
+#include <iostream>                                         // for cout
+#include <fstream>                                          // for operator<<
+#include <memory>                                           // for allocator
+#include <string>                                           // for string
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
 
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-
-#include "TrkDiag/inc/KalDiag.hh"
-#include "TrkDiag/inc/TrkInfo.hh"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "canvas/Utilities/InputTag.h"
-
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <string>
+#include "GeneralUtilities/inc/PathnameWithNextVersion.hh"  // for PathnameW...
+#include "Mu2eUtilities/inc/decodeTrackPatRecType.hh"       // for decodeTra...
+#include "Mu2eUtilities/inc/TrackPatRecType.hh"             // for TrackPatR...
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"      // for KalRepPtr...
+#include "TrkDiag/inc/KalDiag.hh"                           // for KalDiag
+#include "TrkDiag/inc/TrkInfo.hh"                           // for TrkInfo
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "BTrk/KalmanTrack/KalRep.hh"                       // for KalRep
+#include "TrkDiag/inc/helixpar.hh"                          // for helixpar
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr, oper...
+#include "canvas/Persistency/Provenance/EventID.h"          // for operator<<
+#include "cetlib_except/exception.h"                        // for exception
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

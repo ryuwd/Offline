@@ -8,21 +8,33 @@
 // Original author Ivan Logashenko
 //
 
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StepInstanceName.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Handle.h"
-#include "fhiclcpp/ParameterSet.h"
-#include <iostream>
-#include <string>
-#include <set>
+#include <exception>                            // for exception
+#include <stddef.h>                                    // for size_t
+#include <iostream>                                    // for operator<<
+#include <string>                                      // for string, allocator
+#include <set>                                         // for set, operator==
+#include <memory>                                      // for unique_ptr
+#include <typeinfo>                                    // for type_info
+#include <vector>                                      // for vector
+
+#include "GeometryService/inc/GeomHandle.hh"           // for GeomHandle
+#include "MCDataProducts/inc/StepInstanceName.hh"      // for StepInstanceName
+#include "GeometryService/inc/VirtualDetector.hh"      // for VirtualDetector
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "art/Framework/Principal/Handle.h"            // for Handle
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "CLHEP/Vector/ThreeVector.h"                  // for operator<<
+
+#include "DataProducts/inc/VirtualDetectorId.hh"       // for VirtualDetectorId
+#include "MCDataProducts/inc/StepPointMC.hh"           // for StepPointMCCol...
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 

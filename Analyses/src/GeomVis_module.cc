@@ -4,32 +4,45 @@
 // Author: Zhengyun You, 03/21/2014
 //
 
-#include <iostream>
-#include <iomanip>
-#include <vector> 
+#include <exception>                            // for exception
+#include <math.h>                                      // for fabs
+#include <iostream>                                    // for operator<<, endl
+#include <iomanip>                                     // for operator<<, setw
+#include <vector>                                      // for allocator, vector
+#include <memory>                                      // for unique_ptr
+#include <string>                                      // for string
+#include <typeinfo>                                    // for type_info
 
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "fhiclcpp/ParameterSet.h"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "art/Framework/Principal/Handle.h"            // for ValidHandle
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "TApplication.h"                              // for gApplication
+#include "TMath.h"                                     // for RadToDeg
+#include "TVector3.h"                                  // for TVector3, oper...
+#include "TGeoManager.h"                               // for TGeoManager
+#include "TGeoMaterial.h"                              // for TGeoMaterial
+#include "TGeoMedium.h"                                // for TGeoMedium
+#include "TGeoArb8.h"                                  // for TGeoArb8
+#include "TGeoTube.h"                                  // for TGeoTube
+#include "CLHEP/Vector/ThreeVector.h"                  // for Hep3Vector
+#include "MCDataProducts/inc/StepPointMC.hh"           // for StepPointMC
+#include "RtypesCore.h"                                // for Long_t
+#include "TGeoMatrix.h"                                // for TGeoCombiTrans
+#include "TGeoNode.h"                                  // for TGeoNode
+#include "TGeoVolume.h"                                // for TGeoVolume
+#include "TString.h"                                   // for TString, opera...
+#include "canvas/Persistency/Provenance/EventID.h"     // for EventID
+#include "canvas/Utilities/InputTag.h"                 // for InputTag, oper...
+#include "fhiclcpp/coding.h"                           // for ps_sequence_t
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
-#include "TApplication.h"
-#include "TROOT.h"
-#include "TBrowser.h"
-#include "TCanvas.h"
-#include "TH1.h"
-#include "TMath.h"
-#include "TVector3.h"
-#include "TGWindow.h"
-#include "TRootEmbeddedCanvas.h"
-#include "TGeoManager.h"
-#include "TGeoMaterial.h"
-#include "TGeoMedium.h"
-#include "TGeoArb8.h"
-#include "TGeoTube.h"
+class TGHorizontalFrame;
+class TGMainFrame;
+class TPad;
+class TRootEmbeddedCanvas;
 
 using namespace std;
 
@@ -136,27 +149,27 @@ namespace mu2e
     if (pos1.z() > pos2.z())
     {
       TVector3 tmp = pos1;
-      pos1 = pos2; 
+      pos1 = pos2;
       pos2 = tmp;
-    } 
-  
+    }
+
     TVector3 center = 0.5*(pos1 + pos2);
     if (0) { cout<< "center " << endl;  center.Print(); }
-  
+
     const TString base_name("evt_");
     TString name = base_name + Long_t(evt);
     name += TString("_trk") + Long_t(_trk);
     name += TString("_seg") + Long_t(_seg);
     _seg++;
     float dr = 1;
-  
+
     int color = 1;
     if (pdg==-2212 || pdg==211) color = 2;
     else if (pdg==-211 || pdg==13) color = 4;
-    else if (pdg==2112) color = 3; 
+    else if (pdg==2112) color = 3;
     color = _trk%10;
- 
-    TGeoVolume* top = _geom->GetTopVolume(); 
+
+    TGeoVolume* top = _geom->GetTopVolume();
     int kline_shape = 2;
     if (kline_shape == 1)
     {
@@ -218,7 +231,7 @@ namespace mu2e
       _mainPad = new TPad("mainPad","Detector", 0, 0, 1, 1, 5,1,1);
       _mainPad->SetFillColor(1);
       _mainPad->Draw();
-*/    
+*/
       _first = false;
     }
 
@@ -232,7 +245,7 @@ namespace mu2e
       auto ih = event.getValidHandle<StepPointMCCollection>(tag);
       for(const auto& i : *ih) {
         std::cout << "step (" << setw(ks) << i.position().x()
-          << ", "  << setw(ks) << i.position().y() 
+          << ", "  << setw(ks) << i.position().y()
           << ", "  << setw(ks) << i.position().z() << ")"
           << std::endl;
 
@@ -241,7 +254,7 @@ namespace mu2e
         TVector3 momentum(i.momentum().x(), i.momentum().y(), i.momentum().z());
         momentum.SetMag(1.0);
         TVector3 posEnd = posBegin + momentum*stepLength;
- 
+
         int pdg = -2212;
         int evt = event.id().event();
         drawLine(posBegin*0.1, posEnd*0.1, pdg, evt);

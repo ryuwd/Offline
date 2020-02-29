@@ -8,19 +8,28 @@
 // Original author Rob Kutschke
 //
 
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "DataProducts/inc/PDGCode.hh"
-#include "MCDataProducts/inc/ProcessCode.hh"
+#include <exception>                            // for exception
+#include <stdlib.h>                                    // for abs, size_t
+#include <iostream>                                    // for operator<<
+#include <iomanip>                                     // for operator<<, setw
+#include <vector>                                      // for vector, vector...
+#include <string>                                      // for string, char_t...
+#include <memory>                                      // for unique_ptr
+#include <typeinfo>                                    // for type_info
+#include <utility>                                     // for pair
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <string>
+#include "DataProducts/inc/PDGCode.hh"                 // for PDGCode, PDGCo...
+#include "MCDataProducts/inc/ProcessCode.hh"           // for ProcessCode
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Principal/Handle.h"            // for Handle
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "MCDataProducts/inc/SimParticle.hh"           // for SimParticleCol...
+#include "canvas/Persistency/Common/Ptr.h"             // for Ptr
+#include "cetlib/map_vector.h"                         // for map_vector<>::...
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
 using namespace std;
 

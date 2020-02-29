@@ -8,28 +8,39 @@
 // Original author Zhengyun You
 //
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "TH1F.h"
-#include "TNtuple.h"
-#include "TTree.h"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "cetlib_except/exception.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include <cmath>
-#include <iostream>
-#include <string>
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <algorithm>                                        // for max, copy
+#include <memory>                                           // for unique_ptr
+#include <set>                                              // for set
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
+
+#include "CLHEP/Units/SystemOfUnits.h"                      // for keV
+#include "TNtuple.h"                                        // for TNtuple
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPointMC
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 

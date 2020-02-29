@@ -7,47 +7,56 @@
 // $Date: 2014/09/10 18:49:17 $
 //
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-// services
-#include "BFieldGeom/inc/BFieldConfig.hh"
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "DataProducts/inc/VirtualDetectorId.hh"
-#include "GeometryService/inc/DetectorSystem.hh"
-// data
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "RecoDataProducts/inc/TrkExtTrajCollection.hh"
-#include "DataProducts/inc/XYZVec.hh"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "GeometryService/inc/GeomHandle.hh"                // for GeomHandle
+#include "GeometryService/inc/DetectorSystem.hh"            // for DetectorS...
+#include "RecoDataProducts/inc/TrkExtTrajCollection.hh"     // for TrkExtTra...
+#include "DataProducts/inc/XYZVec.hh"                       // for XYZnames
 // ROOT incldues
-#include "TTree.h"
-#include "TH1F.h"
+#include "TTree.h"                                          // for TTree
+#include "CLHEP/Vector/LorentzVector.h"                     // for HepLorent...
+
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "RecoDataProducts/inc/TrkExtTraj.hh"               // for TrkExtTraj
+#include "RtypesCore.h"                                     // for Int_t
+#include "TrkDiag/inc/MCEvtData.hh"                         // for MCEvtData
+#include "TrkDiag/inc/helixpar.hh"                          // for helixpar
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr, oper...
+#include "canvas/Persistency/Common/detail/aggregate.h"     // for CLHEP
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+
 // Need this for the BaBar headers.
 using namespace CLHEP;
-// BaBar includes
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/KalmanTrack/KalHit.hh"
-#include "BTrk/TrkBase/TrkParticle.hh"
-#include "BTrk/TrkBase/TrkHelixUtils.hh"
-// mu2e tracking
-#include "RecoDataProducts/inc/TrkFitDirection.hh"
-#include "TrkDiag/inc/KalDiag.hh"
-#include "TrkDiag/inc/TrkInfo.hh"
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <cmath>
-#include <memory>
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <cmath>                                            // for fabs, M_PI
+#include <memory>                                           // for allocator
+#include <algorithm>                                        // for max
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
+
+#include "BTrk/KalmanTrack/KalRep.hh"                       // for KalRep
+#include "BTrk/TrkBase/TrkParticle.hh"                      // for TrkParticle
+// mu2e tracking
+#include "RecoDataProducts/inc/TrkFitDirection.hh"          // for TrkFitDir...
+#include "TrkDiag/inc/KalDiag.hh"                           // for KalDiag
+#include "TrkDiag/inc/TrkInfo.hh"                           // for TrkFitInfo
 // This is fragile and needs to be last until CLHEP is
 // properly qualified and included in the BaBar classes.
-#include "RecoDataProducts/inc/KalRepCollection.hh"
+#include "RecoDataProducts/inc/KalRepCollection.hh"         // for KalRepCol...
 
 using namespace std;
 
@@ -87,7 +96,7 @@ namespace mu2e {
     Float_t _ot0, _pt0;
     Int_t _uextnpa,_dextnpa,_uextnst,_dextnst;
     Float_t _uextdppa,_dextdppa,_uextdpst,_dextdpst;
-// create 
+// create
     void createTree();
     // Function to pair upstream and downstream fits
     bool reflection() const;
@@ -109,7 +118,7 @@ namespace mu2e {
     _kdiag(pset.get<fhicl::ParameterSet>("KalDiag",fhicl::ParameterSet())),
     _reflect(0)
   {
-// construct the data product instance names for particles 
+// construct the data product instance names for particles
     TrkFitDirection udir(TrkFitDirection::upstream);
     TrkFitDirection ddir(TrkFitDirection::downstream);
     for(int isign=1;isign>-2;isign-=2){
@@ -141,7 +150,7 @@ namespace mu2e {
     for(size_t ie=0;ie<_udname.size();++ie){
       TrkExtTrajCollection const* uext(0);
       TrkExtTrajCollection const* dext(0);
- 
+
       art::Handle<KalRepCollection> utrksHandle;
       event.getByLabel(_umname[ie],_udname[ie],utrksHandle);
       if(!utrksHandle.isValid())continue;
@@ -184,7 +193,7 @@ namespace mu2e {
 		  _kdiag.findMCTrk(ukrep,umcsp);
 		  _kdiag.findMCTrk(dkrep,dmcsp);
 // use these to find the points where the true particle enters the tracker
-		  if(umcsp.isNonnull() && dmcsp.isNonnull() && 
+		  if(umcsp.isNonnull() && dmcsp.isNonnull() &&
 		    umcsp == dmcsp){
 		    // fill generic MC track information
 		    _kdiag.fillTrkInfoMC(umcsp,0,_mcinfo);
@@ -199,15 +208,15 @@ namespace mu2e {
 		      if(_extrapolate && uext != 0 && dext != 0){
 		        TrkExtTraj const& utrkext = (*uext)[iue];
 		        TrkExtTraj const& dtrkext = (*dext)[ide];
-			_uextnpa = utrkext.getNPAHits(); 
-			_dextnpa = dtrkext.getNPAHits(); 
-			_uextnst = utrkext.getNSTHits(); 
-			_dextnst = dtrkext.getNSTHits(); 
-			_uextdppa = utrkext.getDeltapPA(); 
-			_dextdppa = dtrkext.getDeltapPA(); 
-			_uextdpst = utrkext.getDeltapST(); 
-			_dextdpst = dtrkext.getDeltapST(); 
-		      } 
+			_uextnpa = utrkext.getNPAHits();
+			_dextnpa = dtrkext.getNPAHits();
+			_uextnst = utrkext.getNSTHits();
+			_dextnst = dtrkext.getNSTHits();
+			_uextdppa = utrkext.getDeltapPA();
+			_dextdppa = dtrkext.getDeltapPA();
+			_uextdpst = utrkext.getDeltapST();
+			_dextdpst = dtrkext.getDeltapST();
+		      }
 		    } else
 		      std::cout << "Didn't find 2 steps" << std::endl;
 		  } else
@@ -223,7 +232,7 @@ namespace mu2e {
     }
   }
 
-  bool 
+  bool
   Reflect::reflection() const {
 // check basic info
     bool retval = _utrkinfo._status > 0 && _dtrkinfo._status > 0 &&

@@ -2,40 +2,37 @@
 // Module which starts the event display, and transmits the data of each event to the event display.
 //
 
-// framework
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "SeedService/inc/SeedService.hh"
-
-// BaBar
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/MatEnv/RecoMatFactory.hh"
-#include "BTrk/MatEnv/MatDBInfo.hh"
-#include "BTrk/DetectorModel/DetMaterial.hh"
-
+#include <exception>                                 // for exception
 // c++
-#include <iostream>
-#include <string>
-#include <vector>
+#include <iostream>                                         // for basic_ost...
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <algorithm>                                        // for max
 
+// framework
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "BTrk/MatEnv/MatDBInfo.hh"                         // for MatDBInfo
+#include "BTrk/DetectorModel/DetMaterial.hh"                // for DetMaterial
 // ROOT
-#include "TNtuple.h"
-#include "TMath.h"
-#include "TFile.h"
-#include "TH2D.h"
-#include "TCanvas.h"
-#include "TApplication.h"
-#include "TGMsgBox.h"
-#include "TTree.h"
-
+#include "TNtuple.h"                                        // for TNtuple
 // CLHEP
-#include "CLHEP/Units/SystemOfUnits.h"
+#include "CLHEP/Units/SystemOfUnits.h"                      // for cm
+#include "BTrk/TrkBase/TrkParticle.hh"                      // for TrkParticle
+#include "TDirectory.h"                                     // for TDirectory
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+
+namespace art {
+class Run;
+}  // namespace art
 
 
 namespace mu2e

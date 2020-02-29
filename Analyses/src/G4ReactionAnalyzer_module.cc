@@ -2,25 +2,32 @@
 //
 // Andrei Gaponenko, 2013
 
-#include <string>
-#include <vector>
-#include <sstream>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <sstream>                                          // for operator<<
+#include <map>                                              // for map, map<...
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
 
-#include "cetlib_except/exception.h"
-
-#include "TH1.h"
-#include "TH2.h"
-
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
+#include "TH1.h"                                            // for TH1D, TH1
+#include "TH2.h"                                            // for TH2, TH2D
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "MCDataProducts/inc/ProcessCode.hh"                // for operator<<
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 namespace mu2e {
 

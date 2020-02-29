@@ -4,31 +4,38 @@
 //
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
-#include <algorithm>
-#include <cmath>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <vector>                                           // for vector<>:...
+#include <memory>                                           // for unique_ptr
+#include <algorithm>                                        // for max, min
+#include <map>                                              // for _Rb_tree_...
+#include <type_traits>                                      // for __decay_a...
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair, mak...
 
-#include "cetlib_except/exception.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "RecoDataProducts/inc/TrackSummary.hh"
-#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-
-#include "TH1.h"
-#include "TH2.h"
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "art/Framework/Core/EDProducer.h"                  // for EDProducer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "RecoDataProducts/inc/TrackSummary.hh"             // for TrackSummary
+#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"     // for TrackSumm...
+#include "TH1.h"                                            // for TH1D, TH1
+#include "TH2.h"                                            // for TH2, TH2D
+#include "canvas/Persistency/Common/Assns.h"                // for Assns
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr, oper...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 namespace mu2e {
+struct SimParticle;
+
   // The "nice" declaration does not work. Similar to redmine #6420
   // double commonHitFraction(typename TrackSummaryTruthAssns::assn_t& p, const TrackSummaryMatchInfo& mi) {
   // Spell things out by hand for now

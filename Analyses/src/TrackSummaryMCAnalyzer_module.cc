@@ -4,39 +4,35 @@
 //
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-#include <limits>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <algorithm>                                        // for for_each
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
 
-#include "cetlib_except/exception.h"
-
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Vector/ThreeVector.h"
-
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "canvas/Persistency/Common/FindOneP.h"
-
-#include "RecoDataProducts/inc/TrackSummary.hh"
-#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/EventWeight.hh"
-
-#include "Mu2eUtilities/inc/HistTrackSum.hh"
-#include "Mu2eUtilities/inc/TrackCuts.hh"
-
-#include "TH1.h"
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/FindOneP.h"             // for FindOneP
+#include "RecoDataProducts/inc/TrackSummary.hh"             // for TrackSumm...
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/EventWeight.hh"                // for EventWeight
+#include "Mu2eUtilities/inc/TrackCuts.hh"                   // for TrackCuts
+#include "canvas/Persistency/Common/Assns.h"                // for Assns
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Persistency/Provenance/ProductID.h"        // for ProductID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"     // for TrackSummaryMatchInfo
 
 namespace mu2e {
 

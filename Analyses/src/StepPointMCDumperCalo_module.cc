@@ -2,34 +2,37 @@
 //
 // Andrei Gaponenko, 2013
 
-#include <string>
-#include <vector>
-#include <limits>
-#include <cmath>
+#include <exception>                                     // for excep...
+#include <string>                                               // for string
+#include <cmath>                                                // for sqrt
+#include <memory>                                               // for uniqu...
+#include <typeinfo>                                             // for type_...
 
-#include "cetlib_except/exception.h"
-#include "CLHEP/Vector/ThreeVector.h"
+#include "cetlib_except/exception.h"                            // for excep...
+#include "CLHEP/Vector/ThreeVector.h"                           // for Hep3V...
+#include "TTree.h"                                              // for TTree
+#include "canvas/Utilities/InputTag.h"                          // for InputTag
+#include "fhiclcpp/ParameterSet.h"                              // for Param...
+#include "art/Framework/Core/EDAnalyzer.h"                      // for EDAna...
+#include "art/Framework/Principal/Event.h"                      // for Event
+#include "art/Framework/Core/ModuleMacros.h"                    // for DEFIN...
+#include "art_root_io/TFileService.h"                           // for TFile...
+#include "MCDataProducts/inc/StepPointMC.hh"                    // for StepP...
+#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"  // for Globa...
+#include "GlobalConstantsService/inc/ParticleDataTable.hh"      // for Parti...
+#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"           // for SimPa...
 
-#include "TDirectory.h"
-#include "TH1.h"
-#include "TTree.h"
+#include "DataProducts/inc/PDGCode.hh"                          // for PDGCode
+#include "HepPDT/Measurement.hh"                                // for Measu...
 
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
+#include "HepPDT/ParticleData.hh"                               // for Parti...
+#include "MCDataProducts/inc/SimParticle.hh"                    // for SimPa...
+#include "art/Framework/Principal/Handle.h"                     // for Valid...
+#include "art/Framework/Services/Registry/ServiceHandle.h"      // for Servi...
+#include "canvas/Persistency/Common/Ptr.h"                      // for Ptr
+#include "canvas/Utilities/Exception.h"                         // for Excep...
+#include "fhiclcpp/exception.h"                                 // for excep...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"           // for Allow...
 
 namespace mu2e {
 
@@ -81,7 +84,7 @@ namespace mu2e {
 
 
     private:
-      
+
       art::InputTag           hitsInputTag_;
       SimParticleTimeOffset   toff_;
       int _nProcess;
@@ -131,33 +134,33 @@ namespace mu2e {
    }
 
 
- 
-  
-  
+
+
+
   //================================================================
   void StepPointMCDumperCalo::analyze(const art::Event& event)
   {
-  
+
     ++_nProcess;
     toff_.updateMap(event);
     const auto& ih = event.getValidHandle<StepPointMCCollection>(hitsInputTag_);
     StepPointMCCollection const& hits(*ih);
 
     _nStep = hits.size();
-    
+
     for(unsigned int i=0; i < hits.size(); ++i)
     {
-           const auto& hit = hits[i];     
+           const auto& hit = hits[i];
            art::Ptr<SimParticle> grandMother = hit.simParticle();
            while (grandMother->startPosition().z() > 11840 && grandMother->hasParent())grandMother = grandMother->parent();
-           //while (grandMother->hasParent()){ std::cout<< grandMother->pdgId()<<" "<<grandMother->startPosition().z()  <<std::endl; grandMother = grandMother->parent();}          
+           //while (grandMother->hasParent()){ std::cout<< grandMother->pdgId()<<" "<<grandMother->startPosition().z()  <<std::endl; grandMother = grandMother->parent();}
            //std::cout<<"--"<<std::endl;
-	   
+
 	   _stepX[i]        = hit.position().x();
 	   _stepY[i]        = hit.position().y();
 	   _stepZ[i]        = hit.position().z();
 	   _stepT[i]        = toff_.timeWithOffsetsApplied(hit);
-	   
+
 	   _stepPx[i]       = hit.momentum().x();
 	   _stepPy[i]       = hit.momentum().y();
 	   _stepPz[i]       = hit.momentum().z();
@@ -168,15 +171,15 @@ namespace mu2e {
 	   _stepPdgId[i]    = hit.simParticle()->pdgId();
 	   _stepPartId[i]   = hit.simParticle()->id().asUint();
 	   _stepVolumeId[i] = hit.volumeId();
-	   _stepCrCode[i]   = grandMother->pdgId();	   
-     
+	   _stepCrCode[i]   = grandMother->pdgId();
+
      }
 
     nt_->Fill();
 
 
-  } 
- 
+  }
+
     //================================================================
 
 } // namespace mu2e

@@ -8,29 +8,51 @@
 // Original author KLG based on Mu2eG4StudyReadBack_module
 //
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "TH1F.h"
-#include "TNtuple.h"
-#include "TTree.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "cetlib_except/exception.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include <cmath>
-#include <iostream>
-#include <string>
+#include <exception>                                     // for excep...
+#include <stddef.h>                                             // for size_t
+#include <cmath>                                                // for sqrt
+#include <iostream>                                             // for opera...
+#include <string>                                               // for string
+#include <map>                                                  // for _Rb_t...
+#include <memory>                                               // for uniqu...
+#include <typeinfo>                                             // for type_...
+#include <utility>                                              // for pair
+#include <vector>                                               // for vector
+
+#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"  // for Globa...
+#include "GlobalConstantsService/inc/ParticleDataTable.hh"      // for Parti...
+#include "TNtuple.h"                                            // for TNtuple
+#include "TTree.h"                                              // for TTree
+#include "art/Framework/Core/EDAnalyzer.h"                      // for EDAna...
+#include "art/Framework/Principal/Event.h"                      // for Event
+#include "art/Framework/Core/ModuleMacros.h"                    // for DEFIN...
+#include "art_root_io/TFileService.h"                           // for TFile...
+#include "art/Framework/Principal/Handle.h"                     // for Handle
+#include "fhiclcpp/ParameterSet.h"                              // for Param...
+#include "CLHEP/Vector/LorentzVector.h"                         // for HepLo...
+
+#include "CLHEP/Vector/ThreeVector.h"                           // for Hep3V...
+
+#include "ConfigTools/inc/SimpleConfig.hh"                      // for Simpl...
+#include "GeometryService/inc/GeometryService.hh"               // for Geome...
+#include "HepPDT/Measurement.hh"                                // for Measu...
+
+#include "HepPDT/ParticleData.hh"                               // for Parti...
+#include "HepPDT/ParticleID.hh"                                 // for Parti...
+#include "MCDataProducts/inc/ProcessCode.hh"                    // for Proce...
+#include "MCDataProducts/inc/SimParticle.hh"                    // for SimPa...
+#include "MCDataProducts/inc/StepPointMC.hh"                    // for StepP...
+#include "RtypesCore.h"                                         // for Float_t
+#include "art/Framework/Services/Registry/ServiceHandle.h"      // for Servi...
+#include "canvas/Persistency/Provenance/EventID.h"              // for EventID
+#include "canvas/Utilities/Exception.h"                         // for Excep...
+#include "cetlib/map_vector.h"                                  // for map_v...
+#include "fhiclcpp/exception.h"                                 // for excep...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"           // for Allow...
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 
@@ -174,7 +196,7 @@ namespace mu2e {
     // Module label of the g4 module that made the hits.
     std::string _g4ModuleLabel;
 
-    // Save in the particles ntuple only those particles, which die 
+    // Save in the particles ntuple only those particles, which die
     // after this time (in ns)
     double _timeCut;
 
@@ -289,20 +311,20 @@ namespace mu2e {
       SimpleConfig const& config  = geom->config();
       if (config.getBool("mu2e.printParticleDataTable",false)) {
 
-        cout << __func__ 
+        cout << __func__
              << " pdt size : "
-             << pdt_.size() 
+             << pdt_.size()
              << endl;
-      
-        for ( ParticleDataTable::const_iterator pdti=pdt_.begin(), e=pdt_.end(); 
+
+        for ( ParticleDataTable::const_iterator pdti=pdt_.begin(), e=pdt_.end();
               pdti!=e; ++pdti ) {
-      
-          cout << __func__ 
+
+          cout << __func__
                << " pdt particle : "
-               << pdti->first.pid()  
-               << ", name: "          
+               << pdti->first.pid()
+               << ", name: "
                << pdt_.particle(pdti->first.pid()).ref().name()
-               << ", PDTname: "          
+               << ", PDTname: "
                << pdt_.particle(pdti->first.pid()).ref().PDTname()
                << ", "
                << pdt_.particle(pdti->first.pid()).ref().mass()
@@ -329,7 +351,7 @@ namespace mu2e {
     event.getByLabel(_g4ModuleLabel, simParticles);
     bool haveSimPart = simParticles.isValid();
     if ( haveSimPart ) haveSimPart = !(simParticles->empty());
-    
+
     // Loop over all stepper points.
     if( points.isValid() ) for ( size_t i=0; i<points->size(); ++i ){
 
@@ -382,7 +404,7 @@ namespace mu2e {
              << event.id().event() << " | "
              << point.volumeId()   << " | "
              << point.trackId().asInt() << " | "
-             << pdgId              << " , name: "  
+             << pdgId              << " , name: "
              << pdt_.particle(pdgId).ref().name() << " , PDTname: "
              << pdt_.particle(pdgId).ref().PDTname() << " | "
              << point.time()       << " "
@@ -405,10 +427,10 @@ namespace mu2e {
       tstp.gtime  = point.properTime();
       tstp.x      = pos.x();
       tstp.y      = pos.y();
-      tstp.z      = pos.z();  
-      tstp.px     = mom.x(); 
-      tstp.py     = mom.y(); 
-      tstp.pz     = mom.z(); 
+      tstp.z      = pos.z();
+      tstp.px     = mom.x();
+      tstp.py     = mom.y();
+      tstp.pz     = mom.z();
       tstp.p      = mom.mag();
       tstp.ke     = sqrt(mom.mag2()+mass*mass)-mass;
       tstp.tedep  = point.totalEDep();
@@ -478,7 +500,7 @@ namespace mu2e {
              << event.id().event() << " | "
              << hit.volumeId()     << " | "
              << hit.trackId().asInt() << " | "
-             << pdgId              << " , name: "  
+             << pdgId              << " , name: "
              << pdt_.particle(pdgId).ref().name() << " , PDTname: "
              << pdt_.particle(pdgId).ref().PDTname() << " | "
              << hit.time()         << " "
@@ -554,7 +576,7 @@ namespace mu2e {
           // calculation of the prestep info is more involved...
           // assume the step points are sorted by time by construction, get the last one
           size_t thei(-1);
-          size_t trackiid = sim.id().asInt();     
+          size_t trackiid = sim.id().asInt();
           for ( size_t i=points->size()-1; i!=0; --i ){
             if ( trackiid == ((*points)[i]).trackId().asInt() ) {
               thei = i;

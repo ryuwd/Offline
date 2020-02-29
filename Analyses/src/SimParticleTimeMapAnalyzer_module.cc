@@ -2,19 +2,33 @@
 //
 // Andrei Gaponenko, 2016
 
-#include "fhiclcpp/types/Atom.h"
+#include <exception>                                 // for exception
+#include <algorithm>                                        // for all_of
+#include <map>                                              // for map
+#include <memory>                                           // for allocator
+#include <string>                                           // for string
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "MCDataProducts/inc/SimParticleTimeMap.hh"
-
-#include "TH1.h"
+#include "fhiclcpp/types/Atom.h"                            // for Atom
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "MCDataProducts/inc/SimParticleTimeMap.hh"         // for SimPartic...
+#include "TH1.h"                                            // for TH1D, TH1
+#include "art/Framework/Core/detail/Analyzer.h"             // for Analyzer:...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "cetlib/exempt_ptr.h"                              // for exempt_ptr
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "fhiclcpp/types/Comment.h"                         // for Comment
+#include "fhiclcpp/types/Name.h"                            // for Name
+#include "fhiclcpp/types/Table.h"                           // for Table::me...
+#include "fhiclcpp/types/detail/validationException.h"      // for validatio...
 
 namespace mu2e {
 

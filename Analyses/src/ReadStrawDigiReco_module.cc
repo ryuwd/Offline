@@ -4,25 +4,34 @@
 // Original author Rob Kutschke.
 //
 
+#include <exception>                                 // for exception
+#include <iostream>                                         // for operator<<
+#include <algorithm>                                        // for max
+#include <array>                                            // for array
+#include <map>                                              // for map
+#include <memory>                                           // for allocator
+#include <string>                                           // for string
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
+
 // Mu2e includes.
-#include "RecoDataProducts/inc/StrawDigi.hh"
-
-#include "canvas/Utilities/InputTag.h"
-#include "canvas/Utilities/Exception.h"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Provenance.h"
-
-#include "fhiclcpp/ParameterSet.h"
-
-#include "TH1F.h"
-
-#include <iostream>
+#include "RecoDataProducts/inc/StrawDigi.hh"                // for StrawDigi
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "DataProducts/inc/StrawEnd.hh"                     // for StrawEnd
+#include "DataProducts/inc/StrawId.hh"                      // for StrawId
+#include "TH1.h"                                            // for TH1F
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

@@ -3,28 +3,36 @@
 //
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <utility>
-#include <set>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <utility>                                          // for move
+#include <set>                                              // for set, oper...
+#include <algorithm>                                        // for max
+#include <memory>                                           // for unique_ptr
+#include <ostream>                                          // for operator<<
+#include <typeinfo>                                         // for type_info
 
-#include "cetlib_except/exception.h"
-
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art_root_io/TFileService.h"
-
-// Mu2e includes.
-#include "DataProducts/inc/PDGCode.hh"
-#include "MCDataProducts/inc/ProcessCode.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticlePtrCollection.hh"
-
-#include "TH1D.h"
+#include "art/Framework/Core/EDProducer.h"                  // for EDProducer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/ProcessCode.hh"                // for ProcessCo...
+#include "MCDataProducts/inc/SimParticlePtrCollection.hh"   // for SimPartic...
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "TH1.h"                                            // for TH1D, TH1
+#include "art/Framework/Core/ProducerTable.h"               // for ProducerT...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "fhiclcpp/types/Atom.h"                            // for Atom, Ato...
+#include "fhiclcpp/types/Comment.h"                         // for Comment
+#include "fhiclcpp/types/Name.h"                            // for Name
+#include "fhiclcpp/types/Sequence.h"                        // for Sequence
 
 namespace mu2e {
   namespace {

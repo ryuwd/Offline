@@ -10,31 +10,40 @@
 //
 
 // Framework includes.
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "canvas/Utilities/InputTag.h"
+#include "art/Framework/Core/EDProducer.h"                  // for EDProducer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "GeneralUtilities/inc/OwningPointerCollection.hh"  // for OwningPoi...
+#include "canvas/Persistency/Common/detail/aggregate.h"     // for CLHEP
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 // Need this for the BaBar headers.
 using namespace CLHEP;
 
-// BaBar includes
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/TrkBase/TrkParticle.hh"
-
-// mu2e tracking
-#include "RecoDataProducts/inc/TrkFitDirection.hh"
-
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
 // C++ includes.
-#include <iostream>
-#include <string>
+#include <iostream>                                         // for std
+#include <string>                                           // for string
+#include <algorithm>                                        // for max
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for move
+#include <vector>                                           // for vector
 
+#include "BTrk/TrkBase/TrkParticle.hh"                      // for TrkParticle
+// mu2e tracking
+#include "RecoDataProducts/inc/TrkFitDirection.hh"          // for TrkFitDir...
 // This is fragile and needs to be last until CLHEP is
 // properly qualified and included in the BaBar classes.
-#include "RecoDataProducts/inc/KalRepCollection.hh"
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
+#include "RecoDataProducts/inc/KalRepCollection.hh"         // for KalRepCol...
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"      // for KalRepPtr...
+
+class KalRep;
 
 using namespace std;
 

@@ -7,34 +7,41 @@
 // from cetlib version v3_02_01.
 ////////////////////////////////////////////////////////////////////////
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include <exception>                                     // for excep...
+#include <math.h>                                               // for M_PI
+#include <memory>                                               // for alloc...
+#include <string>                                               // for string
+#include <typeinfo>                                             // for type_...
+#include <vector>                                               // for vector
 
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/PhysicsParams.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TTree.h"
-namespace mu2e {
-  class CRYGenPlots;
-}
+#include "art/Framework/Core/EDAnalyzer.h"                      // for EDAna...
+#include "art/Framework/Core/ModuleMacros.h"                    // for DEFIN...
+#include "art/Framework/Principal/Event.h"                      // for Event
+#include "art/Framework/Principal/Handle.h"                     // for Handle
+#include "art_root_io/TFileService.h"                           // for TFile...
+#include "art/Framework/Services/Registry/ServiceHandle.h"      // for Servi...
+#include "fhiclcpp/ParameterSet.h"                              // for Param...
+#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"  // for Globa...
+#include "GlobalConstantsService/inc/ParticleDataTable.hh"      // for Parti...
+#include "TTree.h"                                              // for TTree
+#include "CLHEP/Vector/LorentzVector.h"                         // for HepLo...
+#include "CLHEP/Vector/ThreeVector.h"                           // for Hep3V...
+#include "HepPDT/Measurement.hh"                                // for Measu...
+#include "HepPDT/ParticleData.hh"                               // for Parti...
+#include "MCDataProducts/inc/GenParticle.hh"                    // for GenPa...
+#include "TAxis.h"                                              // for TAxis
+#include "TH1.h"                                                // for TH1F
+#include "TH2.h"                                                // for TH2F
+#include "canvas/Utilities/Exception.h"                         // for Excep...
+#include "fhiclcpp/exception.h"                                 // for excep...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"           // for Allow...
 
 using CLHEP::Hep3Vector;
 using CLHEP::HepLorentzVector;
 
+namespace mu2e {
+  class CRYGenPlots;
+};
 
 class mu2e::CRYGenPlots : public art::EDAnalyzer {
   public:
@@ -132,7 +139,7 @@ void mu2e::CRYGenPlots::analyze(art::Event const & e)
   else
     success = e.getByLabel(CRYModuleLabel_, CRYInstanceName_, gpHandle);
 
-  if (!success) 
+  if (!success)
     return;
 
   const auto & particles = *gpHandle;

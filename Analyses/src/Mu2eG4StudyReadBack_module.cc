@@ -8,31 +8,52 @@
 // Original author KLG somewhat based on vd read back
 //
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeomHandle.hh"
+#include <exception>
+#include <stddef.h>
+#include <cmath>                                                    // for sqrt
+#include <iostream>
+#include <string>
+#include <map>
+#include <memory>
+#include <typeinfo>
+#include <utility>                                                  // for pair
+#include <vector>
+
 #include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
 #include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
 #include "MCDataProducts/inc/PhysicalVolumeInfoMultiCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "TH1F.h"
 #include "TNtuple.h"
 #include "TTree.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art_root_io/TFileService.h"
 #include "art/Framework/Principal/Handle.h"
-#include "cetlib_except/exception.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include <cmath>
-#include <iostream>
-#include <string>
+#include "CLHEP/Vector/LorentzVector.h"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "ConfigTools/inc/SimpleConfig.hh"
+#include "GeometryService/inc/GeometryService.hh"
+#include "HepPDT/Measurement.hh"
+#include "HepPDT/ParticleData.hh"
+#include "HepPDT/ParticleID.hh"
+#include "MCDataProducts/inc/PhysicalVolumeInfo.hh"
+#include "MCDataProducts/inc/ProcessCode.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
+#include "MCDataProducts/inc/StepPointMC.hh"
+#include "RtypesCore.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "canvas/Persistency/Provenance/EventID.h"
+#include "canvas/Utilities/Exception.h"
+#include "canvas/Utilities/InputTag.h"
+#include "cetlib/map_vector.h"
+#include "fhiclcpp/exception.h"
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 
@@ -150,7 +171,7 @@ namespace mu2e {
     // Module label of the g4 module that made the hits.
     std::string _g4ModuleLabel;
 
-    // Save in the particles ntuple only those particles, which die 
+    // Save in the particles ntuple only those particles, which die
     // after this time (in ns)
     double _timeCut;
 
@@ -270,20 +291,20 @@ namespace mu2e {
       SimpleConfig const& config  = geom->config();
       if (config.getBool("mu2e.printParticleDataTable",false)) {
 
-        cout << __func__ 
+        cout << __func__
              << " pdt size : "
-             << pdt_.size() 
+             << pdt_.size()
              << endl;
-      
-        for ( ParticleDataTable::const_iterator pdti=pdt_.begin(), e=pdt_.end(); 
+
+        for ( ParticleDataTable::const_iterator pdti=pdt_.begin(), e=pdt_.end();
               pdti!=e; ++pdti ) {
-      
-          cout << __func__ 
+
+          cout << __func__
                << " pdt particle : "
-               << pdti->first.pid()  
-               << ", name: "          
+               << pdti->first.pid()
+               << ", name: "
                << pdt_.particle(pdti->first.pid()).ref().name()
-               << ", PDTname: "          
+               << ", PDTname: "
                << pdt_.particle(pdti->first.pid()).ref().PDTname()
                << ", "
                << pdt_.particle(pdti->first.pid()).ref().mass()
@@ -310,7 +331,7 @@ namespace mu2e {
     event.getByLabel(_g4ModuleLabel, simParticles);
     bool haveSimPart = simParticles.isValid();
     if ( haveSimPart ) haveSimPart = !(simParticles->empty());
-    
+
     // Loop over all stepper points.
     if( points.isValid() ) for ( size_t i=0; i<points->size(); ++i ){
 
@@ -361,7 +382,7 @@ namespace mu2e {
              << event.id().event() << " | "
              << point.volumeId()   << " | "
              << point.trackId().asInt() << " | "
-             << pdgId              << " , name: "  
+             << pdgId              << " , name: "
              << pdt_.particle(pdgId).ref().name() << " , PDTname: "
              << pdt_.particle(pdgId).ref().PDTname() << " | "
              << point.time()       << " "
@@ -429,7 +450,7 @@ namespace mu2e {
              << event.id().event() << " | "
              << hit.volumeId()     << " | "
              << hit.trackId().asInt() << " | "
-             << pdgId              << " , name: "  
+             << pdgId              << " , name: "
              << pdt_.particle(pdgId).ref().name() << " , PDTname: "
              << pdt_.particle(pdgId).ref().PDTname() << " | "
              << hit.time()         << " "
@@ -503,7 +524,7 @@ namespace mu2e {
           // calculation of the prestep info is more involved...
           // assume the step points are sorted by time by construction, get the last one
           size_t thei(-1);
-          size_t trackiid = sim.id().asInt();     
+          size_t trackiid = sim.id().asInt();
           for ( size_t i=points->size()-1; i!=0; --i ){
             if ( trackiid == ((*points)[i]).trackId().asInt() ) {
               thei = i;

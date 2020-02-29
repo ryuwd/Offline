@@ -1,23 +1,39 @@
 // Andrei Gaponenko, 2011
 
-#include <string>
-#include <vector>
-#include <algorithm>
+#include <exception>                                    // for exception
+#include <math.h>                                              // for fabs
+#include <string>                                              // for string
+#include <vector>                                              // for vector
+#include <algorithm>                                           // for find, max
+#include <iostream>                                            // for operat...
+#include <memory>                                              // for unique...
+#include <set>                                                 // for operat...
+#include <typeinfo>                                            // for type_info
+#include <utility>                                             // for move
 
-// Mu2e includes.
-#include "MCDataProducts/inc/StatusG4.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-#include "Mu2eUtilities/inc/compressSimParticleCollection.hh"
-
+#include "MCDataProducts/inc/StepPointMC.hh"                   // for StepPo...
+#include "Mu2eUtilities/inc/compressSimParticleCollection.hh"  // for compre...
 // art includes.
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDFilter.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
+#include "fhiclcpp/ParameterSet.h"                             // for Parame...
+#include "art/Framework/Core/EDFilter.h"                       // for EDFilter
+#include "art/Framework/Principal/Event.h"                     // for Event
+#include "art/Framework/Core/ModuleMacros.h"                   // for DEFINE...
+#include "CLHEP/Vector/ThreeVector.h"                          // for Hep3Ve...
+#include "MCDataProducts/inc/SimParticle.hh"                   // for SimPar...
+#include "art/Framework/Principal/Handle.h"                    // for Handle
+#include "canvas/Persistency/Common/Ptr.h"                     // for Ptr
+#include "canvas/Persistency/Provenance/EventID.h"             // for operat...
+#include "canvas/Persistency/Provenance/ProductID.h"           // for ProductID
+#include "cetlib/map_vector.h"                                 // for map_ve...
+#include "cetlib_except/exception.h"                           // for exception
+#include "fhiclcpp/coding.h"                                   // for ps_seq...
+#include "fhiclcpp/exception.h"                                // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"          // for Allowe...
+
+namespace art {
+class EDProductGetter;
+class Run;
+}  // namespace art
 
 //#define AGDEBUG(stuff) std::cerr<<"AG: "<<__FILE__<<", line "<<__LINE__<<": "<<stuff<<std::endl;
 #define AGDEBUG(stuff)

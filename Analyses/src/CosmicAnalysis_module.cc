@@ -1,46 +1,38 @@
-#include <iostream>
-#include <memory>
-#include <string>
+#include <TTree.h>                                          // for TTree
+#include <exception>                                 // for exception
+#include <memory>                                           // for allocator
+#include <string>                                           // for string
+#include <cmath>                                            // for NAN, isnan
+#include <map>                                              // for map<>::co...
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
 
-#include <TDirectory.h>
-#include <TMath.h>
-#include <TFile.h>
-#include <TTree.h>
-#include <TROOT.h>
+#include "MCDataProducts/inc/MCTrajectoryCollection.hh"     // for MCTraject...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "CLHEP/Units/SystemOfUnits.h"                      // for CLHEP
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+#include "MCDataProducts/inc/MCTrajectory.hh"               // for MCTrajectory
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "art_root_io/TFileDirectory.h"                     // for TFileDire...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for operator<
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
-#include "CLHEP/Units/GlobalSystemOfUnits.h"
-#include "CosmicRayShieldGeom/inc/CosmicRayShield.hh"
-#include "DataProducts/inc/CRSScintillatorBarIndex.hh"
-#include "DataProducts/inc/VirtualDetectorId.hh"
-#include "GeometryService/inc/DetectorSystem.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GeometryService/inc/GeometryService.hh"
-#include "HepPID/ParticleName.hh"
-#include "MCDataProducts/inc/GenParticle.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/PhysicalVolumeInfoMultiCollection.hh"
-#include "MCDataProducts/inc/MCTrajectoryCollection.hh"
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "Mu2eUtilities/inc/PhysicalVolumeMultiHelper.hh"
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/CrvCoincidenceCollection.hh"
-#include "RecoDataProducts/inc/CrvRecoPulseCollection.hh"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "fhiclcpp/ParameterSet.h"
+namespace mu2e {
+class MCTrajectoryPoint;
+}  // namespace mu2e
 
 using namespace CLHEP;
-#include "RecoDataProducts/inc/KalRepCollection.hh"
-#include "BTrkData/inc/TrkStrawHit.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/TrkBase/TrkHelixUtils.hh"
 
 typedef struct
 {
@@ -83,7 +75,7 @@ typedef struct
   int    run_number, subrun_number, event_number;
 
   char filename[200];
-  
+
   void clear()
   {
     reco_n=0;
@@ -118,7 +110,7 @@ typedef struct
     }
 
     firstCoincidenceHitTime=NAN;
-    
+
     CRVveto_allSectors=false;
     CRVhit_allSectors=false;
     for(int i=0; i<8; i++)
@@ -170,7 +162,7 @@ namespace mu2e
 
   CosmicAnalysis::CosmicAnalysis(fhicl::ParameterSet const &pset)
     :
-    art::EDAnalyzer(pset), 
+    art::EDAnalyzer(pset),
     _fitterModuleLabel(pset.get<std::string>("fitterModuleLabel")),
     _fitterModuleInstance(pset.get<std::string>("fitterModuleInstance")),
     _g4ModuleLabel(pset.get<std::string>("g4ModuleLabel","detectorFilter")),
@@ -255,7 +247,7 @@ namespace mu2e
       {
         double ratio=(crossingPos - point1[dim])/diffVector[dim];
         CLHEP::Hep3Vector point=ratio*diffVector+point1;
-        for(int i=0; i<3; i++) 
+        for(int i=0; i<3; i++)
         {
           crossingPoint[i]=point[i];
           crossingDirection[i]=diffVector.unit()[i];
@@ -282,7 +274,7 @@ namespace mu2e
       std::map<art::Ptr<mu2e::SimParticle>,mu2e::MCTrajectory>::const_iterator traj_iter;
       for(traj_iter=_mcTrajectories->begin(); traj_iter!=_mcTrajectories->end(); traj_iter++)
       {
-        if(traj_iter->first->id()==particleKey) 
+        if(traj_iter->first->id()==particleKey)
         {
           const auto &trajectoryPoints = traj_iter->second.points();
           findCrossingDetails(trajectoryPoints, 0, xCrossing1, _eventinfo.xplane1, _eventinfo.xplane1Dir);
@@ -402,13 +394,13 @@ namespace mu2e
             double momentumDifference=fabs(kalReps->at(k).momentum(0).mag()-104.375);
             if(momentumDifference<minMomentumDifference || std::isnan(minMomentumDifference)) selectedTrack=k;
           }
-          
-          const KalRep &particle = kalReps->at(selectedTrack); 
+
+          const KalRep &particle = kalReps->at(selectedTrack);
           _eventinfo.reco_n=kalReps->size();
           _eventinfo.reco_t0=particle.t0().t0();
 
           //from TrkDiag/src/KalDiag.cc
-          double firsthitfltlen = particle.lowFitRange(); 
+          double firsthitfltlen = particle.lowFitRange();
           double lasthitfltlen = particle.hiFitRange();
           double entlen = std::min(firsthitfltlen,lasthitfltlen);
           TrkHelixUtils::findZFltlen(particle.traj(),_zent,entlen,0.1);
@@ -482,7 +474,7 @@ namespace mu2e
     } //event.getByLabel
 
     if(strlen(_eventinfo.simreco_particle)==0) //this mostly likely happened because the reconstructed track wasn't found
-    {                                          //don't record such events 
+    {                                          //don't record such events
       std::cout<<"Will not record event "<<_eventinfo.event_number<<" of subrun "<<_eventinfo.subrun_number<<" in file "<<_eventinfo.filename<<", ";
       std::cout<<"since either the reco or the MC track is missing."<<std::endl;
       return;
@@ -493,7 +485,7 @@ namespace mu2e
 
     art::Handle<CrvCoincidenceCheckResult> crvCoincidenceCheckResult;
     std::string crvCoincidenceInstanceName="";
-    
+
     if(event.getByLabel(_crvCoincidenceModuleLabel,crvCoincidenceInstanceName,crvCoincidenceCheckResult))
     {
       const std::vector<CrvCoincidenceCheckResult::CoincidenceCombination> &coincidenceCombinations = crvCoincidenceCheckResult->GetCoincidenceCombinations();
@@ -533,7 +525,7 @@ namespace mu2e
 
 //check for CRV step points
     std::vector<art::Handle<StepPointMCCollection> > CRVStepsVector;
-    art::Selector selector(art::ProductInstanceNameSelector("CRV") && 
+    art::Selector selector(art::ProductInstanceNameSelector("CRV") &&
                            art::ProcessNameSelector("*"));
 
     event.getMany(selector, CRVStepsVector);
@@ -585,17 +577,17 @@ namespace mu2e
 /*
     art::Handle<CrvRecoPulsesCollection> crvRecoPulsesCollection;
     event.getByLabel("CrvRecoPulses","",crvRecoPulsesCollection);
-    for(CrvRecoPulsesCollection::const_iterator iter=crvRecoPulsesCollection->begin(); 
+    for(CrvRecoPulsesCollection::const_iterator iter=crvRecoPulsesCollection->begin();
         iter!=crvRecoPulsesCollection->end(); iter++)
     {
       const CRSScintillatorBarIndex &barIndex = iter->first;
       const CRSScintillatorBar &CRSbar = CRS->getBar(barIndex);
-    
+
       const CrvRecoPulses &crvRecoPulses = iter->second;
       for(int SiPM=0; SiPM<4; SiPM++)
       {
         const std::vector<CrvRecoPulses::CrvSingleRecoPulse> &pulseVector = crvRecoPulses.GetRecoPulses(SiPM);
-        for(unsigned int i = 0; i<pulseVector.size(); i++) 
+        for(unsigned int i = 0; i<pulseVector.size(); i++)
         {
           const CrvRecoPulses::CrvSingleRecoPulse &pulse = pulseVector[i];
           int PEs=pulse._PEs;

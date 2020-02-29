@@ -8,32 +8,52 @@
 // Original author Robert Bernstein
 //
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "TH1F.h"
-#include "TNtuple.h"
-#include "TTree.h"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "cetlib_except/exception.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include <cmath>
-#include <iostream>
-#include <iomanip>
-#include <string>
+#include <exception>                                     // for excep...
+#include <stddef.h>                                             // for size_t
+#include <cmath>                                                // for sqrt
+#include <iostream>                                             // for opera...
+#include <iomanip>                                              // for opera...
+#include <string>                                               // for string
+#include <algorithm>                                            // for max
+#include <memory>                                               // for uniqu...
+#include <set>                                                  // for set
+#include <typeinfo>                                             // for type_...
+#include <vector>                                               // for vector
 
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
+#include "CLHEP/Units/SystemOfUnits.h"                          // for keV
+#include "TNtuple.h"                                            // for TNtuple
+#include "art/Framework/Core/EDAnalyzer.h"                      // for EDAna...
+#include "art/Framework/Principal/Event.h"                      // for Event
+#include "art/Framework/Core/ModuleMacros.h"                    // for DEFIN...
+#include "art_root_io/TFileService.h"                           // for TFile...
+#include "art/Framework/Principal/Handle.h"                     // for Handle
+#include "cetlib_except/exception.h"                            // for opera...
+#include "fhiclcpp/ParameterSet.h"                              // for Param...
+#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"  // for Globa...
+#include "GlobalConstantsService/inc/ParticleDataTable.hh"      // for Parti...
+#include "CLHEP/Vector/LorentzVector.h"                         // for HepLo...
+
+#include "CLHEP/Vector/ThreeVector.h"                           // for Hep3V...
+
+#include "DataProducts/inc/PDGCode.hh"                          // for PDGCode
+#include "HepPDT/Measurement.hh"                                // for Measu...
+
+#include "HepPDT/ParticleData.hh"                               // for Parti...
+#include "MCDataProducts/inc/GenParticle.hh"                    // for GenPa...
+#include "MCDataProducts/inc/SimParticle.hh"                    // for SimPa...
+#include "MCDataProducts/inc/StepPointMC.hh"                    // for StepP...
+#include "art/Framework/Services/Registry/ServiceHandle.h"      // for Servi...
+#include "canvas/Persistency/Common/Ptr.h"                      // for Ptr
+#include "canvas/Persistency/Provenance/EventID.h"              // for EventID
+#include "canvas/Utilities/Exception.h"                         // for Excep...
+#include "cetlib/map_vector.h"                                  // for map_v...
+#include "fhiclcpp/coding.h"                                    // for ps_se...
+#include "fhiclcpp/exception.h"                                 // for excep...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"           // for Allow...
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 
@@ -167,7 +187,7 @@ namespace mu2e {
 		//		initialProtonFourMomentum = iGen.momentum();
 	      }
 	  }
-      } 
+      }
 
     if (_diagLevel > 0){
       std::cout << "about to print size of hits" << std::endl;
@@ -176,9 +196,9 @@ namespace mu2e {
 
     // Loop over all hits.
           if( hits.isValid() )
-    //    if (hits.isValid() && hits->size() ==1) 
+    //    if (hits.isValid() && hits->size() ==1)
       {
-	for ( size_t i=0; i< hits->size(); ++i ){ 
+	for ( size_t i=0; i< hits->size(); ++i ){
 	  // Alias, used for readability.
 	  const StepPointMC& hit = (*hits)[i];
 
@@ -208,7 +228,7 @@ namespace mu2e {
 		  if (goodPDG)
 		    {
 		      //
-		      // what was the starting momentum and direction of the track?  
+		      // what was the starting momentum and direction of the track?
 		      // just use angle wrt z as a close-enough estimate
 		      auto originalParticle = sim.originParticle();
 		      startingFourMomentum = originalParticle.startMomentum();
@@ -218,16 +238,16 @@ namespace mu2e {
 		      if (_diagLevel > 0)
 			{
 			  std::cout << "\n inside hit number: " << i << std::endl;
-		  
+
 			  std::cout << "starting momentum = " << startingFourMomentum << std::endl;
 			  std::cout << "starting cos theta = " << startingFourMomentum.cosTheta() << std::endl;
 			  std::cout << "starting position = " << startingPosition << std::endl;
 
 			  std::cout << "_nAnalyzed, pdg, propertime, time, volume " << _nAnalyzed << " " << pdgId << " " << hit.properTime() << " " << hit.time() << " " << hit.volumeId() <<"\n"
-				    << std::setprecision(15) << " position" <<   " " << pos.x() << " " << pos.y() << " " << pos.z() 
+				    << std::setprecision(15) << " position" <<   " " << pos.x() << " " << pos.y() << " " << pos.z()
 				    << " \n current KE " << currentKE << std::endl;
 			}
-		  
+
 		    }
 		}
 	    }
@@ -235,7 +255,7 @@ namespace mu2e {
 
 	  if (goodPDG)//hack to get rid of genParticles
 	    {
-	  
+
 	      // Fill the ntuple.
 	      nt[0]  = event.id().run();
 	      nt[1]  = event.id().event();
@@ -247,11 +267,11 @@ namespace mu2e {
 	      nt[7]  = pos.z();
 	      nt[8] = hit.properTime();
 	      //	      nt[9] = startingFourMomentum.cosTheta();
-	      // 
+	      //
 	      // get angle of initial proton to pbar; convert from HepDouble whatever that is
 	      nt[9] =    (initialProtonFourMomentum.vect().dot(startingFourMomentum.vect()))
 		/(initialProtonFourMomentum.vect().mag()*startingFourMomentum.vect().mag());
-	      nt[10] = startingFourMomentum.vect().mag(); 
+	      nt[10] = startingFourMomentum.vect().mag();
 	      nt[11] = initialProtonFourMomentum.vect().mag();
 	      nt[12] = currentKE;
 	      nt[13] = mom.x();
@@ -260,10 +280,10 @@ namespace mu2e {
 
 	      if (_diagLevel > 0)
 		{
-	      
+
 		  std::cout << " \n filling ntuple" << std::endl;
-		  std::cout << "_nAnalyzed, pdg, time, volume " << _nAnalyzed << " " << pdgId << " " << hit.time()  << " " << hit.volumeId() << "\n" 
-			    << std::setprecision(15) << " position" <<   " " << pos.x() << " " << pos.y() << " " << pos.z() 
+		  std::cout << "_nAnalyzed, pdg, time, volume " << _nAnalyzed << " " << pdgId << " " << hit.time()  << " " << hit.volumeId() << "\n"
+			    << std::setprecision(15) << " position" <<   " " << pos.x() << " " << pos.y() << " " << pos.z()
 			    << " \n current KE " << currentKE << "\n  momentum vector = " << mom << std::endl;
 		}
 	      _ntAntiProtonSteps->Fill(nt);

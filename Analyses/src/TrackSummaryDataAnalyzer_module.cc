@@ -2,33 +2,25 @@
 //
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-#include <limits>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
 
-#include "cetlib_except/exception.h"
-
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Vector/ThreeVector.h"
-
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "RecoDataProducts/inc/TrackSummary.hh"
-#include "Mu2eUtilities/inc/HistTrackSum.hh"
-#include "Mu2eUtilities/inc/TrackCuts.hh"
-
-#include "TH1.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "RecoDataProducts/inc/TrackSummary.hh"             // for TrackSumm...
+#include "Mu2eUtilities/inc/TrackCuts.hh"                   // for TrackCuts
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 namespace mu2e {
 

@@ -9,30 +9,37 @@
 // Original author Rob Kutschke
 //
 
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <set>
+#include <iostream>                                         // for std
+#include <string>                                           // for allocator
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
 // Mu2e includes.
-#include "GeometryService/inc/GeomHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-
-// Root includes.
-#include "TH1F.h"
-#include "TNtuple.h"
-
+#include "GeometryService/inc/GeomHandle.hh"                // for GeomHandle
+#include "TrackerGeom/inc/Tracker.hh"                       // for Tracker
+#include "TNtuple.h"                                        // for TNtuple
 // Other includes.
-#include "CLHEP/Units/SystemOfUnits.h"
+#include "CLHEP/Units/SystemOfUnits.h"                      // for keV
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+
+#include "DataProducts/inc/StrawId.hh"                      // for StrawId
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPoint...
+#include "TH1.h"                                            // for TH1F
+#include "TrackerGeom/inc/Straw.hh"                         // for Straw
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

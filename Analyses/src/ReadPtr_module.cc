@@ -9,35 +9,40 @@
 //
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "canvas/Utilities/InputTag.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "BTrk/TrkBase/TrkErrCode.hh"                       // for TrkErrCode
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+
+#include "TH1.h"                                            // for TH1D
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Persistency/Common/detail/aggregate.h"     // for CLHEP
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 // Need this for the BaBar headers.
 using namespace CLHEP;
 
-// BaBar includes
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/TrkBase/TrkParticle.hh"
-
-// mu2e tracking
-#include "RecoDataProducts/inc/TrkFitDirection.hh"
-
-// This is fragile and needs to be last until CLHEP is
-// properly qualified and included in the BaBar classes.
-//#include "RecoDataProducts/inc/KalRepCollection.hh"
-#include "RecoDataProducts/inc/KalRepCollection.hh"
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-
-#include "TH1D.h"
-
+#include <exception>                                 // for exception
 // C++ includes.
-#include <iostream>
-#include <string>
+#include <iostream>                                         // for std
+#include <string>                                           // for string
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
+
+#include "BTrk/KalmanTrack/KalRep.hh"                       // for KalRep
+#include "BTrk/TrkBase/TrkParticle.hh"                      // for TrkParticle
+// mu2e tracking
+#include "RecoDataProducts/inc/TrkFitDirection.hh"          // for TrkFitDir...
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"      // for KalRepPtr...
 
 using namespace std;
 

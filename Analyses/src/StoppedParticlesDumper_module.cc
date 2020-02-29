@@ -10,31 +10,43 @@
 //
 // Andrei Gaponenko, 2013, 2015
 
-#include <string>
-#include <algorithm>
+#include <exception>                                 // for exception
+#include <string>                                           // for allocator
+#include <algorithm>                                        // for max, sort
+#include <functional>                                       // for function
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector<>:...
 
-#include "cetlib_except/exception.h"
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/SimParticlePtrCollection.hh"   // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPoint...
+#include "Mu2eUtilities/inc/SimParticleGetTau.hh"           // for SimPartic...
+#include "TTree.h"                                          // for TTree
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Utilities/InputTag.h"
-#include "art_root_io/TFileService.h"
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
 
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticlePtrCollection.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "Mu2eUtilities/inc/SimParticleGetTau.hh"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/PhysicsParams.hh"
-
-#include "TTree.h"
-
-#include <algorithm>
-#include <iterator>
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "art/Framework/Core/detail/Analyzer.h"             // for Analyzer:...
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/exempt_ptr.h"                              // for exempt_ptr
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "fhiclcpp/types/Atom.h"                            // for Atom, Ato...
+#include "fhiclcpp/types/Comment.h"                         // for Comment
+#include "fhiclcpp/types/Name.h"                            // for Name
+#include "fhiclcpp/types/Sequence.h"                        // for Sequence
+#include "fhiclcpp/types/Table.h"                           // for Table::me...
 
 namespace mu2e {
 

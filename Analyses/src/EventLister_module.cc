@@ -8,16 +8,19 @@
 // Original author Rob Kutschke
 //
 
+#include <stdio.h>                                     // for printf
 // C++ includes.
-#include <iostream>
-#include <string>
+#include <iostream>                                    // for std
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
+
+namespace fhicl {
+class ParameterSet;
+}  // namespace fhicl
 
 using namespace std;
 

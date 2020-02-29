@@ -1,26 +1,37 @@
 // Andrei Gaponenko, 2013
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <memory>
+#include <exception>                                 // for exception
+#include <string>                                           // for operator<<
+#include <vector>                                           // for vector
+#include <memory>                                           // for allocator
+#include <sstream>                                          // for operator<<
+#include <typeinfo>                                         // for type_info
 
-#include "cetlib_except/exception.h"
+#include "cetlib_except/exception.h"                        // for exception
+#include "messagefacility/MessageLogger/MessageLogger.h"    // for MaybeLogger_
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/SubRun.h"                 // for SubRun
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art/Framework/Principal/Provenance.h"             // for Provenance
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "MCDataProducts/inc/GenEventCount.hh"              // for GenEventC...
+#include "TH1.h"                                            // for TH1D, TH1
+#include "art/Framework/Core/detail/Analyzer.h"             // for Analyzer:...
+#include "canvas/Persistency/Provenance/SubRunID.h"         // for operator<<
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/exempt_ptr.h"                              // for exempt_ptr
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "fhiclcpp/types/Atom.h"                            // for Atom
+#include "fhiclcpp/types/Comment.h"                         // for Comment
+#include "fhiclcpp/types/Name.h"                            // for Name
+#include "fhiclcpp/types/Table.h"                           // for Table::me...
 
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "MCDataProducts/inc/GenEventCount.hh"
-
-#include "TH1D.h"
+namespace art {
+class Event;
+}  // namespace art
 
 namespace mu2e {
 

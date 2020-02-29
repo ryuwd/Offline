@@ -4,36 +4,42 @@
 // Author: Zhengyun You, 03/27/2014
 //
 
-#include <iostream>
-#include <iomanip>
-#include <vector> 
-#include <map>
+#include <exception>                                 // for exception
+#include <math.h>                                           // for fabs, sqrt
+#include <iostream>                                         // for operator<<
+#include <iomanip>                                          // for operator<<
+#include <vector>                                           // for allocator
+#include <map>                                              // for map, oper...
+#include <memory>                                           // for unique_ptr
+#include <string>                                           // for string
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
 
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "fhiclcpp/ParameterSet.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "TH2.h"                                            // for TH2F
+#include "TMath.h"                                          // for DegToRad
+#include "TVector3.h"                                       // for TVector3
+#include "TGeoManager.h"                                    // for TGeoManager
+#include "TGeoMaterial.h"                                   // for TGeoMaterial
+#include "TGeoMedium.h"                                     // for TGeoMedium
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
 
-#include "TApplication.h"
-#include "TROOT.h"
-#include "TBrowser.h"
-#include "TCanvas.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TMath.h"
-#include "TVector3.h"
-#include "TGWindow.h"
-#include "TRootEmbeddedCanvas.h"
-#include "TGeoManager.h"
-#include "TGeoMaterial.h"
-#include "TGeoMedium.h"
-#include "TGeoArb8.h"
-#include "TGeoTube.h"
-#include "TMath.h"
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPointMC
+#include "TGeoNode.h"                                       // for TGeoNode
+#include "TGeoVolume.h"                                     // for TGeoVolume
+#include "TString.h"                                        // for TString
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
@@ -84,7 +90,7 @@ namespace mu2e
       fhicl::ParameterSet _pset;
       bool _first;
       int _ks;
- 
+
       std::map<int, TVector3> _mapTrkIntersection;
       std::map<int, double>   _mapTrkDelta;
       std::map<int, TH2F*> _maph2YvsR;
@@ -193,7 +199,7 @@ namespace mu2e
   }
 
   int TSTrackAna::geth2Id(int ts, int i)
-  { 
+  {
     return ts*10000+i;
   }
 
@@ -224,7 +230,7 @@ namespace mu2e
     else if (ts == 3) delta = -1.0*(_cutX - x);
 
     if ((ts == 1 || ts ==3) && fabs(delta) > _deltaMax) return;
-    if (ts == 2 && (theta > TMath::PiOver2()+0.01 || theta < -0.01 || fabs(delta) > _deltaMax)) return;    
+    if (ts == 2 && (theta > TMath::PiOver2()+0.01 || theta < -0.01 || fabs(delta) > _deltaMax)) return;
 
     TVector3 dir(step.momentum().x(), step.momentum().y(), step.momentum().z());
     dir.SetMag(1.0);
@@ -273,11 +279,11 @@ namespace mu2e
       double r = _originTS2.Z();
       if (ts == 1)      r = localPos.X();
       else if (ts == 2) r = localPos.Mag();
-      else if (ts == 3) r = localPos.Z(); 
+      else if (ts == 3) r = localPos.Z();
       double y = i.second.Y();
       if (_verbosity >= 1) cout << "r=" << setw(_ks) << r << " y=" << setw(_ks) << y << endl;
       h2YvsR->Fill(r, y);
-    } 
+    }
     _mapTrkIntersection.clear();
     _mapTrkDelta.clear();
   }
@@ -321,7 +327,7 @@ namespace mu2e
         for(const auto& i : *ih) {
           if (_verbosity >= 2) {
             std::cout << "Theta step (" << setw(_ks) << i.position().x()
-              << ", "  << setw(_ks) << i.position().y() 
+              << ", "  << setw(_ks) << i.position().y()
               << ", "  << setw(_ks) << i.position().z() << ")"
               << std::endl;
           }

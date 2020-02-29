@@ -1,29 +1,40 @@
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
+#include <exception>                                // for exception
+#include <string>                                          // for string
+#include <vector>                                          // for vector
+#include <memory>                                          // for unique_ptr
+#include <algorithm>                                       // for max
+#include <map>                                             // for map, map<>...
+#include <set>                                             // for set
+#include <typeinfo>                                        // for type_info
+#include <utility>                                         // for move, pair
 
-#include "cetlib_except/exception.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-
-#include "RecoDataProducts/inc/StrawDigi.hh"
-#include "MCDataProducts/inc/StrawDigiMC.hh"
-#include "MCDataProducts/inc/StrawDigiMCCollection.hh"
-#include "RecoDataProducts/inc/TrackSummaryRecoMap.hh"
-#include "BTrkData/inc/TrkStrawHit.hh"
-#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"
-#include "MCDataProducts/inc/SimParticlePtrCollection.hh"
-
-#include "Mu2eUtilities/inc/particleEnteringG4Volume.hh"
+#include "cetlib_except/exception.h"                       // for exception
+#include "art/Framework/Core/EDProducer.h"                 // for EDProducer
+#include "art/Framework/Core/ModuleMacros.h"               // for DEFINE_ART...
+#include "art/Framework/Principal/Event.h"                 // for Event
+#include "art/Framework/Principal/Handle.h"                // for ValidHandle
+#include "MCDataProducts/inc/StrawDigiMC.hh"               // for StrawDigiMC
+#include "RecoDataProducts/inc/TrackSummaryRecoMap.hh"     // for TrackSumma...
+#include "BTrkData/inc/TrkStrawHit.hh"                     // for TrkStrawHit
+#include "MCDataProducts/inc/TrackSummaryTruthAssns.hh"    // for TrackSumma...
+#include "MCDataProducts/inc/SimParticlePtrCollection.hh"  // for SimParticl...
+#include "Mu2eUtilities/inc/particleEnteringG4Volume.hh"   // for particleEn...
+#include "BTrk/KalmanTrack/KalRep.hh"                      // for KalRep
+#include "BTrk/TrkBase/TrkHit.hh"                          // for TrkHit
+#include "DataProducts/inc/StrawEnd.hh"                    // for StrawEnd
+#include "DataProducts/inc/StrawId.hh"                     // for operator<<
+#include "TrackerGeom/inc/Straw.hh"                        // for Straw
+#include "canvas/Persistency/Common/Assns.h"               // for Assns, Ass...
+#include "canvas/Persistency/Common/Ptr.h"                 // for Ptr, opera...
+#include "canvas/Utilities/InputTag.h"                     // for InputTag
+#include "fhiclcpp/ParameterSet.h"                         // for ParameterSet
+#include "fhiclcpp/exception.h"                            // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"      // for AllowedCon...
 
 namespace mu2e {
+struct SimParticle;
 
   class TrackSummaryTruthMaker : public art::EDProducer {
   public:

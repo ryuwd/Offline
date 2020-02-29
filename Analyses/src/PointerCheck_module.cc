@@ -9,32 +9,51 @@
 // or set verbose to 0 to run quietly.
 //
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <vector>
-#include <algorithm>
+#include <exception>                                // for exception
+#include <iostream>                                        // for operator<<
+#include <iomanip>                                         // for operator<<
+#include <string>                                          // for string
+#include <vector>                                          // for vector
+#include <algorithm>                                       // for max, all_of
+#include <memory>                                          // for unique_ptr
+#include <typeinfo>                                        // for type_info
+#include <utility>                                         // for pair
 
-#include "fhiclcpp/ParameterSet.h"
-#include "fhiclcpp/types/Atom.h"
-#include "fhiclcpp/types/Sequence.h"
-#include "cetlib_except/exception.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "art/Framework/Core/ModuleMacros.h"
-// the products that can be re-written
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticlePtrCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/MCTrajectoryCollection.hh"
-#include "MCDataProducts/inc/StrawDigiMCCollection.hh"
-#include "MCDataProducts/inc/CaloShowerStepCollection.hh"
-#include "MCDataProducts/inc/CaloDigiMCCollection.hh"
-#include "MCDataProducts/inc/CrvDigiMCCollection.hh"
+#include "fhiclcpp/types/Atom.h"                           // for Atom<>::de...
+#include "fhiclcpp/types/Sequence.h"                       // for Sequence
+#include "cetlib_except/exception.h"                       // for operator<<
+#include "art/Framework/Core/EDAnalyzer.h"                 // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                 // for Event
+#include "canvas/Persistency/Common/Ptr.h"                 // for Ptr, opera...
+#include "art/Framework/Core/ModuleMacros.h"               // for DEFINE_ART...
+#include "MCDataProducts/inc/SimParticlePtrCollection.hh"  // for SimParticl...
+#include "MCDataProducts/inc/MCTrajectoryCollection.hh"    // for MCTrajecto...
+#include "MCDataProducts/inc/CaloShowerStepCollection.hh"  // for CaloShower...
+#include "MCDataProducts/inc/CaloDigiMCCollection.hh"      // for CaloDigiMC...
+#include "DataProducts/inc/StrawEnd.hh"                    // for StrawEnd
+#include "MCDataProducts/inc/CaloDigiMC.hh"                // for CaloDigiMC
+#include "MCDataProducts/inc/CaloShowerStep.hh"            // for CaloShower...
+#include "MCDataProducts/inc/CrvDigiMC.hh"                 // for CrvDigiMCC...
+#include "MCDataProducts/inc/MCTrajectory.hh"              // for MCTrajectory
+#include "MCDataProducts/inc/SimParticle.hh"               // for SimParticl...
+#include "MCDataProducts/inc/StepPointMC.hh"               // for StepPointM...
+#include "MCDataProducts/inc/StrawDigiMC.hh"               // for StrawDigiM...
+#include "art/Framework/Core/detail/Analyzer.h"            // for Analyzer::...
+#include "art/Framework/Principal/Handle.h"                // for Handle
+#include "art/Framework/Principal/Provenance.h"            // for Provenance
+#include "canvas/Utilities/InputTag.h"                     // for InputTag
+#include "cetlib/exempt_ptr.h"                             // for exempt_ptr
+#include "cetlib/map_vector.h"                             // for operator==
+#include "fhiclcpp/exception.h"                            // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"      // for AllowedCon...
+#include "fhiclcpp/types/Comment.h"                        // for Comment
+#include "fhiclcpp/types/Name.h"                           // for Name
+#include "fhiclcpp/types/Table.h"                          // for Table::mem...
+#include "fhiclcpp/types/detail/validationException.h"     // for validation...
 
 
 namespace mu2e {
+class StrawGasStep;
 
 
   class PointerCheck : public art::EDAnalyzer {
@@ -45,49 +64,49 @@ namespace mu2e {
       using Name=fhicl::Name;
       using Comment=fhicl::Comment;
 
-      fhicl::Atom<bool> skipDereference{Name("skipDereference"), 
+      fhicl::Atom<bool> skipDereference{Name("skipDereference"),
 	  Comment("skip dereferencing pointers check"),false};
-      fhicl::Atom<int> verbose{Name("verbose"), 
+      fhicl::Atom<int> verbose{Name("verbose"),
 	  Comment("verbose flag, 0 to 10"),1};
 
-      fhicl::Sequence<art::InputTag> skipSimParticle{ 
+      fhicl::Sequence<art::InputTag> skipSimParticle{
 	fhicl::Name("skipSimParticle"),
           fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipSimParticlePtr{ 
+      fhicl::Sequence<art::InputTag> skipSimParticlePtr{
 	fhicl::Name("skipSimParticlePtr"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipStepPointMC{ 
+      fhicl::Sequence<art::InputTag> skipStepPointMC{
 	fhicl::Name("skipStepPointMC"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipMCTracjectory{ 
+      fhicl::Sequence<art::InputTag> skipMCTracjectory{
 	fhicl::Name("skipMCTracjectory"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipStrawDigiMC{ 
+      fhicl::Sequence<art::InputTag> skipStrawDigiMC{
 	fhicl::Name("skipStrawDigiMC"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipCaloDigiMC{ 
+      fhicl::Sequence<art::InputTag> skipCaloDigiMC{
 	fhicl::Name("skipCaloDigiMC"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipCaloShowerStep{ 
+      fhicl::Sequence<art::InputTag> skipCaloShowerStep{
 	fhicl::Name("skipCaloShowerStep"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
-      fhicl::Sequence<art::InputTag> skipCrvDigiMC{ 
+      fhicl::Sequence<art::InputTag> skipCrvDigiMC{
 	fhicl::Name("skipCrvDigiMC"),
-          fhicl::Comment("InputTag for collections to skip"), 
+          fhicl::Comment("InputTag for collections to skip"),
 	  std::vector<art::InputTag>()
 	  };
     };
@@ -221,30 +240,30 @@ namespace mu2e {
       } // endif excluded
     } // loop over handles
 
-  
+
   }
 
   void PointerCheck::printProvenance(art::Provenance const& p) {
     if(_verbose<1) return;
-    std::cout 
-      << " " << p.friendlyClassName() 
-      << ":" << p.moduleLabel() 
-      << ":" << p.productInstanceName() 
-      << ":" << p.processName() 
+    std::cout
+      << " " << p.friendlyClassName()
+      << ":" << p.moduleLabel()
+      << ":" << p.productInstanceName()
+      << ":" << p.processName()
       << std::endl;
     return;
   }
 
-  bool PointerCheck::excludedCollection(art::Provenance const& p, 
+  bool PointerCheck::excludedCollection(art::Provenance const& p,
 					InputTags const& tags) {
 
     // a tag has four fields, Classname already determined
     // treat empty fields as wildcards that match
     bool exclude = true;
     for(auto const& tag : tags) {
-      if( !tag.label().empty() && 
+      if( !tag.label().empty() &&
 	  tag.label() != p.moduleLabel() ) exclude = false;
-      if( !tag.instance().empty() && 
+      if( !tag.instance().empty() &&
 	  tag.instance() != p.productInstanceName() ) exclude = false;
       if( !tag.process().empty() &&
 	  tag.process() != p.processName() ) exclude = false;
@@ -286,7 +305,7 @@ namespace mu2e {
       } else { // null
 	if(s.isPrimary()) ns++;
       }
-      
+
       auto const& g = s.genParticle();
       if(g.isNonnull()) {
 	gn++;
@@ -297,7 +316,7 @@ namespace mu2e {
 	  }
 	}
       }
-      
+
       // check daughters
       for(auto const& d: s.daughters()) {
 	nd++;
@@ -311,9 +330,9 @@ namespace mu2e {
 	  }
 	}
       } // loop over daughters
-      
+
     } // loop over SP in coll
-    
+
     bool rc;
     rc = (ne==n && nn+ns==n && ni==nn && gi==gn && di==nd);
 
@@ -358,7 +377,7 @@ namespace mu2e {
 	}
       }
     } // loop over SP in coll
-    
+
     bool rc = (ni==n);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -399,7 +418,7 @@ namespace mu2e {
 	}
       }
     } // loop over SP in coll
-    
+
     bool rc = (ni==n);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -431,7 +450,7 @@ namespace mu2e {
 	}
       }
     } // loop over SP in coll
-    
+
     bool rc = (ni==n);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -470,7 +489,7 @@ namespace mu2e {
 	}
       }
     } // loop over SDMC in coll
-    
+
     bool rc = (ni==np);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -506,7 +525,7 @@ namespace mu2e {
 	}
       } // loop over Simparticles in a digi
     } // loop over SP in coll
-    
+
     bool rc = (ni==n);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -540,7 +559,7 @@ namespace mu2e {
 	}
       }
     } // loop over SS in coll
-    
+
     bool rc = (ni==n);
     if(_verbose<1 && !rc) return rc;
     // report
@@ -573,7 +592,7 @@ namespace mu2e {
 	}
       }
     } // loop over SS in coll
-    
+
     bool rc = (n<10 || (n>10 && ni>=n/2));
     if(_verbose>0) {
     // report
@@ -607,7 +626,7 @@ namespace mu2e {
 	}
       }
     } // loop over SDMC in coll
-    
+
     rc = rc && (n<10 || (n>10 && ni>=n/2));
     if(_verbose<1 && !rc) return rc;
     // report

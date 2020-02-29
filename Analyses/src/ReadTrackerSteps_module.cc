@@ -4,38 +4,39 @@
 // Original author KLG
 //
 
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
 //#include <cmath>
-#include <iostream>
-#include <string>
-#include <iomanip>
-
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <iomanip>                                          // for operator<<
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
 
 // CLHEP includes
-#include "CLHEP/Units/SystemOfUnits.h"
-
-// Mu2e includes
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-// root includes
-#include "TH1F.h"
-#include "TNtuple.h"
-#include "TTree.h"
-
+#include "CLHEP/Units/SystemOfUnits.h"                      // for keV
+#include "TrackerGeom/inc/Tracker.hh"                       // for Tracker
+#include "TNtuple.h"                                        // for TNtuple
 // Framework includes
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "cetlib_except/exception.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "messagefacility/MessageLogger/MessageLogger.h"    // for LogError
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+
+#include "GeometryService/inc/GeometryService.hh"           // for GeometryS...
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPointMC
+#include "TH1.h"                                            // for TH1F
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
@@ -77,7 +78,7 @@ namespace mu2e {
 
   };
 
-  ReadTrackerSteps::ReadTrackerSteps(fhicl::ParameterSet const& pset) : 
+  ReadTrackerSteps::ReadTrackerSteps(fhicl::ParameterSet const& pset) :
     art::EDAnalyzer(pset),
     // Run time parameters
     _diagLevel(pset.get<int>("diagLevel",0)),
@@ -90,7 +91,7 @@ namespace mu2e {
     _tsStepPoints(pset.get<string>("tsStepPoints","trackerDS"))
   {}
 
- 
+
 
   void ReadTrackerSteps::beginJob(){
 
@@ -98,16 +99,16 @@ namespace mu2e {
 
     art::ServiceHandle<art::TFileService> tfs;
 
-    _hNtset  = tfs->make<TH1F>( "hNtset ", 
+    _hNtset  = tfs->make<TH1F>( "hNtset ",
                                  "Number/ID of the detector with step",
                                  50,  0., 50. );
 
-    _hNtsetH = tfs->make<TH1F>( "hNtsetH", 
+    _hNtsetH = tfs->make<TH1F>( "hNtsetH",
                                  "Number of steps",
                                  50,  0., 50. );
 
     // Create an ntuple.
-    _nttts = tfs->make<TNtuple>( "nttts", 
+    _nttts = tfs->make<TNtuple>( "nttts",
                                   "Tracker steps ntuple",
                                   "evt:trk:sid:pdg:time:x:y:z:px:py:pz:"
                                   "g4bl_time");
@@ -118,19 +119,19 @@ namespace mu2e {
     ++_nAnalyzed;
 
     if (_diagLevel>1 ) {
-      cout << "ReadTrackerSteps::" << __func__ 
-           << setw(4) << " called for event "  
+      cout << "ReadTrackerSteps::" << __func__
+           << setw(4) << " called for event "
            << event.id().event()
            << " hitMakerModuleLabel "
-           << _hitMakerModuleLabel 
-           << " tsStepPoints " 
+           << _hitMakerModuleLabel
+           << " tsStepPoints "
            << _tsStepPoints
            << endl;
     }
 
     art::ServiceHandle<GeometryService> geom;
 
-    if (!geom->hasElement<Tracker>()) 
+    if (!geom->hasElement<Tracker>())
       {
         mf::LogError("Geom")
           << "Skipping ReadTrackerSteps::analyze due to lack of tracker\n";
@@ -156,8 +157,8 @@ namespace mu2e {
     unsigned int const nhits = hits.size();
 
     if (_diagLevel>0 && nhits>0 ) {
-      cout << "ReadTrackerSteps::" << __func__ 
-           << " Number of TS hits: " <<setw(4) 
+      cout << "ReadTrackerSteps::" << __func__
+           << " Number of TS hits: " <<setw(4)
            << nhits
            << endl;
     }
@@ -219,14 +220,14 @@ namespace mu2e {
       _nttts->Fill(nt);
 
       if ( _nAnalyzed < _maxFullPrint){
-        cout <<  "ReadTrackerSteps::" << __func__ 
+        cout <<  "ReadTrackerSteps::" << __func__
              << ": TS hit: "
              << setw(8) << event.id().event() << " | "
              << setw(4) << hit.volumeId()     << " | "
              << setw(6) << pdgId              << " | "
-             << setw(8) << hit.time()         << " | "  
+             << setw(8) << hit.time()         << " | "
              << setw(8) << mom.mag()          << " | "
-             << pos               
+             << pos
              << endl;
 
       }

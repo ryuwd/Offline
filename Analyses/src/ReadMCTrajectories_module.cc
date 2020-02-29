@@ -7,23 +7,35 @@
 // Contact person Rob Kutschke
 //
 
+#include <exception>                                 // for exception
 // C++ includes.
-#include <iostream>
-#include <string>
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <map>                                              // for map
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-// Mu2e includes.
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/MCTrajectoryCollection.hh"
-
-#include "TH1F.h"
-#include "TNtuple.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "MCDataProducts/inc/MCTrajectoryCollection.hh"     // for MCTraject...
+#include "TNtuple.h"                                        // for TNtuple
+#include "MCDataProducts/inc/MCTrajectory.hh"               // for MCTrajectory
+#include "MCDataProducts/inc/MCTrajectoryPoint.hh"          // for MCTraject...
+#include "TH1.h"                                            // for TH1F
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for operator<<
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

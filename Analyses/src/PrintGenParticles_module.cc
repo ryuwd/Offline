@@ -7,16 +7,21 @@
 // Original author Andrei Gaponenko
 //
 
-#include <iostream>
-#include <string>
+#include <exception>                            // for exception
+#include <iostream>                                    // for operator<<
+#include <string>                                      // for string, operat...
+#include <memory>                                      // for unique_ptr
+#include <typeinfo>                                    // for type_info
+#include <vector>                                      // for vector, vector...
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-#include "MCDataProducts/inc/GenParticle.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Principal/Handle.h"            // for Handle
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "MCDataProducts/inc/GenParticle.hh"           // for GenParticleCol...
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
 namespace mu2e {
 
@@ -34,7 +39,7 @@ namespace mu2e {
     std::string instanceName_;
   };
 
-  PrintGenParticles::PrintGenParticles(const fhicl::ParameterSet& pset) : 
+  PrintGenParticles::PrintGenParticles(const fhicl::ParameterSet& pset) :
     art::EDAnalyzer(pset),
     moduleLabel_(pset.get<std::string>("inputModuleLabel")),
     instanceName_(pset.get<std::string>("inputInstanceName"))

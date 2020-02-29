@@ -1,33 +1,53 @@
 // Andrei Gaponenko, 2014
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
+#include <exception>                             // for exception
+#include <string>                                       // for string
+#include <vector>                                       // for vector
+#include <memory>                                       // for unique_ptr
+#include <algorithm>                                    // for min, max
+#include <typeinfo>                                     // for type_info
+#include <utility>                                      // for move
 
-#include "cetlib_except/exception.h"
+#include "cetlib_except/exception.h"                    // for exception
+#include "CLHEP/Vector/ThreeVector.h"                   // for Hep3Vector
+#include "art/Framework/Core/EDProducer.h"              // for EDProducer
+#include "art/Framework/Core/ModuleMacros.h"            // for DEFINE_ART_MO...
+#include "art/Framework/Principal/Event.h"              // for Event
+#include "art/Framework/Principal/Handle.h"             // for ValidHandle
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"  // for KalRepPtrColl...
+#include "BTrk/KalmanTrack/KalRep.hh"                   // for KalRep
+#include "BTrk/KalmanTrack/KalHit.hh"                   // for KalHit
+#include "BTrk/TrkBase/TrkHelixUtils.hh"                // for TrkHelixUtils
+#include "BTrk/BbrGeom/BbrVectorErr.hh"                 // for BbrVectorErr
+#include "GeometryService/inc/GeomHandle.hh"            // for GeomHandle
+#include "GeometryService/inc/DetectorSystem.hh"        // for DetectorSystem
+#include "GeometryService/inc/VirtualDetector.hh"       // for VirtualDetector
+#include "DataProducts/inc/VirtualDetectorId.hh"        // for VirtualDetect...
+#include "Mu2eUtilities/inc/toHepPoint.hh"              // for fromHepPoint
+#include "RecoDataProducts/inc/TrackSummary.hh"         // for TrackSummaryC...
+#include "RecoDataProducts/inc/TrackSummaryRecoMap.hh"  // for TrackSummaryR...
+#include "BTrk/BbrGeom/BbrError.hh"                     // for BbrError
+#include "BTrk/BbrGeom/HepPoint.h"                      // for HepPoint
+#include "BTrk/KalmanTrack/KalSite.hh"                  // for KalSite
+#include "BTrk/TrkBase/TrkDifTraj.hh"                   // for TrkDifTraj
+#include "BTrk/TrkBase/TrkErrCode.hh"                   // for TrkErrCode
+#include "BTrk/TrkBase/TrkHit.hh"                       // for TrkHit
+#include "BTrk/TrkBase/TrkT0.hh"                        // for TrkT0
 
-#include "CLHEP/Vector/ThreeVector.h"
+#include "art/Framework/Core/ProducerTable.h"           // for ProducerTable
+#include "canvas/Persistency/Common/Assns.h"            // for Assns
+#include "canvas/Persistency/Common/Ptr.h"              // for Ptr
+#include "canvas/Persistency/Provenance/ProductID.h"    // for ProductID
+#include "canvas/Utilities/InputTag.h"                  // for InputTag, ope...
+#include "fhiclcpp/exception.h"                         // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"   // for AllowedConfig...
+#include "fhiclcpp/types/Atom.h"                        // for Atom
+#include "fhiclcpp/types/Comment.h"                     // for Comment
+#include "fhiclcpp/types/Name.h"                        // for Name
 
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/KalmanTrack/KalHit.hh"
-#include "BTrk/TrkBase/TrkHelixUtils.hh"
-#include "BTrk/BbrGeom/BbrVectorErr.hh"
-
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GeometryService/inc/DetectorSystem.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
-#include "DataProducts/inc/VirtualDetectorId.hh"
-
-#include "Mu2eUtilities/inc/toHepPoint.hh"
-#include "RecoDataProducts/inc/TrackSummary.hh"
-#include "RecoDataProducts/inc/TrackSummaryRecoMap.hh"
+namespace art {
+class EDProductGetter;
+}  // namespace art
 
 namespace mu2e {
 

@@ -9,27 +9,34 @@
 //
 
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <set>
-#include <cmath>
-#include <algorithm>
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <set>                                              // for set, set<...
+#include <algorithm>                                        // for max
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "MCDataProducts/inc/ProcessCode.hh"                // for ProcessCode
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "TH1.h"                                            // for TH1F
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vecto...
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
-// Mu2e includes.
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-
-// Root includes.
-#include "TH1F.h"
-
-// Other includes.
-#include "CLHEP/Units/SystemOfUnits.h"
+namespace fhicl {
+class ParameterSet;
+}  // namespace fhicl
 
 using namespace std;
 

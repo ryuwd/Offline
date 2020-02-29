@@ -3,74 +3,36 @@
 // Original author G. Pezzullo
 //
 
+#include <exception>                                    // for exception
+#include <iostream>                                            // for std
+#include <memory>                                              // for allocator
+#include <string>                                              // for string
+#include <typeinfo>                                            // for type_info
+
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Selector.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileDirectory.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-
+#include "art/Framework/Core/EDAnalyzer.h"                     // for EDAnal...
+#include "art/Framework/Principal/Event.h"                     // for Event
+#include "art/Framework/Core/ModuleMacros.h"                   // for DEFINE...
+#include "art/Framework/Services/Registry/ServiceHandle.h"     // for Servic...
+#include "art_root_io/TFileService.h"                          // for TFileS...
+#include "art/Framework/Principal/Handle.h"                    // for Handle
 //CLHEP includes
-#include "CLHEP/Vector/ThreeVector.h"
-#include "CLHEP/Matrix/Vector.h"
-#include "CLHEP/Vector/TwoVector.h"
-#include "CLHEP/Matrix/Matrix.h"
-#include "BTrk/BbrGeom/HepPoint.h"
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Matrix/SymMatrix.h"
-
-#include "RecoDataProducts/inc/KalRepCollection.hh"
-
+#include "CLHEP/Vector/ThreeVector.h"                          // for Hep3Ve...
+#include "BTrk/BbrGeom/HepPoint.h"                             // for HepPoint
 // From the art tool-chain
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-//tracker includes
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/BaBar/Constants.hh"
-#include "BTrk/TrkBase/TrkRep.hh"
-#include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/TrkBase/HelixTraj.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-// conditions
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
+#include "fhiclcpp/ParameterSet.h"                             // for Parame...
+#include "BTrk/KalmanTrack/KalRep.hh"                          // for KalRep
 // data
-#include "RecoDataProducts/inc/TrkCaloIntersectCollection.hh"
+#include "RecoDataProducts/inc/TrkCaloIntersectCollection.hh"  // for TrkCal...
 
-// Other includes.
-#include "cetlib_except/exception.h"
-
-// Mu2e includes.
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-
-//root includes
-#include "TFile.h"
-#include "TNtuple.h"
-#include "TH2D.h"
-#include "TCanvas.h"
-#include "THStack.h"
-#include "TGraph.h"
-#include "TROOT.h"
-#include "TStyle.h"
-#include "TLatex.h"
-#include "TMath.h"
-
-// From the art tool-chain
-#include <cmath>
-#include <deque>
-#include <iostream>
-#include <list>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
-#include <functional>
-#include "cetlib/pow.h"
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"         // for KalRepPtr
+#include "RecoDataProducts/inc/TrkCaloIntersect.hh"            // for TrkCal...
+#include "RtypesCore.h"                                        // for Float_t
+#include "TTree.h"                                             // for TTree
+#include "canvas/Persistency/Provenance/EventID.h"             // for EventID
+#include "canvas/Utilities/Exception.h"                        // for Exception
+#include "fhiclcpp/exception.h"                                // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"          // for Allowe...
 
 
 using namespace std;

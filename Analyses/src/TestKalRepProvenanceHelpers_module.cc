@@ -6,23 +6,30 @@
 // Original author Rob Kutschke
 //
 
-#include "Mu2eUtilities/inc/decodeTrackPatRecType.hh"
-#include "Mu2eUtilities/inc/KalRepCollectionInfo.hh"
-#include "Mu2eUtilities/inc/TrackPatRecType.hh"
-#include "Mu2eUtilities/inc/TrkSpecies.hh"
+#include <exception>                                 // for exception
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
 
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-#include "RecoDataProducts/inc/KalRepCollection.hh"
-#include "RecoDataProducts/inc/TrkFitDirection.hh"
-
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "canvas/Utilities/InputTag.h"
-
-#include <iostream>
-#include <string>
+#include "Mu2eUtilities/inc/decodeTrackPatRecType.hh"       // for decodeTra...
+#include "Mu2eUtilities/inc/KalRepCollectionInfo.hh"        // for KalRepCol...
+#include "Mu2eUtilities/inc/TrackPatRecType.hh"             // for TrackPatR...
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"      // for KalRepPtr...
+#include "RecoDataProducts/inc/KalRepCollection.hh"         // for KalRepCol...
+#include "RecoDataProducts/inc/TrkFitDirection.hh"          // for TrkFitDir...
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "GeneralUtilities/inc/EnumToStringSparse.hh"       // for operator<<
+#include "GeneralUtilities/inc/OwningPointerCollection.hh"  // for OwningPoi...
+#include "canvas/Persistency/Common/Ptr.h"                  // for operator<<
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 

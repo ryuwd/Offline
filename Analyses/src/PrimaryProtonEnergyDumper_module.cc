@@ -2,55 +2,56 @@
 //
 // Andrei Gaponenko, 2013
 
-#include <string>
-#include <vector>
-#include <limits>
-#include <cmath>
+#include <exception>                                     // for excep...
+#include <string>                                               // for string
+#include <vector>                                               // for vecto...
+#include <limits>                                               // for numer...
+#include <cmath>                                                // for sqrt
+#include <algorithm>                                            // for max
+#include <iostream>                                             // for opera...
+#include <memory>                                               // for uniqu...
+#include <typeinfo>                                             // for type_...
 
-#include "cetlib_except/exception.h"
-#include "CLHEP/Vector/ThreeVector.h"
-
-#include "TDirectory.h"
-#include "TH1.h"
-#include "TTree.h"
-#include "TH2F.h"
-
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art_root_io/TFileDirectory.h"
-
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"
-#include "Mu2eUtilities/inc/SimParticleGetTau.hh"
-
-
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
+#include "cetlib_except/exception.h"                            // for excep...
+#include "CLHEP/Vector/ThreeVector.h"                           // for Hep3V...
+#include "TH1.h"                                                // for TH1F
+#include "TTree.h"                                              // for TTree
+#include "canvas/Utilities/InputTag.h"                          // for InputTag
+#include "fhiclcpp/ParameterSet.h"                              // for Param...
+#include "art/Framework/Core/EDAnalyzer.h"                      // for EDAna...
+#include "art/Framework/Principal/Event.h"                      // for Event
+#include "art/Framework/Core/ModuleMacros.h"                    // for DEFIN...
+#include "art_root_io/TFileService.h"                           // for TFile...
+#include "MCDataProducts/inc/StepPointMC.hh"                    // for StepP...
+#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"  // for Globa...
+#include "GlobalConstantsService/inc/ParticleDataTable.hh"      // for Parti...
+#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"           // for SimPa...
+#include "Mu2eUtilities/inc/SimParticleGetTau.hh"               // for SimPa...
+#include "art/Framework/Services/Registry/ServiceHandle.h"      // for Servi...
 // Mu2e includes
-#include "DataProducts/inc/PDGCode.hh"
-#include "ConfigTools/inc/SimpleConfig.hh"
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
-#include "GlobalConstantsService/inc/PhysicsParams.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "ProductionTargetGeom/inc/ProductionTarget.hh"
+#include "DataProducts/inc/PDGCode.hh"                          // for PDGCode
+#include "GeometryService/inc/GeomHandle.hh"                    // for GeomH...
+#include "ProductionTargetGeom/inc/ProductionTarget.hh"         // for Produ...
+#include "CLHEP/Vector/Rotation.h"                              // for HepRo...
 
-// CLHEP includes.
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Vector/Rotation.h"
-#include "CLHEP/Units/SystemOfUnits.h"
+
+#include "GeometryService/inc/GeometryService.hh"               // for Geome...
+#include "HepPDT/Measurement.hh"                                // for Measu...
+
+#include "HepPDT/ParticleData.hh"                               // for Parti...
+#include "MCDataProducts/inc/SimParticle.hh"                    // for SimPa...
+#include "RtypesCore.h"                                         // for Int_t
+#include "TH2.h"                                                // for TH2F
+#include "art/Framework/Principal/Handle.h"                     // for Valid...
+#include "canvas/Persistency/Common/Ptr.h"                      // for Ptr
+#include "canvas/Utilities/Exception.h"                         // for Excep...
+#include "fhiclcpp/coding.h"                                    // for ps_se...
+#include "fhiclcpp/exception.h"                                 // for excep...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"           // for Allow...
+
+namespace art {
+class Run;
+}  // namespace art
 
 namespace mu2e {
 
@@ -186,7 +187,7 @@ namespace mu2e {
     TH1F* _hHitZFin;
     TH1F* _hHitZStartingFin;
 
-    
+
 
   TH2F* _hHitPosRing;
     TH2F* _hHitNegRing;
@@ -246,7 +247,7 @@ namespace mu2e {
     _gunRotation = GeomHandle<ProductionTarget>()->protonBeamRotation();
     _gunOrigin = GeomHandle<ProductionTarget>()->haymanPosition();
 
-    std::cout << "gun origin pieces in analysis module \n " << 
+    std::cout << "gun origin pieces in analysis module \n " <<
       GeomHandle<ProductionTarget>()->haymanPosition()  << "\n"<<
       _gunRotation*CLHEP::Hep3Vector(0., 0., GeomHandle<ProductionTarget>()->halfHaymanLength()) << "\n" <<
       _gunOrigin << std::endl;
@@ -260,7 +261,7 @@ namespace mu2e {
     _hHitX = tfs->make<TH1F>("_hHitX","Internal X Position of Hit, Energy Weighted",200,-20.,20.);
     _hHitY = tfs->make<TH1F>("_hHitY","Internal Y Position Of Hit, Energy Weighted",200,-20.,20.);
     std::cout << " half length = " << GeomHandle<ProductionTarget>()->halfHaymanLength() << std::endl;
- 
+
     _hHitZCore = tfs->make<TH1F>("_hHitZCore","Internal Z Position of Hit, Core Section, Energy Weighted",nbins+10
  				 ,-10.,+2.0*GeomHandle<ProductionTarget>()->halfHaymanLength());
 
@@ -294,9 +295,9 @@ namespace mu2e {
     }
 
 
- 
+
     std::string hitInputTagInstance = hitsInputTag_.instance();
- 
+
     //              std::cout << "hitsInputTag_ " << hitsInputTag_ << std::endl;
     //std::cout << "hitsInputTag instance " << hitInputTagInstance << std::endl;
 
@@ -310,16 +311,16 @@ namespace mu2e {
 
       //      std::cout << "hit x = " << hitLoc << std::endl;
       //     if (hit_.totalEDep > 0){_hEnergyVsZ->Fill(hit_.z,hit_.totalEDep);}
-  
+
       //
-      // this rotation takes me from mu2e coordinates to internal  
+      // this rotation takes me from mu2e coordinates to internal
       // at generation time  we apply _gunRotation to go from target coord to mu2e coord.  A little tricky
       // since gunOrigin is defined to be the downstream end of the gun for the rotated target, that is, where the protons hit. Let's transform that away.
- 
+
       CLHEP::Hep3Vector hitPositionInternal = _gunRotation.inverse()*(hitLoc - _gunOrigin) - CLHEP::Hep3Vector(0.,0., GeomHandle<ProductionTarget>()->halfHaymanLength());
       //      std::cout << "hitloc, rotation, core = " << hitLoc << "\n" << _gunOrigin << "\n" << _gunRotation << "\n" << hitPositionInternal << std::endl;
 	   //	   std::cout << " x val " << hitLoc << std::endl;
- 
+
       //
       // - sign since beam travels toward negative z in Mu2e coordinates.  make plot run from zero and look like the target...
       if (hitInputTagInstance == "ProductionTargetCoreSection") {

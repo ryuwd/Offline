@@ -3,17 +3,21 @@
 //
 // Andrei Gaponenko, 2013
 
+#include <exception>
 #include <string>
 #include <vector>
-#include <algorithm>
+#include <algorithm>                                                // for copy
 #include <iterator>
 #include <iostream>
 #include <limits>
-
-#include "cetlib_except/exception.h"
+#include <functional>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <typeinfo>
+#include <utility>                                                  // for pair
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
-
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
@@ -21,15 +25,27 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art_root_io/TFileService.h"
-
 // Mu2e includes.
 #include "DataProducts/inc/PDGCode.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
 #include "MCDataProducts/inc/SimParticlePtrCollection.hh"
 #include "MCDataProducts/inc/PhysicalVolumeInfoMultiCollection.hh"
 #include "Mu2eUtilities/inc/PhysicalVolumeMultiHelper.hh"
-
-#include "TH1D.h"
+#include "CLHEP/Vector/LorentzVector.h"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "MCDataProducts/inc/PhysicalVolumeInfo.hh"
+#include "MCDataProducts/inc/ProcessCode.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
+#include "TH1.h"                                                    // for TH1D
+#include "art/Framework/Core/ProducerTable.h"
+#include "canvas/Utilities/Exception.h"
+#include "canvas/Utilities/InputTag.h"
+#include "cetlib/map_vector.h"
+#include "fhiclcpp/exception.h"
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"
+#include "fhiclcpp/types/Atom.h"                                    // for Atom
+#include "fhiclcpp/types/Comment.h"
+#include "fhiclcpp/types/Name.h"                                    // for Name
+#include "fhiclcpp/types/Sequence.h"
 
 namespace mu2e {
 

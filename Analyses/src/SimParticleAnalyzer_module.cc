@@ -4,27 +4,39 @@
 // Original author KLGenser based on previous readback modules
 //
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "CLHEP/Vector/ThreeVector.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "TH1F.h"
-#include "TNtuple.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "cetlib_except/exception.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <iomanip>
+#include <exception>                                 // for exception
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+#include "TNtuple.h"                                        // for TNtuple
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "CLHEP/Vector/LorentzVector.h"                     // for HepLorent...
+
+
+#include "MCDataProducts/inc/GenId.hh"                      // for GenId
+#include "MCDataProducts/inc/GenParticle.hh"                // for GenParticle
+#include "MCDataProducts/inc/ProcessCode.hh"                // for ProcessCode
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+
+namespace art {
+class Run;
+}  // namespace art
 
 using namespace std;
 
@@ -92,7 +104,7 @@ namespace mu2e {
   void SimParticleAnalyzer::analyze(const art::Event& event) {
 
     ++_nAnalyzed;
-    
+
     // ntuple buffer.
     float nt[_ntpssp->GetNvar()];
 

@@ -2,25 +2,33 @@
 //
 // Andrei Gaponenko, 2017
 
-#include <string>
+#include <exception>                                 // for exception
+#include <string>                                           // for allocator
+#include <algorithm>                                        // for all_of
 
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "canvas/Utilities/InputTag.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileDirectory.h"                     // for TFileDire...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "ParticleID/inc/PIDLogLRatio.hh"                   // for PIDLogLRa...
+#include "ParticleID/inc/PIDLogLEp.hh"                      // for PIDLogLEp
+#include "TH2.h"                                            // for TH2, TH2D
+#include "TAxis.h"                                          // for TAxis
+#include "art/Framework/Core/detail/Analyzer.h"             // for Analyzer:...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/exempt_ptr.h"                              // for exempt_ptr
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
+#include "fhiclcpp/types/Atom.h"                            // for Atom
+#include "fhiclcpp/types/Comment.h"                         // for Comment
+#include "fhiclcpp/types/Name.h"                            // for Name
+#include "fhiclcpp/types/Table.h"                           // for Table::me...
 
-#include "art_root_io/TFileDirectory.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "ParticleID/inc/PIDLogLRatio.hh"
-#include "ParticleID/inc/PIDLogL1D.hh"
-#include "ParticleID/inc/PIDLogLEp.hh"
-
-#include "TH1.h"
-#include "TH2.h"
+namespace art {
+class Event;
+class Run;
+}  // namespace art
 
 namespace mu2e {
 

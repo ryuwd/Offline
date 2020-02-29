@@ -8,16 +8,19 @@
 //  Original author Rob Kutschke
 //
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Provenance.h"
+#include <iostream>                                    // for operator<<, endl
+#include <string>                                      // for operator<<
+#include <utility>                                     // for pair
 
-#include "fhiclcpp/ParameterSet.h"
-#include "fhiclcpp/ParameterSetRegistry.h"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/ParameterSetRegistry.h"             // for ParameterSetRe...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
-#include <iostream>
+namespace art {
+class Event;
+}  // namespace art
 
 using namespace std;
 

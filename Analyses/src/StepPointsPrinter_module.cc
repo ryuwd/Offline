@@ -2,17 +2,22 @@
 //
 // Andrei Gaponenko, 2013
 
-#include <string>
-#include <iostream>
+#include <exception>                            // for exception
+#include <string>                                      // for string, allocator
+#include <iostream>                                    // for operator<<
+#include <memory>                                      // for unique_ptr
+#include <typeinfo>                                    // for type_info
+#include <vector>                                      // for vector
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Utilities/InputTag.h"
-
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Principal/Handle.h"            // for ValidHandle
+#include "MCDataProducts/inc/StepPointMC.hh"           // for StepPointMCCol...
+#include "canvas/Persistency/Provenance/EventID.h"     // for operator<<
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
 namespace mu2e {
 

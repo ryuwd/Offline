@@ -2,34 +2,37 @@
 //
 // Zhengyun You, 2013-12-01
 
-#include <string>
-#include <vector>
-#include <set>
-#include <limits>
-#include <cmath>
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
+#include <string>                                           // for string
+#include <vector>                                           // for vector
+#include <set>                                              // for set, oper...
+#include <limits>                                           // for numeric_l...
+#include <algorithm>                                        // for max
+#include <iostream>                                         // for operator<<
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
 
-#include "cetlib_except/exception.h"
-#include "CLHEP/Vector/ThreeVector.h"
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+#include "TTree.h"                                          // for TTree
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPointMC
 
-#include "TDirectory.h"
-#include "TH1.h"
-#include "TTree.h"
-#include "TFile.h"
-
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/Provenance.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art_root_io/TFileService.h"
-
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-#include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
-#include "GlobalConstantsService/inc/ParticleDataTable.hh"
+#include "MCDataProducts/inc/ProcessCode.hh"                // for ProcessCode
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/coding.h"                                // for ps_sequen...
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
@@ -76,7 +79,7 @@ namespace mu2e {
   //================================================================
   class StepPointMCDumperCompact : public art::EDAnalyzer {
     typedef std::vector<art::InputTag> InputTags;
-    InputTags stepInputs_; 
+    InputTags stepInputs_;
 
     typedef vector<int> Vint;
     // List of particles of interest for the particles ntuple

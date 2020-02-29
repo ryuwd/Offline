@@ -2,15 +2,22 @@
 //
 // Rob Kutschke, 2015
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <stdexcept>
-#include <unistd.h>
+#include <unistd.h>                                    // for sysconf, _SC_P...
+#include <exception>                            // for exception
+#include <stddef.h>                                    // for size_t
+#include <iostream>                                    // for operator<<
+#include <string>                                      // for string, operat...
+#include <stdexcept>                                   // for runtime_error
+#include <algorithm>                                   // for max
+#include <array>                                       // for array
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "canvas/Persistency/Provenance/EventID.h"     // for operator<<
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
 namespace {
 
@@ -73,7 +80,7 @@ namespace {
 
   // helper function
   long parseLine ( std::string const& line,
-                   std::string const& keyExpected, 
+                   std::string const& keyExpected,
                    std::string const& unitExpected ){
     std::istringstream is(line);
     std::string key, unit;

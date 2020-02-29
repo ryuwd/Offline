@@ -8,20 +8,34 @@
 // Original author Rob Kutschke
 //
 
+#include <ext/alloc_traits.h>                          // for __alloc_traits...
+#include <stddef.h>                                    // for size_t
 // C++ includes.
-#include <iostream>
-#include <vector>
+#include <iostream>                                    // for operator<<
+#include <vector>                                      // for vector, vector...
+#include <algorithm>                                   // for max
+#include <memory>                                      // for unique_ptr
+#include <string>                                      // for string
+#include <typeinfo>                                    // for type_info
+#include <utility>                                     // for pair
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Persistency/Common/Ptr.h"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Principal/Handle.h"            // for Handle
+#include "canvas/Persistency/Common/Ptr.h"             // for Ptr
 
-// Mu2e includes.
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
+
+#include "MCDataProducts/inc/GenId.hh"                 // for operator<<
+#include "MCDataProducts/inc/GenParticle.hh"           // for GenParticleCol...
+#include "MCDataProducts/inc/SimParticle.hh"           // for SimParticle
+#include "cetlib/map_vector.h"                         // for map_vector<>::...
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
+
+namespace fhicl {
+class ParameterSet;
+}  // namespace fhicl
 
 using namespace std;
 
@@ -63,7 +77,7 @@ namespace mu2e {
       size_t offset = &(*i)-&gens.front();
       cout << "Gen: "
            << offset << " "
-           << gen.pdgId() <<  " " 
+           << gen.pdgId() <<  " "
            << gen.generatorId() << " "
            << gen.time() << " "
            << endl;
@@ -73,9 +87,9 @@ namespace mu2e {
     // Read back the Ptrs.
     for ( size_t i=0; i< genPtrs.size(); ++i ){
       GenParticle const& gen = *genPtrs.at(i);
-      cout << "Gen from Ptr: " 
+      cout << "Gen from Ptr: "
            << i << " "
-           << gen.pdgId()       <<  " " 
+           << gen.pdgId()       <<  " "
            << gen.generatorId() << " "
            << gen.time()
            << endl;
@@ -90,13 +104,13 @@ namespace mu2e {
       SimParticle const& sim = i->second;
 
       if ( sim.fromGenerator() ){
-        cout << "Sim: " 
-             << key.asInt()          << " " 
-             << sim.id().asInt()     << " " 
-             << sim.generatorIndex() << " " 
+        cout << "Sim: "
+             << key.asInt()          << " "
+             << sim.id().asInt()     << " "
+             << sim.generatorIndex() << " "
              << sim.startGlobalTime() << " "
              << endl;
-        
+
         simPtrs.push_back( art::Ptr<SimParticle>() );
         simPtrs.back() = art::Ptr<SimParticle>(simsHandle,key.asInt());
 
@@ -110,10 +124,10 @@ namespace mu2e {
 
       SimParticle const& sim = *simPtrs.at(i);
 
-      cout << "Sim from Ptr: " 
+      cout << "Sim from Ptr: "
            << i << " "
-           << sim.id().asInt()     << " " 
-           << sim.generatorIndex() << " " 
+           << sim.id().asInt()     << " "
+           << sim.generatorIndex() << " "
            << sim.startGlobalTime() << " "
            << endl;
 

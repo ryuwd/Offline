@@ -7,16 +7,23 @@
 // Original author Pavel Murat
 //
 
-#include <iostream>
-#include <string>
+#include <exception>                            // for exception
+#include <stdio.h>                                     // for printf
+#include <iostream>                                    // for operator<<
+#include <string>                                      // for string, operat...
+#include <memory>                                      // for unique_ptr
+#include <typeinfo>                                    // for type_info
+#include <vector>                                      // for vector, vector...
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-#include "RecoDataProducts/inc/StrawHit.hh"
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
+#include "art/Framework/Core/EDAnalyzer.h"             // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"             // for Event
+#include "art/Framework/Principal/Handle.h"            // for Handle
+#include "art/Framework/Core/ModuleMacros.h"           // for DEFINE_ART_MODULE
+#include "RecoDataProducts/inc/StrawHit.hh"            // for StrawHitCollec...
+#include "DataProducts/inc/StrawId.hh"                 // for StrawId
+#include "fhiclcpp/ParameterSet.h"                     // for ParameterSet
+#include "fhiclcpp/exception.h"                        // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"  // for AllowedConfigu...
 
 namespace mu2e {
 
@@ -36,11 +43,11 @@ namespace mu2e {
     int         _printStrawHits;
   };
 
-  PrintStrawHits::PrintStrawHits(const fhicl::ParameterSet& pset) : 
+  PrintStrawHits::PrintStrawHits(const fhicl::ParameterSet& pset) :
     art::EDAnalyzer   (pset),
     _makeSHmoduleLabel(pset.get<std::string>("makeSHModuleLabel","makeSH")),
     _makeSHinstance   (pset.get<std::string>("makeSHinstance"   ,""      )),
-    _printStrawHits   (pset.get<int>        ("printStrawHits"   ,       0)) 
+    _printStrawHits   (pset.get<int>        ("printStrawHits"   ,       0))
   {}
 
   void PrintStrawHits::analyze(const art::Event& event) {

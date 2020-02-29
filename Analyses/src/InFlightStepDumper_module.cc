@@ -2,28 +2,31 @@
 //
 // Andrei Gaponenko, 2015
 
-#include <string>
-#include <algorithm>
+#include <exception>                                 // for exception
+#include <string>                                           // for string
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
 
-#include "cetlib_except/exception.h"
+#include "cetlib_except/exception.h"                        // for operator<<
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for ValidHandle
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPointMC
+#include "GeneralUtilities/inc/RSNTIO.hh"                   // for InFlightP...
+#include "TTree.h"                                          // for TTree
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
 
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Utilities/InputTag.h"
-#include "art_root_io/TFileService.h"
-
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
-#include "GeneralUtilities/inc/RSNTIO.hh"
-
-#include "TTree.h"
-
-#include <algorithm>
-#include <iterator>
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimParticle
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Common/Ptr.h"                  // for Ptr
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 namespace mu2e {
 

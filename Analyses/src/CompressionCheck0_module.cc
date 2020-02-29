@@ -8,27 +8,32 @@
 // Original author Rob Kutschke
 //
 
+#include <exception>                                 // for exception
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <set>
+#include <iostream>                                         // for std
+#include <string>                                           // for string
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <vector>                                           // for vector
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-// Mu2e includes.
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "MCDataProducts/inc/StepInstanceName.hh"
-#include "GeneralUtilities/inc/Binning.hh"
-
-// Root includes.
-#include "TH1F.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "MCDataProducts/inc/StepInstanceName.hh"           // for StepInsta...
+#include "GeneralUtilities/inc/Binning.hh"                  // for Binning
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPoint...
+#include "TH1.h"                                            // for TH1F
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "canvas/Utilities/InputTag.h"                      // for InputTag
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
@@ -83,7 +88,7 @@ namespace mu2e {
     art::InputTag simsTag1_;
     art::InputTag simsTag2_;
 
-    // Bin definitions: must be specified in the 
+    // Bin definitions: must be specified in the
     Binning trackerStepBins_;
     Binning caloStepBins_;
     Binning croStepBins_;

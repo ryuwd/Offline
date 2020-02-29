@@ -2,53 +2,49 @@
 //
 // Andrei Gaponenko, 2012, 2015
 
+#include <exception>
+// std
+#include <string>
+#include <vector>
+#include <limits>
+#include <iostream>
+#include <memory>
+#include <typeinfo>
+
 #include "cetlib_except/exception.h"
-
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-// Mu2e includes.
-#include "MCDataProducts/inc/StatusG4.hh"
 #include "MCDataProducts/inc/StepPointMC.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
 #include "DataProducts/inc/VirtualDetectorId.hh"
-
 #include "GlobalConstantsService/inc/GlobalConstantsHandle.hh"
 #include "GlobalConstantsService/inc/ParticleDataTable.hh"
-
 #include "GeometryService/inc/GeomHandle.hh"
 #include "ProtonBeamDumpGeom/inc/ProtonBeamDump.hh"
 #include "ExtinctionMonitorFNAL/Geometry/inc/ExtMonFNAL.hh"
-
 // art includes.
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/Provenance.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art_root_io/TFileService.h"
-
-// ROOT
-#include "TDirectory.h"
-#include "TH1.h"
 #include "TTree.h"
-
 // externals
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Vector/Rotation.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "DataProducts/inc/PDGCode.hh"
+#include "ExtinctionMonitorFNAL/Geometry/inc/ExtMonFNALPlaneStack.hh"
+#include "HepPDT/ParticleData.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
+#include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Utilities/Exception.h"
+#include "fhiclcpp/exception.h"
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"
 
-// std
-#include <string>
-#include <vector>
-#include <map>
-#include <set>
-#include <algorithm>
-#include <iterator>
-#include <limits>
+namespace art {
+class Run;
+}  // namespace art
 
-
-#include <iostream>
 //#define AGDEBUG(stuff) do { std::cerr<<"AG: "<<__FILE__<<", line "<<__LINE__<<": "<<stuff<<std::endl; } while(0)
 #define AGDEBUG(stuff) do {} while(0)
 

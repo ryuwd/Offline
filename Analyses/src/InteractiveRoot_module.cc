@@ -43,34 +43,37 @@
 //    once when the canvas is deleted.  The hack solution is to do a Write() in endJob.
 //
 
+#include <unistd.h>                                         // for sleep
+#include <exception>                                 // for exception
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <memory>
-#include <unistd.h>
+#include <iostream>                                         // for operator<<
+#include <string>                                           // for string
+#include <memory>                                           // for allocator
+#include <typeinfo>                                         // for type_info
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-
-// Mu2e includes.
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
 // Root includes.
-#include "TApplication.h"
-#include "TCanvas.h"
-#include "TDirectory.h"
-#include "TH1F.h"
+#include "TApplication.h"                                   // for TApplication
+#include "TCanvas.h"                                        // for TCanvas
+#include "TDirectory.h"                                     // for TDirectory
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPoint...
+#include "TH1.h"                                            // for TH1F
+#include "TString.h"                                        // for TString
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Persistency/Provenance/EventID.h"          // for EventID
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
 namespace mu2e {
-
-  class Straw;
 
   class InteractiveRoot : public art::EDAnalyzer {
   public:

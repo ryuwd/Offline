@@ -9,36 +9,38 @@
 //
 
 
+#include <exception>                                 // for exception
+#include <stddef.h>                                         // for size_t
 // C++ includes.
-#include <iostream>
-#include <string>
-#include <cmath>
+#include <iostream>                                         // for std
+#include <string>                                           // for string
+#include <cmath>                                            // for sqrt
+#include <memory>                                           // for unique_ptr
+#include <typeinfo>                                         // for type_info
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
 
 // Framework includes.
-#include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art_root_io/TFileService.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-
-// Mu2e includes.
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-
-// Root includes.
-#include "TApplication.h"
-#include "TCanvas.h"
-#include "TDirectory.h"
-#include "TH1F.h"
+#include "art/Framework/Core/EDAnalyzer.h"                  // for EDAnalyzer
+#include "art/Framework/Principal/Event.h"                  // for Event
+#include "fhiclcpp/ParameterSet.h"                          // for ParameterSet
+#include "art/Framework/Principal/Handle.h"                 // for Handle
+#include "art_root_io/TFileService.h"                       // for TFileService
+#include "art/Framework/Core/ModuleMacros.h"                // for DEFINE_AR...
+#include "CLHEP/Vector/LorentzVector.h"                     // for HepLorent...
+#include "CLHEP/Vector/ThreeVector.h"                       // for Hep3Vector
+#include "MCDataProducts/inc/SimParticle.hh"                // for SimPartic...
+#include "MCDataProducts/inc/StepPointMC.hh"                // for StepPoint...
+#include "TH1.h"                                            // for TH1F
+#include "art/Framework/Services/Registry/ServiceHandle.h"  // for ServiceHa...
+#include "canvas/Utilities/Exception.h"                     // for Exception
+#include "cetlib/map_vector.h"                              // for map_vector
+#include "fhiclcpp/exception.h"                             // for exception
+#include "fhiclcpp/types/AllowedConfigurationMacro.h"       // for AllowedCo...
 
 using namespace std;
 
 namespace mu2e {
-
-  class Straw;
 
   class Histforpabs : public art::EDAnalyzer {
   public:
