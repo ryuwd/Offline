@@ -1,7 +1,7 @@
 // Andrei Gaponenko, 2011
 
 #include <exception>                                    // for exception
-#include <math.h>                                              // for fabs
+#include <cmath>                                              // for fabs
 #include <string>                                              // for char_t...
 #include <vector>                                              // for vector
 #include <algorithm>                                           // for find, max

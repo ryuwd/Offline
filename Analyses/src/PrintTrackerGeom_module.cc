@@ -5,7 +5,7 @@
 //
 
 #include <exception>                            // for exception
-#include <math.h>                                      // for M_PI
+#include <cmath>                                      // for M_PI
 #include <stddef.h>                                    // for size_t
 #include <stdint.h>                                    // for uint16_t
 // C++ includes.

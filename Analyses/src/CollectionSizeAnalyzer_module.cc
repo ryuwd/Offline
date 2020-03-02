@@ -1,7 +1,7 @@
 // Andrei Gaponenko, 2015
 
 #include <exception>                                 // for exception
-#include <math.h>                                           // for log10
+#include <cmath>                                           // for log10
 #include <string>                                           // for operator<<
 #include <vector>                                           // for vector
 #include <algorithm>                                        // for max

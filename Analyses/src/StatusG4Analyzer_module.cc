@@ -1,7 +1,7 @@
 // Andrei Gaponenko, 2015, with most of the code picked from Rob's DiagnosticG4.
 
 #include <exception>                                 // for exception
-#include <math.h>                                           // for log10
+#include <cmath>                                           // for log10
 #include <string>                                           // for allocator
 #include <memory>                                           // for unique_ptr
 #include <typeinfo>                                         // for type_info

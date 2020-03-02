@@ -5,7 +5,7 @@
 //
 
 #include <exception>                                 // for exception
-#include <math.h>                                           // for fabs, sqrt
+#include <cmath>                                           // for fabs, sqrt
 #include <iostream>                                         // for operator<<
 #include <iomanip>                                          // for operator<<
 #include <vector>                                           // for allocator
