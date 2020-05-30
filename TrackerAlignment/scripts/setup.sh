@@ -153,17 +153,18 @@ function mu2ealign() {
 
         echo "If you want to configure for multiple jobs, run mu2ealign parallel <NJOBS>"
         echo "Run 'mu2ealign run' to start."
-    elif [[ $COMMAND == "parallel"]]; then 
+
+    elif [[ $COMMAND == "parallel" ]]; then 
         mu2ealign_genparallel $2
 
-    elif [[ $COMMAND == "run"]]; then 
+    elif [[ $COMMAND == "run" ]]; then 
         mu2ealign_runjobs
 
     elif [[ $COMMAND == "pede" ]]; then
         # check completion of jobs
         mu2ealign_checkcomplete || return 1
         mu2ealign_mergeouput
-        
+
         pede mp-steer.txt || return 1
 
         if [ -f "millepede.res" ]; then 
