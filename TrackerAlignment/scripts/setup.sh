@@ -11,6 +11,7 @@ if [ -z ${MU2E_BASE_RELEASE} ]; then
 fi
 
 export TRKALIGN_SCRIPTS_DIR="${MU2E_BASE_RELEASE}/TrackerAlignment/scripts"
+export DS_COSMIC_NOFIELD_ALIGNSELECT="/pnfs/mu2e/persistent/users/mu2epro/MDC2020Dev/DS-cosmic-nofield-alignselect/sources.txt"
 
 setup millepede
 
@@ -20,45 +21,82 @@ python -m pip install --user -r ${TRKALIGN_SCRIPTS_DIR}/requirements.txt
 
 alias aligntrack_display='python ${TRKALIGN_SCRIPTS_DIR}/aligntrack_display.py ' 
 
+function mu2ealign_genparallel() {
+    rm job_part*.fcl
+
+    nparts=$1
+    nfiles=$2
+    echo "generating fcls for $nparts processes and $nfiles total files using job.fcl"
+    END=$nparts
+    for ((i=1;i<=END;i++)); do
+        cp job.fcl job_part$i.fcl
+        sed -i "s/MilleData.bin/MilleData.bin.${i}/g" job_part$i.fcl
+        sed -i "s/mp-steer.txt/mp-steer.txt.${i}/g" job_part$i.fcl
+        sed -i "s/mp-constr.txt/mp-constr.txt.${i}/g" job_part$i.fcl
+        sed -i "s/mp-params.txt/mp-params.txt.${i}/g" job_part$i.fcl
+        sed -i "s/TrackDiag.root/TrackDiag.root.${i}/g" job_part$i.fcl
+
+        head -n $nfiles sources.txt | split --number=$i/$nparts -d > sources_job_part${i}.txt
+    done
+    rm *.tmp
+}
+
+function mu2ealign_runjobs() {
+    if [ ! -f "job_part1.fcl" ]; then
+        mu2e -c job.fcl -S sources.txt > job.log &
+        return 0
+    fi
+
+    i=0
+    for f in job_part*.fcl; do
+        i=$((i+1))
+        mu2e -c job_part${i}.fcl -S sources_job_part$i.txt > job_part$i.log &
+    done
+
+    echo "started $i jobs.. see job_part{job number}.log files for progress.."
+}
+
+function mu2ealign_checkcomplete() {
+    if [ ! -f "job_part1.fcl" ]; then
+        if ! grep -q "Art has completed and will exit with status 0." job.log ; then 
+            echo "Job incomplete! See below (job.log):"
+            tail -n 5 job.log
+            echo "-------------------------------------------"
+            return 1
+        fi
+        return 0
+    fi
+
+    i=0
+    for f in job_part*.fcl; do
+        i=$((i+1))
+        if ! grep -q "Art has completed and will exit with status 0." job_part$i.log ; then 
+            echo "Job incomplete! See below (job_part$i.log):"
+            tail -n 5 job_part$i.log
+            echo "-------------------------------------------"
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+function mu2ealign_mergeouput() {
+    if [ ! -f "job_part1.fcl" ]; then
+        echo "nothing to merge"
+        return 1
+    fi
+
+    python ${MU2E_BASE_RELEASE}/TrackerAlignment/scripts/mergesteer.py mp-steer.txt mp-steer.txt.*
+    hadd -f TrackDiag.root TrackDiag.root.*
+
+}
+
 function mu2ealign_genjobfcl() {
-    cat << EOF > job.fcl
-#include "TrackerAlignment/fcl/cosmicAlign_timefit.fcl"
-#include "JobConfig/reco/misalign_epilog.fcl"
-
-services.ProditionsService.alignedTracker.useDb: true
-services.ProditionsService.alignedTracker.verbose: 2
-
-services.ProditionsService.mu2eDetector.useDb: true
-services.ProditionsService.mu2eDetector.verbose: 2
-physics.analyzers.TrkAnaNeg.diagLevel: 2
-
-services.DbService.textFile: ["alignconstants_in.txt"]
-
-physics.analyzers.AlignTrackCollector.diagLevel : 5
-
-physics.analyzers.AlignTrackCollector.MinTraversedPlanes : 3
-physics.analyzers.AlignTrackCollector.MaxTimeRes : 10.0
-physics.analyzers.AlignTrackCollector.MinTrackSH: 10
-
-physics.analyzers.AlignTrackCollector.PlaneFilter : false
-physics.analyzers.AlignTrackCollector.PlaneFilterList : [  ]
-physics.analyzers.AlignTrackCollector.SteeringOpts : [ ]
-
-physics.analyzers.AlignTrackCollector.ErrorScale : 1.0
-
-physics.analyzers.AlignTrackCollector.MilleFile : "MilleData.bin.gz"
-physics.analyzers.AlignTrackCollector.GzipCompression : true 
-
-physics.analyzers.AlignTrackCollector.SteerFile : "mp-steer.txt"
-physics.analyzers.AlignTrackCollector.ParamFile : "mp-params.txt"
-physics.analyzers.AlignTrackCollector.ConstrFile : "mp-constr.txt"
-
-# diagnostics and plots, usually
-services.TFileService.fileName: "TrackDiag.root"
-
-EOF
-    echo "Generated job.fcl!"
-
+    cp ${MU2E_BASE_RELEASE}/TrackerAlignment/fcl/job_template.fcl job.fcl
+    echo "Generated new job.fcl!"
+    echo "using DS_COSMIC_NOFIELD_ALIGNSELECT as dataset. Please change sources.txt if you want to use something else."
+    cat ${DS_COSMIC_NOFIELD_ALIGNSELECT} > sources.txt
 }
 
 function mu2ealign() {
@@ -101,8 +139,11 @@ function mu2ealign() {
         JOB_FCL_FILE=$(dirname ${ALIGN_CONST_FILE})/job.fcl
 
         if [ -f ${JOB_FCL_FILE} ]; then 
-            # copy old job fcl over
-            cp ${JOB_FCL_FILE} job.fcl
+            # copy old fcl over
+            cp ${JOB_FCL_FILE} job*.fcl
+            cp $(dirname ${ALIGN_CONST_FILE})/sources*.txt .
+
+            echo "Copied previous job configuration!"
         else
             mu2ealign_genjobfcl
         fi
@@ -110,9 +151,19 @@ function mu2ealign() {
         # produces a job.fcl to run and a seed alignment constant file
         # for DbService
 
-        echo "Good to go!"
+        echo "If you want to configure for multiple jobs, run mu2ealign parallel <NJOBS>"
+        echo "Run 'mu2ealign run' to start."
+    elif [[ $COMMAND == "parallel"]]; then 
+        mu2ealign_genparallel $2
+
+    elif [[ $COMMAND == "run"]]; then 
+        mu2ealign_runjobs
 
     elif [[ $COMMAND == "pede" ]]; then
+        # check completion of jobs
+        mu2ealign_checkcomplete || return 1
+        mu2ealign_mergeouput
+        
         pede mp-steer.txt || return 1
 
         if [ -f "millepede.res" ]; then 
