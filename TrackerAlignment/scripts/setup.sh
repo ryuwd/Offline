@@ -114,6 +114,7 @@ function mu2ealign_genjobfcl() {
 }
 
 function mu2ealign_runNaligniters() {
+    END=$1
     (
         echo "Alignment track collection: iteration 0 (this working directory)"
         # run first alignment iteration
@@ -126,17 +127,17 @@ function mu2ealign_runNaligniters() {
 
         lastconsts=$(pwd)/alignconstants_out.txt
 
-        END=$1
-        for ((i=1;i<=END-1;i++)); do
-            mkdir iter$i || return 1
-            cd iter$i || return 1
+        for ((alignjobn=1;alignjobn<=END-1;alignjobn++)); do
+            mkdir iter$alignjobn || return 1
+            cd iter$alignjobn || return 1
+
+            echo "Working directory: $(pwd)"
 
             mu2ealign new $lastconsts
 
-            echo "Alignment track collection: iteration $i"
+            echo "Alignment track collection: iteration $alignjobn"
             
             mu2ealign run 
-            echo "running..."
 
             wait 
 
