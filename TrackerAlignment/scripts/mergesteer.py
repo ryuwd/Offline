@@ -11,7 +11,7 @@ def main():
     for filename in files:
         with open(filename, 'r') as f:
             lines = f.readlines()
-            if nlines == 0:
+            if nlines == -1:
                 nlines = len(lines)
             if nlines != lines or nlines < 0:
                 exit(1)
