@@ -9,7 +9,7 @@ def main():
     nlines = -1
 
     for filename in files:
-        with open(filename, r) as f:
+        with open(filename, 'r') as f:
             lines = f.readlines()
             if nlines == 0:
                 nlines = len(lines)
