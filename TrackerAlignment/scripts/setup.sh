@@ -153,7 +153,7 @@ function mu2ealign() {
 
         if [ -f ${JOB_FCL_FILE} ]; then 
             # copy old fcl over
-            cp ${JOB_FCL_FILE} job*.fcl
+            cp $(dirname ${ALIGN_CONST_FILE})/*.fcl .
             cp $(dirname ${ALIGN_CONST_FILE})/sources*.txt .
 
             echo "Copied previous job configuration!"
@@ -164,7 +164,9 @@ function mu2ealign() {
         # produces a job.fcl to run and a seed alignment constant file
         # for DbService
 
-        echo "If you want to configure for multiple jobs, run mu2ealign parallel <NJOBS>"
+        if [ ! -f "sources_job_part1.txt" ]; then
+            echo "If you want to configure for multiple jobs, run mu2ealign parallel <NJOBS>"
+        fi
         echo "Run 'mu2ealign run' to start."
 
     elif [[ $COMMAND == "parallel" ]]; then 
