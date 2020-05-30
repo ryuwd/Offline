@@ -80,13 +80,17 @@ function mu2ealign_checkcomplete() {
             tail -n 5 job_part$i.log
             echo "-------------------------------------------"
             rc=1
+        else
+            echo "Job $i complete!"
+            grep "TimeReport" job_part$i.log
+            echo ""
         fi
     done
 
     return $rc
 }
 
-function mu2ealign_mergeouput() {
+function mu2ealign_mergeoutput() {
     if [ ! -f "job_part1.fcl" ]; then
         echo "nothing to merge"
         return 1
@@ -168,7 +172,7 @@ function mu2ealign() {
     elif [[ $COMMAND == "pede" ]]; then
         # check completion of jobs
         mu2ealign_checkcomplete || return 1
-        mu2ealign_mergeouput
+        mu2ealign_mergeoutput
 
         pede mp-steer.txt || return 1
 
