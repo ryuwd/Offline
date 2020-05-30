@@ -45,17 +45,17 @@ function mu2ealign_genparallel() {
 
 function mu2ealign_runjobs() {
     if [ ! -f "job_part1.fcl" ]; then
-        mu2e -c job.fcl -S sources.txt 2>&1 > job.log &
+        mu2e -c job.fcl -S sources.txt > job.log 2>&1 &
         return 0
     fi
 
     i=0
     for f in job_part*.fcl; do
         i=$((i+1))
-        mu2e -c job_part${i}.fcl -S sources_job_part$i.txt 2>&1 > job_part$i.log &
+        mu2e -c job_part${i}.fcl -S sources_job_part$i.txt > job_part$i.log 2>&1  &
     done
 
-    echo "started $i jobs.. see job_part{job number}.log files for progress.."
+    echo "Started $i jobs.. see job_part{job number}.log files for progress.."
 }
 
 function mu2ealign_checkcomplete() {
@@ -116,15 +116,14 @@ function mu2ealign_genjobfcl() {
 function mu2ealign_runNaligniters() {
     END=$1
     (
-        echo "Alignment track collection: iteration 0 (this working directory)"
+        echo "Working directory: $(pwd)"
+        echo "Alignment track collection: iteration 0"
+        
         # run first alignment iteration
         mu2ealign run
-
-        echo "running..."
         wait;
 
         mu2ealign pede
-
         lastconsts=$(pwd)/alignconstants_out.txt
 
         for ((alignjobn=1;alignjobn<=END-1;alignjobn++)); do
