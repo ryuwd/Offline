@@ -45,14 +45,14 @@ function mu2ealign_genparallel() {
 
 function mu2ealign_runjobs() {
     if [ ! -f "job_part1.fcl" ]; then
-        mu2e -c job.fcl -S sources.txt > job.log &
+        mu2e -c job.fcl -S sources.txt 2>&1 > job.log &
         return 0
     fi
 
     i=0
     for f in job_part*.fcl; do
         i=$((i+1))
-        mu2e -c job_part${i}.fcl -S sources_job_part$i.txt > job_part$i.log &
+        mu2e -c job_part${i}.fcl -S sources_job_part$i.txt 2>&1 > job_part$i.log &
     done
 
     echo "started $i jobs.. see job_part{job number}.log files for progress.."
@@ -108,7 +108,8 @@ function mu2ealign_mergeoutput() {
 function mu2ealign_genjobfcl() {
     cp ${MU2E_BASE_RELEASE}/TrackerAlignment/fcl/job_template.fcl job.fcl
     echo "Generated new job.fcl!"
-    echo "using DS_COSMIC_NOFIELD_ALIGNSELECT as dataset. ( 4 files ) Please change sources.txt if you want to use something else."
+    echo "Using DS_COSMIC_NOFIELD_ALIGNSELECT as dataset. ( 4 files )"
+    echo "Please change sources.txt if you want to use something else."
     head -n 4 ${DS_COSMIC_NOFIELD_ALIGNSELECT} > sources.txt
 }
 
