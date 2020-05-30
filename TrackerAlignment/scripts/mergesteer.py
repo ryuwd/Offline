@@ -13,7 +13,7 @@ def main():
             lines = f.readlines()
             if nlines == -1:
                 nlines = len(lines)
-            if nlines != lines or nlines < 0:
+            if nlines != len(lines) or nlines < 0:
                 exit(1)
             file_lines.append(lines)
 
