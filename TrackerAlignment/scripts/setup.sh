@@ -118,7 +118,7 @@ function mu2ealign_runNaligniters() {
     (
         echo "Working directory: $(pwd)"
         echo "Alignment track collection: iteration 0"
-        
+
         # run first alignment iteration
         mu2ealign run
         wait;
@@ -144,6 +144,21 @@ function mu2ealign_runNaligniters() {
             lastconsts=$(pwd)/alignconstants_out.txt
             cd ..
         done
+
+        # run nominal config for comparison
+        mkdir nominal
+        cd nominal 
+        echo "Working directory: $(pwd)"
+
+        mu2ealign new ${MU2E_BASE_RELEASE}/TrackerAlignment/test/misalignments/nominal.txt
+
+        echo "Alignment track collection: NOMINAL geom"
+            
+        mu2ealign run 
+
+        wait 
+        
+        echo "Complete! Final alignment constants are in $lastconsts"
     )
 }
 
