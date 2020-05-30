@@ -96,7 +96,7 @@ function mu2ealign_mergeoutput() {
         return 1
     fi
 
-    if [ ! -f "mp-steer" ]; then
+    if [ ! -f "mp-steer.txt" ]; then
         python ${MU2E_BASE_RELEASE}/TrackerAlignment/scripts/mergesteer.py mp-steer.txt.* > mp-steer.txt
     fi
 
