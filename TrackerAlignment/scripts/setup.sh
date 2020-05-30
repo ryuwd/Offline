@@ -62,6 +62,7 @@ function mu2ealign_checkcomplete() {
     if [ ! -f "job_part1.fcl" ]; then
         if ! grep -q "Art has completed and will exit with status 0." job.log ; then 
             echo "Job incomplete! See below (job.log):"
+            echo "-------------------------------------------"
             tail -n 5 job.log
             echo "-------------------------------------------"
             return 1
@@ -70,17 +71,19 @@ function mu2ealign_checkcomplete() {
     fi
 
     i=0
+    rc=0
     for f in job_part*.fcl; do
         i=$((i+1))
         if ! grep -q "Art has completed and will exit with status 0." job_part$i.log ; then 
-            echo "Job incomplete! See below (job_part$i.log):"
+            echo "Job $i incomplete! See below (job_part$i.log):"
+            echo "-------------------------------------------"
             tail -n 5 job_part$i.log
             echo "-------------------------------------------"
-            return 1
+            rc=1
         fi
     done
 
-    return 0
+    return $rc
 }
 
 function mu2ealign_mergeouput() {
