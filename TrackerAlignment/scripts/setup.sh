@@ -22,7 +22,7 @@ python -m pip install --user -r ${TRKALIGN_SCRIPTS_DIR}/requirements.txt
 alias aligntrack_display='python ${TRKALIGN_SCRIPTS_DIR}/aligntrack_display.py ' 
 
 function mu2ealign_genparallel() {
-    rm job_part*.fcl
+    rm job_part*.fcl > /dev/null
 
     nparts=$1
     nfiles=$2
@@ -95,8 +95,8 @@ function mu2ealign_mergeouput() {
 function mu2ealign_genjobfcl() {
     cp ${MU2E_BASE_RELEASE}/TrackerAlignment/fcl/job_template.fcl job.fcl
     echo "Generated new job.fcl!"
-    echo "using DS_COSMIC_NOFIELD_ALIGNSELECT as dataset. Please change sources.txt if you want to use something else."
-    cat ${DS_COSMIC_NOFIELD_ALIGNSELECT} > sources.txt
+    echo "using DS_COSMIC_NOFIELD_ALIGNSELECT as dataset. ( 4 files ) Please change sources.txt if you want to use something else."
+    head -n 4 ${DS_COSMIC_NOFIELD_ALIGNSELECT} > sources.txt
 }
 
 function mu2ealign() {
@@ -155,7 +155,7 @@ function mu2ealign() {
         echo "Run 'mu2ealign run' to start."
 
     elif [[ $COMMAND == "parallel" ]]; then 
-        mu2ealign_genparallel $2
+        mu2ealign_genparallel $2 4
 
     elif [[ $COMMAND == "run" ]]; then 
         mu2ealign_runjobs
