@@ -15,7 +15,7 @@ export DS_COSMIC_NOFIELD_ALIGNSELECT="/pnfs/mu2e/persistent/users/mu2epro/MDC202
 
 setup millepede
 
-python -m pip install --user -r ${TRKALIGN_SCRIPTS_DIR}/requirements.txt
+# python -m pip install --user -r ${TRKALIGN_SCRIPTS_DIR}/requirements.txt
 
 # set up some convenience commands 
 
@@ -187,6 +187,12 @@ function mu2ealign() {
 
             echo "Generated new alignment constants in alignconstants_out.txt."
         fi
+
+    elif [[ $COMMAND == "help" ]]; then 
+        echo "Available commands: "
+        echo "mu2ealign new <path to alignment constants txt file>: create a new alignment working directory using specified alignment constants"
+        echo "mu2ealign run: start the alignment track collection in the current working directory"
+        echo "mu2ealign pede: check jobs have completed, merge results if needed and run PEDE. Produce new alignment constants"
     fi
 }
 
