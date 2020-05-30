@@ -17,8 +17,8 @@ def main():
                 exit(1)
             file_lines.append(lines)
 
-    for i in range(nlines):
-        lines = [file_lines[i] for i, _ in enumerate(files)]
+    for lineno in range(nlines):
+        lines = [file_lines[i][lineno] for i, _ in enumerate(files)]
         if len(lines) == 0:
             continue
         if '.bin' in lines[0]: # include all mille file inputs
