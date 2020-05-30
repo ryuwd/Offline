@@ -28,6 +28,7 @@ function mu2ealign_genparallel() {
     nfiles=$2
     echo "generating fcls for $nparts processes and $nfiles total files using job.fcl"
     END=$nparts
+    head -n $nfiles sources.txt > sources.txt.tmp
     for ((i=1;i<=END;i++)); do
         cp job.fcl job_part$i.fcl
         sed -i "s/MilleData.bin/MilleData.bin.${i}/g" job_part$i.fcl
@@ -36,9 +37,10 @@ function mu2ealign_genparallel() {
         sed -i "s/mp-params.txt/mp-params.txt.${i}/g" job_part$i.fcl
         sed -i "s/TrackDiag.root/TrackDiag.root.${i}/g" job_part$i.fcl
 
-        head -n $nfiles sources.txt | split --number=$i/$nparts -d > sources_job_part${i}.txt
+        split --number=$i/$nparts -d sources.txt.tmp > sources_job_part${i}.txt
     done
-    rm *.tmp
+
+    rm sources.txt.tmp
 }
 
 function mu2ealign_runjobs() {
