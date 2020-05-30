@@ -14,6 +14,8 @@
 #include "GeometryService/inc/GeomHandle.hh"
 #include "CLHEP/Matrix/Vector.h"
 
+#include <boost/histogram.hpp>
+
 
 using namespace std;
 namespace mu2e {
@@ -54,16 +56,33 @@ namespace mu2e {
     pmpEnergyScaleAvg /= (double) pmpEnergyScale.size();
 
     std::vector<double> _parDriftDocas, _parDriftOffsets, _parDriftRes;
+    using namespace boost::histogram; // strip the boost::histogram prefix
 
     double sigma = _config.parameterizedDriftSigma();
     double tau = _config.parameterizedDriftTau();
     int parameterizedDriftBins = _config.parameterizedDriftBins();
+
+    TH1F *h = new TH1F("","",10000,-20,80);
+
+    auto h = make_histogram(axis::regular<>(10000, -20, 80));
+
+    auto p = make_profile(axis::regular<>(parameterizedDriftBins, 0, 2.5));
+    for (int i=0;i<parameterizedDriftBins;i++) {
+      double doca = i*2.5/parameterizedDriftBins;
+      double hypotenuse = sqrt(pow(doca,2) + pow(tau*_config.linearDriftVelocity(),2));
+      double tau_eff = hypotenuse/_config.linearDriftVelocity() - doca/_config.linearDriftVelocity();
+
+      for (int it=0; it < 10000;it++) {
+
+      }
+
+    }
+
     for (int i=0;i<parameterizedDriftBins;i++){
       double doca = i*2.5/parameterizedDriftBins;
       double hypotenuse = sqrt(pow(doca,2) + pow(tau*_config.linearDriftVelocity(),2));
       double tau_eff = hypotenuse/_config.linearDriftVelocity() - doca/_config.linearDriftVelocity();
 
-      TH1F *h = new TH1F("","",10000,-20,80);
       for (int it=0;it<h->GetNbinsX();it++){
         double tresid = h->GetBinCenter(it+1);
         h->SetBinContent(it+1,exp(sigma*sigma/(2*tau_eff*tau_eff)-tresid/tau_eff)*(1-TMath::Erf((sigma*sigma-tau_eff*tresid)/(sqrt(2)*sigma*tau_eff))));
