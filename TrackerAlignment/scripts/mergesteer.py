@@ -23,7 +23,7 @@ def main():
             continue
         if '.bin' in lines[0]: # include all mille file inputs
             for line in lines:
-                print (line)
+                print (line.strip())
         else:
             pline = 0
             for line in lines:
@@ -31,7 +31,7 @@ def main():
                 if pline != 0 and line != pline and '.txt' not in line:
                     exit(1)
                 pline = line
-            print(lines[0])
+            print(lines[0].strip())
 
 if __name__ == '__main__':
     main()

@@ -96,9 +96,13 @@ function mu2ealign_mergeoutput() {
         return 1
     fi
 
-    python ${MU2E_BASE_RELEASE}/TrackerAlignment/scripts/mergesteer.py mp-steer.txt.* > mp-steer.txt
-    hadd -f TrackDiag.root TrackDiag.root.*
+    if [ ! -f "mp-steer" ]; then
+        python ${MU2E_BASE_RELEASE}/TrackerAlignment/scripts/mergesteer.py mp-steer.txt.* > mp-steer.txt
+    fi
 
+    if [ ! -f "TrackDiag.root" ]; then
+        hadd -f TrackDiag.root TrackDiag.root.*
+    fi
 }
 
 function mu2ealign_genjobfcl() {
