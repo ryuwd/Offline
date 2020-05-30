@@ -112,6 +112,40 @@ function mu2ealign_genjobfcl() {
     head -n 4 ${DS_COSMIC_NOFIELD_ALIGNSELECT} > sources.txt
 }
 
+function mu2ealign_runNaligniters() {
+    (
+        echo "Alignment track collection: iteration 0 (this working directory)"
+        # run first alignment iteration
+        mu2ealign run
+
+        echo "running..."
+        wait;
+
+        mu2ealign pede
+
+        lastconsts=$(pwd)/alignconstants_out.txt
+
+        END=$1
+        for ((i=1;i<=END-1;i++)); do
+            mkdir iter$i || return 1
+            cd iter$i || return 1
+
+            mu2ealign new $lastconsts
+
+            echo "Alignment track collection: iteration $i"
+            
+            mu2ealign run 
+            echo "running..."
+
+            wait 
+
+            mu2ealign pede
+            lastconsts=$(pwd)/alignconstants_out.txt
+            cd ..
+        done
+    )
+}
+
 function mu2ealign() {
     COMMAND=$1
 
@@ -174,6 +208,9 @@ function mu2ealign() {
 
     elif [[ $COMMAND == "run" ]]; then 
         mu2ealign_runjobs
+
+    elif [[ $COMMAND == "autorun" ]]; then
+        mu2ealign_runNaligniters $2
 
     elif [[ $COMMAND == "pede" ]]; then
         # check completion of jobs
