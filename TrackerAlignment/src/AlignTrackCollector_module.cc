@@ -25,6 +25,7 @@
 #include "DbTables/inc/TrkAlignPanel.hh"
 #include "DbTables/inc/TrkAlignPlane.hh"
 #include "GeneralUtilities/inc/BitMap.hh"
+#include "GeneralUtilities/inc/HepTransform.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 #include "Minuit2/MnUserCovariance.h"
 #include "Mu2eUtilities/inc/TwoLinePCA.hh"
@@ -77,7 +78,7 @@
 
 #include "TrackerAlignment/inc/AlignmentDerivatives.hh"
 #include "TrackerAlignment/inc/MilleDataWriter.hh"
-
+#include "TrackerAlignment/inc/AlignStraw.hh"
 namespace art {
 class Run;
 } // namespace art
@@ -273,6 +274,23 @@ public:
   void writeMillepedeParams(TrkAlignPlane const& alignConstPlanes,
                             TrkAlignPanel const& alignConstPanels);
   bool isDOFenabled(int object_class, int object_id, int dof_n);
+
+double CosmicTrack_RealDCA(
+  StrawId const& strawId,
+
+  double const& a0, double const& b0, 
+  double const& a1, double const& b1, 
+  double const& t0, 
+
+  double const& plane_dx, double const& plane_dy, double const& plane_dz, 
+  double const& plane_a, double const& plane_b, double const& plane_g, 
+
+  double const& panel_dx, double const& panel_dy, double const& panel_dz, 
+  double const& panel_a, double const& panel_b, double const& panel_g, 
+
+  StrawResponse const& _srep);
+
+
   virtual ~AlignTrackCollector() {}
 
   AlignTrackCollector(const Parameters& conf) :
@@ -545,6 +563,41 @@ void AlignTrackCollector::endJob() {
   writeMillepedeSteering();
 }
 
+double AlignTrackCollector::CosmicTrack_RealDCA(
+  StrawId const& strawId,
+
+  double const& a0, double const& b0, 
+  double const& a1, double const& b1, 
+  double const& t0, 
+
+  double const& plane_dx, double const& plane_dy, double const& plane_dz, 
+  double const& plane_a, double const& plane_b, double const& plane_g, 
+
+  double const& panel_dx, double const& panel_dy, double const& panel_dz, 
+  double const& panel_a, double const& panel_b, double const& panel_g, 
+
+  StrawResponse const& _srep)
+{
+  Tracker const& nominalTracker = *_tracker;
+
+  Plane const& nominal_plane = nominalTracker.getPlane(strawId);
+  Panel const& nominal_panel = nominalTracker.getPanel(strawId);
+
+  HepTransform align_tracker(0,0,0, 0,0,0);
+  HepTransform align_plane(plane_dx, plane_dy, plane_dz, plane_a, plane_b, plane_g);
+  HepTransform align_panel(panel_dx, panel_dy, panel_dz, panel_a, panel_b, panel_g);
+
+  auto aligned_result = AlignStraw::alignStraw(nominalTracker, nominal_plane, nominal_panel, strawId, align_tracker, align_plane, align_panel);
+
+  CLHEP::Hep3Vector intercept(a0, 0, b0);
+  CLHEP::Hep3Vector dir(a1, -1, b1);
+  dir = dir.unit();
+  TwoLinePCA pca(intercept, dir, aligned_result.first, aligned_result.second);
+
+  double result = (pca.s2() > 0 ? pca.dca() : -pca.dca());
+  return result;
+}
+
 bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
     art::Event const& event, Tracker const& tracker, Tracker const& nominalTracker,
     StrawResponse const& _srep, CosmicTrackSeedCollection const& coscol) {
@@ -724,13 +777,11 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
       if (_diag > 4) {
         // FIXME!
         // move to another place
-        double generated_doca = CosmicTrack_DCA(
+        double generated_doca = CosmicTrack_RealDCA(
+            straw_id,
             A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
-            rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-
-            nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-            nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-            plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel);
+            rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(), 
+            _srep);
 
         double diff = std::abs(signdca - generated_doca);
         std::cout << "doca: " << signdca << ", gendoca: " << generated_doca << ", diff: " << diff
@@ -767,8 +818,6 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
         std::cout << "]" << std::endl;
 
         // quick and dirty numerical derivative estimation
-        // This is only performed using CosmicTrack_DCA once confirmed to be consistent with
-        // TwoLinePCA
         // TODO: move to a utility class?
         // TODO: avoid DRY problems
 
@@ -785,22 +834,20 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         double diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0 + h, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
-                rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(), 
+                _srep),
             0);
 
         double diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0 - h, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -812,24 +859,22 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0 + h, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0 - h, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -840,24 +885,22 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1 + h, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1 - h, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -868,22 +911,20 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1 + h, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1 - h, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -897,22 +938,20 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx() + h, rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx() - h, rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -923,22 +962,20 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy() + h, rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy() - h, rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -949,22 +986,20 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
 
         diff_a = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz() + h, rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff_b = _srep.driftDistanceToTime(
             straw_id,
-            CosmicTrack_DCA(
+            CosmicTrack_RealDCA(
+              straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz() - h, rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                nominalStraw_mp.x(), nominalStraw_mp.y(), nominalStraw_mp.z(), nominalStraw_dir.x(),
-                nominalStraw_dir.y(), nominalStraw_dir.z(), plane_origin.x(), plane_origin.y(),
-                plane_origin.z(), panel_origin.x(), panel_origin.y(), panel_origin.z(), driftvel),
+                _srep),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
