@@ -5,6 +5,7 @@
 #include "TrackerConditions/inc/AlignedTrackerMaker.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 #include "CLHEP/Vector/ThreeVector.h"
+#include "cetlib_except/exception.h"
 
 using namespace std;
 using namespace CLHEP;
@@ -102,6 +103,29 @@ namespace mu2e {
 
           Hep3Vector pdif = aligned_straw - straw.getMidPoint();
           Hep3Vector ddif = aligned_straw_dir - straw.getDirection();
+
+          if (std::abs(pdif.x() - align_plane.displacement().x()) > 1e-6)
+          {
+            std::cout << align_plane.displacement()<< std::endl;
+            std::cout << align_plane.rotation() << std::endl;
+            std::cout << pdif << std::endl;
+            throw cet::exception("ALIGN") << "(x shift) Something is wrong with tracker alignment...!" <<std::endl;
+          }
+          if (std::abs(pdif.y() - align_plane.displacement().y()) > 1e-6)
+          {
+            std::cout << align_plane.displacement()<< std::endl;
+            std::cout << align_plane.rotation() << std::endl;
+            std::cout << pdif << std::endl;
+            throw cet::exception("ALIGN") << "(y shift) Something is wrong with tracker alignment...!" <<std::endl;
+          }
+
+          if (std::abs(pdif.z() - align_plane.displacement().z()) > 1e-6)
+          {
+            std::cout << align_plane.displacement()<< std::endl;
+            std::cout << align_plane.rotation() << std::endl;
+            std::cout << pdif << std::endl;
+            throw cet::exception("ALIGN") << "(z shift) Something is wrong with tracker alignment...!" <<std::endl;
+          }
 
           straw._c = aligned_straw;
           straw._w = aligned_straw_dir;
