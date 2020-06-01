@@ -12,7 +12,6 @@ def genshifts(nrows=36, max_shift=3.0):
     return np.concatenate((shifts, rotations), axis=1)
 
 def genshifts_gaus(nrows=36, max_shift=2.0):
-    # uniform random shifts in range [-3.0, 3.0] mm
     shifts = np.random.normal(0, max_shift, size=nrows*3).reshape((nrows, 3))
     rotations = np.zeros((nrows, 3))
 
