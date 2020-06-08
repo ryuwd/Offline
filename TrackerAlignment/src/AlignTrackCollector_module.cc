@@ -254,10 +254,13 @@ public:
 
   double error_scale;
 
+
   std::string constrain_strat;
   std::vector<int> fixed_planes;
   
 
+  int nambig_matches = 0;
+  int nambigmatchings = 0;
 
   const CosmicTrackSeedCollection* _coscol;
   const Tracker* _tracker;
@@ -592,6 +595,12 @@ void AlignTrackCollector::endJob() {
     std::cout << "AlignTrackCollector: wrote " << tracks_written << " tracks to " << mille_filename
               << std::endl;
   }
+
+  std::cout << "ambig test: " << nambigmatchings << " hits compared "
+            << " of which " << nambig_matches << " ambig signs (" 
+            << (nambig_matches / nambigmatchings)*100.0<< "%) matched between HitAmbiguity and pca.s2()>0"
+            << std::endl; 
+
   writeMillepedeConstraints();
   writeMillepedeSteering();
 }
@@ -770,6 +779,13 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
       double time_resid = fit_object.TimeResidual(straw_hit, sts);
       double drift_res = error_scale * _srep.driftTimeError(straw_hit.strawId(), 0, 0, pca.dca());
 
+      int pcaambig = (pca.s2() > 0 ? 1 : -1);
+      int testambig = fit_object.HitAmbiguity(straw_hit, sts);
+
+      nambigmatchings++;
+      if (testambig == pcaambig){
+        nambig_matches++;
+      }
       // FIXME! use newly implemented chisq function in fit object
       chisq += pow(time_resid / drift_res, 2);
       chisq_doca += pow(dca_resid / drift_res_dca, 2);
