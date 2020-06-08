@@ -598,7 +598,7 @@ void AlignTrackCollector::endJob() {
 
   std::cout << "ambig test: " << nambigmatchings << " hits compared "
             << " of which " << nambig_matches << " ambig signs (" 
-            << (nambig_matches / nambigmatchings)*100.0<< "%) matched between HitAmbiguity and pca.s2()>0"
+            << ((double)nambig_matches / (double)nambigmatchings)*100.0<< "%) matched between HitAmbiguity and pca.s2()>0"
             << std::endl; 
 
   writeMillepedeConstraints();
