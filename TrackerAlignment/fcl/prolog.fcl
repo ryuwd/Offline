@@ -17,7 +17,7 @@ BEGIN_PROLOG
     PlaneFilterList : [ ]
 
     ConstrainStrategy : "Fix"
-    FixPlanes : [ 5, 30 ]
+    FixPlane : [ 5, 30 ]
 
     UseTimeDomain : true
 
