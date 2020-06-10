@@ -106,7 +106,7 @@ TABLE TrkAlignTracker
                 line = line.strip()
                 if 'Parameter' in line:
                     continue
-                label, p, _ = line.split()
+                label, p, _ = line.split()[:3]
 
                 p = float(p)
 
