@@ -80,10 +80,10 @@ function mu2ealign_checkcomplete() {
             tail -n 5 job_part$i.log
             echo "-------------------------------------------"
             rc=1
-        else
-            echo "Job $i complete!"
-            grep "TimeReport" job_part$i.log
-            echo ""
+        #else
+        #    echo "Job $i complete!"
+        #    grep "TimeReport" job_part$i.log
+        #    echo ""
         fi
     done
 
@@ -98,10 +98,14 @@ function mu2ealign_mergeoutput() {
 
     if [ ! -f "mp-steer.txt" ]; then
         python ${MU2E_BASE_RELEASE}/TrackerAlignment/scripts/mergesteer.py mp-steer.txt.* > mp-steer.txt
+    else
+        echo "mp-steer.txt already exists - skip"
     fi
 
     if [ ! -f "TrackDiag.root" ]; then
         hadd -f TrackDiag.root TrackDiag.root.*
+    else
+        echo "TrackDiag.root already exists - skip"
     fi
 }
 
