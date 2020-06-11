@@ -15,7 +15,6 @@ mu2e_libs = [
     'mu2e_TrackerGeom',
     'mu2e_GeneralUtilities',
     'mu2e_Mu2eUtilities',
-    'mu2e_TrackerAlignment',
     'mu2e_TrackerConditions',
     'mu2e_ProditionsService',
     'mu2e_DbTables',
