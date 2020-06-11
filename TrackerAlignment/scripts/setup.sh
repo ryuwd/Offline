@@ -136,7 +136,7 @@ function mu2ealign_runNaligniters() {
 
         for ((alignjobn=1;alignjobn<=END-1;alignjobn++)); do
 
-            mkdir iter$alignjobn || return 1
+            mkdir -p iter$alignjobn || return 1
             cd iter$alignjobn || return 1
             if [ ! -f "alignconstants_out.txt" ]; then
                 echo "Working directory: $(pwd)"
