@@ -771,7 +771,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
       double time_resid = fit_object.TimeResidual(straw_hit, sts);
       double drift_res = error_scale * _srep.driftTimeError(straw_hit.strawId(), 0, 0, pca.dca());
 
-      int pcaambig = (pca.s2() > 0 ? 1 : -1);
+      //int pcaambig = (pca.s2() > 0 ? 1 : -1);
       int testambig = fit_object.HitAmbiguity(straw_hit, sts);
 
       // FIXME! use newly implemented chisq function in fit object
