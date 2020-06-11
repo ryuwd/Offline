@@ -124,27 +124,35 @@ function mu2ealign_runNaligniters() {
         echo "Alignment track collection: iteration 0"
 
         # run first alignment iteration
-        mu2ealign run
-        wait;
-
-        mu2ealign pede
-        lastconsts=$(pwd)/alignconstants_out.txt
-
-        for ((alignjobn=1;alignjobn<=END-1;alignjobn++)); do
-            mkdir iter$alignjobn || return 1
-            cd iter$alignjobn || return 1
-
-            echo "Working directory: $(pwd)"
-
-            mu2ealign new $lastconsts
-
-            echo "Alignment track collection: iteration $alignjobn"
-            
-            mu2ealign run 
-
-            wait 
+        if [ ! -f "alignconstants_out.txt" ]; then
+            mu2ealign run
+            wait;
 
             mu2ealign pede
+            lastconsts=$(pwd)/alignconstants_out.txt
+        else
+            echo "Already complete - skip"
+        fi
+
+        for ((alignjobn=1;alignjobn<=END-1;alignjobn++)); do
+
+            mkdir iter$alignjobn || return 1
+            cd iter$alignjobn || return 1
+            if [ ! -f "alignconstants_out.txt" ]; then
+                echo "Working directory: $(pwd)"
+
+                mu2ealign new $lastconsts
+
+                echo "Alignment track collection: iteration $alignjobn"
+                
+                mu2ealign run 
+
+                wait 
+
+                mu2ealign pede
+            else
+                echo "Already complete - skip"
+            fi
             lastconsts=$(pwd)/alignconstants_out.txt
             cd ..
         done
@@ -226,7 +234,7 @@ function mu2ealign() {
         if [ ! -f "sources_job_part1.txt" ]; then
             echo "If you want to configure for multiple jobs, run mu2ealign parallel <NJOBS>"
         fi
-        echo "Run 'mu2ealign run' to start."
+        echo "Run 'mu2ealign run' to start. To run multiple alignment iterations, run mu2ealign autorun <NITERS>."
 
     elif [[ $COMMAND == "parallel" ]]; then 
         mu2ealign_genparallel $2 4
