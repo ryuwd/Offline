@@ -301,7 +301,7 @@ double CosmicTrack_RealDCA(
   double const& panel_dx, double const& panel_dy, double const& panel_dz, 
   double const& panel_a, double const& panel_b, double const& panel_g, 
 
-  StrawResponse const& _srep);
+  StrawResponse const& _srep, int ambiguity);
 
 
   virtual ~AlignTrackCollector() {}
