@@ -609,7 +609,8 @@ double AlignTrackCollector::CosmicTrack_RealDCA(
   double const& panel_dx, double const& panel_dy, double const& panel_dz, 
   double const& panel_a, double const& panel_b, double const& panel_g, 
 
-  StrawResponse const& _srep)
+  StrawResponse const& _srep,
+  int ambiguity)
 {
   Tracker const& nominalTracker = *_tracker;
 
@@ -627,7 +628,7 @@ double AlignTrackCollector::CosmicTrack_RealDCA(
   dir = dir.unit();
   TwoLinePCA pca(intercept, dir, aligned_result.first, aligned_result.second);
 
-  double result = HitAmbiguity(sh, x) * pca.dca();//(pca.s2() > 0 ? pca.dca() : -pca.dca());
+  double result = ambiguity * pca.dca();//(pca.s2() > 0 ? pca.dca() : -pca.dca());
   return result;
 }
 
@@ -817,7 +818,8 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
             straw_id,
             A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
             rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(), 
-            _srep);
+            _srep,
+            testambig);
 
         double diff = std::abs(signdca - generated_doca);
         std::cout << "doca: " << signdca << ", gendoca: " << generated_doca << ", diff: " << diff
