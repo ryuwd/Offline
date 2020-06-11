@@ -19,6 +19,8 @@ mu2e_libs = [
     'mu2e_DbTables',
     'mu2e_DbService',
     'mu2e_CosmicReco',
+
+    'mu2e_GeomPrimitives',
 ]
 
 # extra ROOT libraries
