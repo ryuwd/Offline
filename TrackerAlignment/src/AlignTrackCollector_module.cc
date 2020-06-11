@@ -876,7 +876,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0 + h, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(), 
-                _srep),
+                _srep,testambig),
             0);
 
         double diff_b = _srep.driftDistanceToTime(
@@ -885,7 +885,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0 - h, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -902,7 +902,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
                 A0, B0 + h, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -912,7 +912,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
                 A0, B0 - h, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -928,7 +928,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
                 A0, B0, A1 + h, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -938,7 +938,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
                 A0, B0, A1 - h, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
 
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -953,7 +953,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1 + h, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -962,7 +962,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1 - h, T0, rowpl.dx(), rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -980,7 +980,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx() + h, rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -989,7 +989,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx() - h, rowpl.dy(), rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -1004,7 +1004,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy() + h, rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -1013,7 +1013,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy() - h, rowpl.dz(), rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
@@ -1028,7 +1028,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz() + h, rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff_b = _srep.driftDistanceToTime(
@@ -1037,7 +1037,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
               straw_id,
                 A0, B0, A1, B1, T0, rowpl.dx(), rowpl.dy(), rowpl.dz() - h, rowpl.rx(), rowpl.ry(),
                 rowpl.rz(), rowpa.dx(), rowpa.dy(), rowpa.dz(), rowpa.rx(), rowpa.ry(), rowpa.rz(),
-                _srep),
+                _srep,testambig),
             0);
 
         diff = (diff_a - diff_b) / (2.0 * h);
