@@ -47,6 +47,8 @@ other_libs = [
     'HepPDT',
     'xerces-c',
 
+    'pthread',
+
     'boost_system',
     'boost_iostreams',
     'boost_math_c99'
