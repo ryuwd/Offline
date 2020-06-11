@@ -236,7 +236,6 @@ public:
   bool use_timeresid;
   bool no_panel_dofs;
   bool no_plane_rotations;
-
   bool use_plane_filter;
   std::vector<int> plane_filter_list;
   bool use_db;
@@ -258,9 +257,6 @@ public:
   std::string constrain_strat;
   std::vector<int> fixed_planes;
   
-
-  int nambig_matches = 0;
-  int nambigmatchings = 0;
 
   const CosmicTrackSeedCollection* _coscol;
   const Tracker* _tracker;
@@ -596,11 +592,6 @@ void AlignTrackCollector::endJob() {
               << std::endl;
   }
 
-  std::cout << "ambig test: " << nambigmatchings << " hits compared "
-            << " of which " << nambig_matches << " ambig signs (" 
-            << ((double)nambig_matches / (double)nambigmatchings)*100.0<< "%) matched between HitAmbiguity and pca.s2()>0"
-            << std::endl; 
-
   writeMillepedeConstraints();
   writeMillepedeSteering();
 }
@@ -636,7 +627,7 @@ double AlignTrackCollector::CosmicTrack_RealDCA(
   dir = dir.unit();
   TwoLinePCA pca(intercept, dir, aligned_result.first, aligned_result.second);
 
-  double result = (pca.s2() > 0 ? pca.dca() : -pca.dca());
+  double result = HitAmbiguity(sh, x) * pca.dca();//(pca.s2() > 0 ? pca.dca() : -pca.dca());
   return result;
 }
 
@@ -774,7 +765,7 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
       // The following are based on reco performed using current alignment parameters
       double dca_resid = fit_object.DOCAresidual(straw_hit, sts);
       double drift_res_dca = error_scale * _srep.driftDistanceError(straw_hit.strawId(), 0, 0, pca.dca());
-      double signdca = (pca.s2() > 0 ? pca.dca() : -pca.dca());
+      double signdca = fit_object.HitAmbiguity(straw_hit, sts) * pca.dca(); //(pca.s2() > 0 ? pca.dca() : -pca.dca());
 
       double time_resid = fit_object.TimeResidual(straw_hit, sts);
       double drift_res = error_scale * _srep.driftTimeError(straw_hit.strawId(), 0, 0, pca.dca());
@@ -782,10 +773,6 @@ bool AlignTrackCollector::filter_CosmicTrackSeedCollection(
       int pcaambig = (pca.s2() > 0 ? 1 : -1);
       int testambig = fit_object.HitAmbiguity(straw_hit, sts);
 
-      nambigmatchings++;
-      if (testambig == pcaambig){
-        nambig_matches++;
-      }
       // FIXME! use newly implemented chisq function in fit object
       chisq += pow(time_resid / drift_res, 2);
       chisq_doca += pow(dca_resid / drift_res_dca, 2);
