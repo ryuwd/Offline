@@ -1,5 +1,5 @@
 yum -y install epel-release
-yum -y install make base-devel glibc-devel freetype-devel xxhash-devel xxhash-libs libcurl libcurl-devel libzstd-devel libzstd
+yum -y install make base-devel glibc-devel freetype-devel xxhash-devel xxhash-libs libcurl libcurl-devel libzstd-devel libzstd openssl openssl-devel openssl-libs
 
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
