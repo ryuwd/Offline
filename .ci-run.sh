@@ -20,3 +20,6 @@ mu2e -c Mu2eG4/fcl/transportOnly.fcl -n 1
 mu2e -c JobConfig/beam/PS.fcl -n 1
 mu2e -c Mu2eG4/fcl/g4study.fcl -n 1
 mu2e -c Validation/fcl/cosmicSimReco.fcl -n 1
+
+
+# if we get this far, the build passes
