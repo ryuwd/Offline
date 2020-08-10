@@ -5,7 +5,7 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 source setup.sh
 
-scons -k --max-drift=1 --implicit-deps-unchanged -j 24 2>&1 | tee "${WORKSPACE}/scons.log"
+scons -k --max-drift=1 --implicit-deps-unchanged -j 16 2>&1 | tee "scons.log"
 
 declare -a FCLFILES=(
     "Validation/fcl/ceSimReco.fcl" 
