@@ -29,4 +29,4 @@ before_install:
 script:
   - docker pull scientificlinux/sl:7
   - cd .. && docker run --name OfflineCI -v /cvmfs:/cvmfs:ro,shared -v "$(pwd)"/Offline:/Offline -it -d scientificlinux/sl:7
-  - docker exec -ti Offline /bin/bash -c "cd /Offline && source .ci-run.sh"
+  - docker exec -ti OfflineCI /bin/bash -c "cd /Offline && source .ci-run.sh"
