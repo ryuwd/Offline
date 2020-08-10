@@ -1,4 +1,4 @@
-yum -y install make base-devel glibc-devel freetype-devel
+yum -y install make base-devel glibc-devel freetype-devel xxhash-devel xxhash-libs libcurl libcurl-devel
 
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
