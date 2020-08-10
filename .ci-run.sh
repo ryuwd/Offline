@@ -1,3 +1,4 @@
+yum -y install epel-release
 yum -y install make base-devel glibc-devel freetype-devel xxhash-devel xxhash-libs libcurl libcurl-devel
 
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
